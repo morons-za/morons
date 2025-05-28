@@ -1,0 +1,132 @@
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f4f4f4;
+}
+
+h1 {
+  text-align: center;
+  color: #333;
+  margin: 20px 0;
+}
+
+#map {
+  width: 90vw;
+  max-width: 1000px;
+  height: 60vw;
+  max-height: 600px;
+  min-height: 300px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2vw;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+.sidebar button:disabled {
+  background: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+.sidebar input[type="date"] {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.app-container {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.main-content {
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main-title {
+  font-size: clamp(1.2rem, 4vw, 2.2rem);
+  white-space: normal;
+  text-align: center;
+  margin: 6vw 0 3vw 0;
+  line-height: 1.1;
+  word-break: break-word;
+}
+
+@media (max-width: 700px) {
+  .main-title {
+    font-size: clamp(1rem, 6vw, 1.5rem);
+    margin: 4vw 0 2vw 0;
+  }
+  #map {
+    width: 98vw;
+    height: 60vw;
+    min-height: 200px;
+    max-height: 350px;
+  }
+  .main-content {
+    padding: 0;
+  }
+}
+
+@media (max-width: 400px) {
+  .main-title {
+    font-size: 1rem;
+    margin: 2vw 0 1vw 0;
+  }
+  #map {
+    min-height: 120px;
+    max-height: 200px;
+  }
+}
