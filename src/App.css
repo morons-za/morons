@@ -78,6 +78,15 @@ h1 {
   margin-bottom: 8px;
 }
 
+.app-container,
+.main-content,
+table,
+th,
+td,
+.filter-card {
+  color: #222;
+}
+
 .app-container {
   width: 100%;
   min-height: 100vh;

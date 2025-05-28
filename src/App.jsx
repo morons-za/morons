@@ -14,59 +14,6 @@ function isInTableMountainArea(lat, lon) {
   return lat >= -34.1 && lat <= -33.9 && lon >= 18.3 && lon <= 18.5
 }
 
-function extractKmlInfo(kmlText) {
-  try {
-    const parser = new window.DOMParser();
-    const xml = parser.parseFromString(kmlText, 'text/xml');
-    // Registration: try <Document><name> or <description>
-    let registration = '';
-    const docName = xml.querySelector('Document > name');
-    if (docName && docName.textContent) {
-      // Try to extract reg from e.g. '-/ZSHIM' or similar
-      const match = docName.textContent.match(/[A-Z0-9-]{4,}/i);
-      if (match) registration = match[0];
-    }
-    if (!registration) {
-      // Try <description> with <a> tag
-      const desc = xml.querySelector('Document > description');
-      if (desc) {
-        const html = desc.textContent;
-        const regMatch = html.match(/Registration<[^>]*>.*?<a [^>]*>([A-Z0-9-]+)<\/a>/i);
-        if (regMatch) registration = regMatch[1];
-      }
-    }
-    // Date/Time: first <Placemark> <name> or <TimeStamp> <when>
-    let date = '';
-    let time = '';
-    const firstPlacemark = xml.querySelector('Folder > Placemark');
-    if (firstPlacemark) {
-      // Try <name> e.g. '2025-05-03 07:31:49 UTC'
-      const placemarkName = firstPlacemark.querySelector('name');
-      if (placemarkName && placemarkName.textContent) {
-        const dtMatch = placemarkName.textContent.match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
-        if (dtMatch) {
-          date = dtMatch[1];
-          time = dtMatch[2];
-        }
-      }
-      // Try <TimeStamp><when>
-      if (!date || !time) {
-        const when = firstPlacemark.querySelector('TimeStamp > when');
-        if (when && when.textContent) {
-          const dtMatch = when.textContent.match(/(\d{4}-\d{2}-\d{2})[T ](\d{2}:\d{2})/);
-          if (dtMatch) {
-            date = dtMatch[1];
-            time = dtMatch[2];
-          }
-        }
-      }
-    }
-    return { registration, date, time };
-  } catch {
-    return { registration: '', date: '', time: '' };
-  }
-}
-
 function utcToSaTime(date, time) {
   if (!date || !time) return '-';
   // date: '2025-05-03', time: '07:31'
@@ -127,7 +74,7 @@ function FAQ() {
       question: 'Are there exceptions?',
       answer: (
         <div>
-          <p>Aircraft participating in official duties, such as emergency services, firefighting, fire-spotting, crime patrols, military and state aircraft, are assumed to have permission to enter airspace.</p>
+          <p>Aircraft participating in official duties, such as emergency services, firefighting, fire-spotting, crime patrolling, military and state aircraft, are assumed to have permission to enter airspace.</p>
           <p>Commercial and private aircraft (such as those doing film shoots or those collecting footage for races such as the Cape Argus or the Two Oceans Marathon), may request and be provided clearance to fly enter TM17.</p>
           <p>Tourist helicopters are assumed not to have permission to enter TM17 airspace and will be assumed subject to the penalties outlined above.</p>
         </div>
@@ -222,10 +169,46 @@ function App() {
   const [kmlSizes, setKmlSizes] = useState({})
   const placemarkMarkersRef = useRef([])
   const [showFAQ, setShowFAQ] = useState(false)
+  const [kmlMetadata, setKmlMetadata] = useState([])
+  const [loadingMetadata, setLoadingMetadata] = useState(false)
+  const [registrationFilter, setRegistrationFilter] = useState('')
+  const [registrationInput, setRegistrationInput] = useState('')
+  const [showRegDropdown, setShowRegDropdown] = useState(false)
+  const [dateStart, setDateStart] = useState('')
+  const [dateEnd, setDateEnd] = useState('')
+  const [showFilters, setShowFilters] = useState(false)
+  const [lastViewedFilename, setLastViewedFilename] = useState('');
 
-  // Fetch uploaded KMLs from backend
+  // Filter summary
+  let filterSummary = 'All flights';
+  if (registrationFilter || dateStart || dateEnd) {
+    const parts = [];
+    if (registrationFilter) parts.push(`Registration: ${registrationFilter}`);
+    if (dateStart) parts.push(`From: ${dateStart}`);
+    if (dateEnd) parts.push(`To: ${dateEnd}`);
+    filterSummary = parts.join(', ');
+  }
+
+  // Fetch KML metadata from backend
+  const fetchKmlMetadata = async () => {
+    setLoadingMetadata(true);
+    setFetchError('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/kml-metadata`);
+      if (!res.ok) throw new Error('Failed to fetch KML metadata');
+      const data = await res.json();
+      setKmlMetadata(data);
+      console.log('DEBUG: kmlMetadata from backend', data);
+    } catch (err) {
+      setFetchError('Could not fetch KML metadata. Is the backend running?');
+      setKmlMetadata([]);
+    }
+    setLoadingMetadata(false);
+  };
+
+  // Fetch uploaded KMLs for download links and file size
   const fetchKmls = async () => {
-    setFetchError('')
+    setFetchError('');
     try {
       const res = await fetch(`${BACKEND_URL}/uploads`)
       if (!res.ok) throw new Error('Failed to fetch uploads')
@@ -238,8 +221,41 @@ function App() {
   }
 
   useEffect(() => {
-    fetchKmls()
-  }, [])
+    fetchKmlMetadata();
+    fetchKmls();
+  }, []);
+
+  // Fetch file sizes for table
+  useEffect(() => {
+    async function fetchSizes() {
+      const sizes = {};
+      for (const kml of uploadedKmls) {
+        try {
+          const headRes = await fetch(`${BACKEND_URL}${kml.url}`, { method: 'HEAD' })
+          const size = headRes.headers.get('content-length')
+          if (size) sizes[kml.filename] = (Number(size) / (1024 * 1024)).toFixed(2)
+        } catch {
+          sizes[kml.filename] = null;
+        }
+      }
+      setKmlSizes(sizes);
+    }
+    if (uploadedKmls.length > 0) fetchSizes();
+  }, [uploadedKmls]);
+
+  // Admin: Rescan KML Metadata
+  const handleRescanMetadata = async () => {
+    setLoadingMetadata(true);
+    setFetchError('');
+    try {
+      const res = await fetch(`${BACKEND_URL}/refresh-metadata?admin=1`, { method: 'POST' });
+      if (!res.ok) throw new Error('Failed to refresh metadata');
+      await fetchKmlMetadata();
+    } catch (err) {
+      setFetchError('Failed to refresh KML metadata');
+    }
+    setLoadingMetadata(false);
+  };
 
   useEffect(() => {
     if (showFAQ) {
@@ -363,7 +379,6 @@ function App() {
   // Fetch and parse KML info for each uploaded file
   useEffect(() => {
     async function fetchAllKmlInfo() {
-      const infos = {};
       const sizes = {};
       for (const kml of uploadedKmls) {
         try {
@@ -371,20 +386,63 @@ function App() {
           const headRes = await fetch(`${BACKEND_URL}${kml.url}`, { method: 'HEAD' })
           const size = headRes.headers.get('content-length')
           if (size) sizes[kml.filename] = (Number(size) / (1024 * 1024)).toFixed(2)
-          // Fetch and parse KML info
-          const res = await fetch(`${BACKEND_URL}${kml.url}`)
-          const text = await res.text();
-          infos[kml.filename] = extractKmlInfo(text);
         } catch {
-          infos[kml.filename] = { registration: '', date: '', time: '' };
           sizes[kml.filename] = null;
         }
       }
-      setKmlInfos(infos);
       setKmlSizes(sizes);
     }
     if (uploadedKmls.length > 0) fetchAllKmlInfo();
   }, [uploadedKmls]);
+
+  // Get unique registrations for filter dropdown
+  const uniqueRegistrations = Array.from(new Set(kmlMetadata.map(m => m.registration).filter(r => r && r !== '-'))).sort();
+  const filteredRegOptions = registrationInput
+    ? uniqueRegistrations.filter(reg => reg.toLowerCase().includes(registrationInput.toLowerCase()))
+    : uniqueRegistrations;
+
+  // Filtered metadata
+  const filteredMetadata = kmlMetadata.filter(meta => {
+    // Registration filter
+    if (registrationFilter && meta.registration !== registrationFilter) return false;
+    // Date filter
+    if (dateStart && (!meta.date || meta.date < dateStart)) return false;
+    if (dateEnd && (!meta.date || meta.date > dateEnd)) return false;
+    return true;
+  });
+
+  // Summary stats for filteredMetadata
+  const flightCount = filteredMetadata.length;
+  const uniqueHelis = Array.from(new Set(filteredMetadata.map(m => m.registration).filter(r => r && r !== '-'))).length;
+  const dates = filteredMetadata.map(m => m.date).filter(Boolean).sort();
+  const dateRange = dates.length > 0 ? `${dates[0]} to ${dates[dates.length - 1]}` : 'N/A';
+
+  // CSV export function
+  function exportCSV() {
+    const headers = ['Date', 'UTC Time', 'SA Time', 'Registration', 'Filename', 'KML URL', 'Size (MB)'];
+    const rows = filteredMetadata.map(meta => {
+      const kml = uploadedKmls.find(k => k.filename === meta.filename) || {};
+      return [
+        meta.date || '',
+        meta.time || '',
+        utcToSaTime(meta.date, meta.time),
+        meta.registration || '',
+        meta.filename || '',
+        kml.url ? `${BACKEND_URL}${kml.url}` : '',
+        kmlSizes[meta.filename] || ''
+      ];
+    });
+    const csvContent = [headers, ...rows].map(r => r.map(x => `"${String(x).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'flights.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div className="app-container">
@@ -425,8 +483,8 @@ function App() {
         </div>
       ) : (
         <div className="main-content">
-          <h1 className="main-title">Misbehaving Operators Roaming Over National Sanctuaries</h1>
-          <div id="map" style={{ height: '600px', width: '100%' }}></div>
+          <h1 className="main-title" style={{ marginTop: 24, marginBottom: 16 }}>Misbehaving Operators Roaming Over National Sanctuaries</h1>
+          <div id="map" style={{ height: '600px', width: '100%', marginTop: 0, marginBottom: 24 }}></div>
           <div style={{marginTop: 24, textAlign: 'left'}}>
             {helicopters.length > 0 && (
               <div>
@@ -443,115 +501,194 @@ function App() {
           </div>
           {/* Violations Table */}
           <div style={{ width: '100%', maxWidth: 800, margin: '32px auto 0 auto' }}>
+            {/* Summary Section */}
+            <div style={{ margin: '0 0 18px 0', fontSize: 18, color: '#223', fontWeight: 500, textAlign: 'center' }}>
+              Summary: <strong>{flightCount} flight{flightCount === 1 ? '' : 's'} shown</strong> with <i>likely</i> <strong>NP17</strong> airspace violations over Table Mountain National Park, from <strong>{uniqueHelis} helicopter{uniqueHelis === 1 ? '' : 's'}</strong>, with flight logs shown from <strong>{dates.length > 0 ? dates[0] : ''}</strong> <span style={{ fontWeight: 500 }}>to</span> <strong>{dates.length > 0 ? dates[dates.length - 1] : ''}</strong>
+            </div>
+            {/* Filters */}
+            <div style={{ width: '100%', margin: '0 auto 24px auto', maxWidth: 800 }}>
+              <div style={{ background: '#f7f9fa', borderRadius: 10, boxShadow: '0 1px 4px rgba(0,0,0,0.04)', padding: showFilters ? 24 : 16, marginBottom: 8, border: '1px solid #e3e8ee', transition: 'padding 0.2s' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: showFilters ? 18 : 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: 18, color: '#223', letterSpacing: 0.2 }}>Tools and filters 🔧</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <span style={{ color: '#555', fontSize: 15 }}>{filterSummary}</span>
+                    <button onClick={() => setShowFilters(f => !f)} style={{ padding: '6px 18px', borderRadius: 6, background: '#007bff', color: '#fff', border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>
+                      {showFilters ? 'Hide Filters' : 'Show Filters'}
+                    </button>
+                    {(registrationFilter || dateStart || dateEnd) && (
+                      <button onClick={() => { setRegistrationFilter(''); setRegistrationInput(''); setDateStart(''); setDateEnd(''); }} style={{ padding: '6px 12px', borderRadius: 6, background: '#eee', color: '#222', border: 'none', fontWeight: 500, fontSize: 14, cursor: 'pointer' }}>Clear Filters</button>
+                    )}
+                  </div>
+                </div>
+                {showFilters && (
+                  <div style={{ display: 'flex', gap: 24, marginTop: 8, alignItems: 'center', justifyContent: 'flex-start' }}>
+                    {/* Registration Filter */}
+                    <div style={{ position: 'relative', minWidth: 180 }}>
+                      <label style={{ fontWeight: 600 }}>Registration:</label><br />
+                      <input
+                        type="text"
+                        placeholder="Type registration..."
+                        value={registrationInput}
+                        onChange={e => {
+                          setRegistrationInput(e.target.value);
+                          setShowRegDropdown(true);
+                        }}
+                        onFocus={() => setShowRegDropdown(true)}
+                        style={{ minWidth: 160 }}
+                      />
+                      {registrationFilter && (
+                        <button onClick={() => { setRegistrationFilter(''); setRegistrationInput(''); }} style={{ marginLeft: 8, fontSize: 14 }}>Clear</button>
+                      )}
+                      {showRegDropdown && filteredRegOptions.length > 0 && registrationInput && (
+                        <div style={{ position: 'absolute', zIndex: 10, background: '#fff', border: '1px solid #ccc', borderRadius: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.07)', maxHeight: 120, overflowY: 'auto', width: '100%' }}>
+                          {filteredRegOptions.map(reg => (
+                            <div
+                              key={reg}
+                              onMouseDown={() => {
+                                setRegistrationFilter(reg);
+                                setRegistrationInput(reg);
+                                setShowRegDropdown(false);
+                              }}
+                              style={{ padding: '6px 12px', cursor: 'pointer', background: reg === registrationFilter ? '#e6f0ff' : '#fff' }}
+                            >
+                              {reg}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {/* Date Filter */}
+                    <div>
+                      <label style={{ fontWeight: 600 }}>Date from:</label><br />
+                      <input type="date" value={dateStart} onChange={e => setDateStart(e.target.value)} />
+                    </div>
+                    <div>
+                      <label style={{ fontWeight: 600 }}>Date to:</label><br />
+                      <input type="date" value={dateEnd} onChange={e => setDateEnd(e.target.value)} />
+                    </div>
+                    {/* Export CSV Button */}
+                    <div>
+                      <button onClick={exportCSV} style={{ padding: '8px 24px', borderRadius: 6, background: '#28a745', color: '#fff', border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>
+                        Export CSV
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
             <h2>Airspace Violations</h2>
             {fetchError && <div style={{ color: 'red', marginBottom: 12 }}>{fetchError}</div>}
+            {loadingMetadata && <div style={{ color: '#007bff', marginBottom: 12 }}>Loading metadata...</div>}
             <table style={{ width: '100%', borderCollapse: 'collapse', background: '#fff', borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
               <thead>
                 <tr style={{ background: '#f0f0f0' }}>
-                  <th style={{ padding: 8, border: '1px solid #ddd' }}>Filename</th>
-                  <th style={{ padding: 8, border: '1px solid #ddd' }}>Size</th>
-                  <th style={{ padding: 8, border: '1px solid #ddd' }}>KML</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Date</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>UTC Time</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>SA Time</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Registration</th>
-                  <th style={{ padding: 8, border: '1px solid #ddd' }}>View</th>
+                  <th style={{ padding: 8, border: '1px solid #ddd' }}>Filename</th>
+                  <th style={{ padding: 8, border: '1px solid #ddd' }}>KML</th>
+                  <th style={{ padding: 8, border: '1px solid #ddd' }}>Size</th>
+                  <th style={{ padding: 8, border: '1px solid #ddd' }}>View Flight</th>
                 </tr>
               </thead>
               <tbody>
-                {uploadedKmls.length === 0 && !fetchError && (
-                  <tr><td colSpan={5} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
+                {filteredMetadata.length === 0 && !fetchError && (
+                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
                 )}
-                {uploadedKmls
+                {filteredMetadata
                   .slice() // copy to avoid mutating state
                   .sort((a, b) => {
-                    const infoA = kmlInfos[a.filename] || {};
-                    const infoB = kmlInfos[b.filename] || {};
-                    const dtA = infoA.date && infoA.time ? new Date(`${infoA.date}T${infoA.time}:00Z`).getTime() : 0;
-                    const dtB = infoB.date && infoB.time ? new Date(`${infoB.date}T${infoB.time}:00Z`).getTime() : 0;
+                    const dtA = a.date && a.time ? new Date(`${a.date}T${a.time}:00Z`).getTime() : 0;
+                    const dtB = b.date && b.time ? new Date(`${b.date}T${b.time}:00Z`).getTime() : 0;
                     return dtB - dtA; // most recent first
                   })
-                  .map((kml, idx) => {
-                    const info = kmlInfos[kml.filename] || {};
+                  .map((meta, idx) => {
+                    const kml = uploadedKmls.find(k => k.filename === meta.filename) || {};
                     return (
-                      <tr key={idx}>
-                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{kml.filename}</td>
+                      <tr key={idx} style={lastViewedFilename === meta.filename ? { background: '#e6f7ff' } : {}}>
+                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.date || '-'}</td>
+                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.time || '-'}</td>
+                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{utcToSaTime(meta.date, meta.time)}</td>
+                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.registration || '-'}</td>
+                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.filename || '-'}</td>
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
-                          {kmlSizes[kml.filename] ? `${kmlSizes[kml.filename]} MB` : '-'}
+                          {kml.url ? (
+                            <a href={`${BACKEND_URL}${kml.url}`} download={meta.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
+                              ⬇️
+                            </a>
+                          ) : '-'}
                         </td>
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
-                          <a href={`${BACKEND_URL}${kml.url}`} download={kml.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
-                            ⬇️
-                          </a>
+                          {kmlSizes[meta.filename] ? `${kmlSizes[meta.filename]} MB` : '-'}
                         </td>
-                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{info.date || '-'}</td>
-                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{info.time || '-'}</td>
-                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{utcToSaTime(info.date, info.time)}</td>
-                        <td style={{ padding: 8, border: '1px solid #ddd' }}>{info.registration || '-'}</td>
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
-                          <button onClick={async () => {
-                            // Remove previous KML layer and markers
-                            if (kmlLayerRef.current) {
-                              mapRef.current.removeLayer(kmlLayerRef.current)
-                              kmlLayerRef.current = null
-                            }
-                            placemarkMarkersRef.current.forEach(m => mapRef.current.removeLayer(m))
-                            placemarkMarkersRef.current = []
-                            // Add new KML layer
-                            kmlLayerRef.current = omnivore.kml(`${BACKEND_URL}${kml.url}`)
-                              .on('ready', function() {
-                                this.setStyle({
-                                  color: '#0000ff',
-                                  weight: 4,
-                                  opacity: 0.8
-                                });
-                                // Fit bounds to both TMNP and the new KML if both are present
-                                if (tmnpLayerRef.current) {
-                                  const group = L.featureGroup([tmnpLayerRef.current, this]);
-                                  mapRef.current.fitBounds(group.getBounds(), { padding: [20, 20] });
-                                } else {
-                                  mapRef.current.fitBounds(this.getBounds(), { padding: [20, 20] });
-                                }
-                              })
-                              .addTo(mapRef.current)
-                            // Fetch and parse KML for placemarks
-                            try {
-                              const res = await fetch(`${BACKEND_URL}${kml.url}`)
-                              const text = await res.text()
-                              const parser = new window.DOMParser()
-                              const xml = parser.parseFromString(text, 'text/xml')
-                              const placemarks = Array.from(xml.querySelectorAll('Folder > Placemark'))
-                              placemarks.forEach(pm => {
-                                const name = pm.querySelector('name')?.textContent || ''
-                                const desc = pm.querySelector('description')?.textContent || ''
-                                const when = pm.querySelector('TimeStamp > when')?.textContent || ''
-                                const coords = pm.querySelector('Point > coordinates')?.textContent || ''
-                                // Parse coordinates (lon,lat,alt)
-                                const [lon, lat] = coords.split(',').map(Number)
-                                // Extract Altitude, Speed, Heading from desc (HTML)
-                                let altitude = '', speed = '', heading = ''
-                                const altMatch = desc.match(/Altitude:\s*([\d,]+) ft/i)
-                                if (altMatch) altitude = altMatch[1]
-                                const spdMatch = desc.match(/Speed:\s*([\d,]+) kt/i)
-                                if (spdMatch) speed = spdMatch[1]
-                                const hdgMatch = desc.match(/Heading:\s*([\d,]+)[^\d]?/i)
-                                if (hdgMatch) heading = hdgMatch[1]
-                                // Compose popup HTML
-                                const popup = `<div style='font-size:14px;'><b>${name}</b><br/>`
-                                  + (altitude ? `<b>Altitude:</b> ${altitude} ft<br/>` : '')
-                                  + (speed ? `<b>Speed:</b> ${speed} kt<br/>` : '')
-                                  + (heading ? `<b>Heading:</b> ${heading}&deg;<br/>` : '')
-                                  + `</div>`
-                                if (!isNaN(lat) && !isNaN(lon)) {
-                                  const marker = L.marker([lat, lon]).addTo(mapRef.current)
-                                  marker.bindPopup(popup)
-                                  placemarkMarkersRef.current.push(marker)
-                                }
-                              })
-                            } catch {}
-                          }} style={{ padding: '4px 12px', borderRadius: 4, background: '#007bff', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '1.2em' }} title="View on map">
-                            👀
-                          </button>
+                          {kml.url ? (
+                            <button onClick={async () => {
+                              setLastViewedFilename(meta.filename);
+                              // Remove previous KML layer and markers
+                              if (kmlLayerRef.current) {
+                                mapRef.current.removeLayer(kmlLayerRef.current)
+                                kmlLayerRef.current = null
+                              }
+                              placemarkMarkersRef.current.forEach(m => mapRef.current.removeLayer(m))
+                              placemarkMarkersRef.current = []
+                              // Add new KML layer
+                              kmlLayerRef.current = omnivore.kml(`${BACKEND_URL}${kml.url}`)
+                                .on('ready', function() {
+                                  this.setStyle({
+                                    color: '#0000ff',
+                                    weight: 4,
+                                    opacity: 0.8
+                                  });
+                                  // Fit bounds to both TMNP and the new KML if both are present
+                                  if (tmnpLayerRef.current) {
+                                    const group = L.featureGroup([tmnpLayerRef.current, this]);
+                                    mapRef.current.fitBounds(group.getBounds(), { padding: [20, 20] });
+                                  } else {
+                                    mapRef.current.fitBounds(this.getBounds(), { padding: [20, 20] });
+                                  }
+                                })
+                                .addTo(mapRef.current)
+                              // Fetch and parse KML for placemarks (optional, for popups)
+                              try {
+                                const res = await fetch(`${BACKEND_URL}${kml.url}`)
+                                const text = await res.text()
+                                const parser = new window.DOMParser()
+                                const xml = parser.parseFromString(text, 'text/xml')
+                                const placemarks = Array.from(xml.querySelectorAll('Folder > Placemark'))
+                                placemarks.forEach(pm => {
+                                  const name = pm.querySelector('name')?.textContent || ''
+                                  const desc = pm.querySelector('description')?.textContent || ''
+                                  const when = pm.querySelector('TimeStamp > when')?.textContent || ''
+                                  const coords = pm.querySelector('Point > coordinates')?.textContent || ''
+                                  // Parse coordinates (lon,lat,alt)
+                                  const [lon, lat] = coords.split(',').map(Number)
+                                  // Extract Altitude, Speed, Heading from desc (HTML)
+                                  let altitude = '', speed = '', heading = ''
+                                  const altMatch = desc.match(/Altitude:\s*([\d,]+) ft/i)
+                                  if (altMatch) altitude = altMatch[1]
+                                  const spdMatch = desc.match(/Speed:\s*([\d,]+) kt/i)
+                                  if (spdMatch) speed = spdMatch[1]
+                                  const hdgMatch = desc.match(/Heading:\s*([\d,]+)[^\d]?/i)
+                                  if (hdgMatch) heading = hdgMatch[1]
+                                  // Compose popup HTML
+                                  const popup = `<div style='font-size:14px;'><b>${name}</b><br/>`
+                                    + (altitude ? `<b>Altitude:</b> ${altitude} ft<br/>` : '')
+                                    + (speed ? `<b>Speed:</b> ${speed} kt<br/>` : '')
+                                    + (heading ? `<b>Heading:</b> ${heading}&deg;<br/>` : '')
+                                    + `</div>`
+                                  if (!isNaN(lat) && !isNaN(lon)) {
+                                    const marker = L.marker([lat, lon]).addTo(mapRef.current)
+                                    marker.bindPopup(popup)
+                                    placemarkMarkersRef.current.push(marker)
+                                  }
+                                })
+                              } catch {}
+                            }} style={{ padding: '4px 12px', borderRadius: 4, background: '#007bff', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '1.2em' }} title="View on map">
+                              👀
+                            </button>
+                          ) : '-'}
                         </td>
                       </tr>
                     );
@@ -562,6 +699,9 @@ function App() {
           {/* Admin Interface */}
           {isAdmin && (
             <div style={{ margin: '40px auto', padding: 24, background: '#f9f9f9', borderRadius: 8, maxWidth: 500, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
+              <button onClick={handleRescanMetadata} style={{ marginBottom: 18, padding: '8px 24px', borderRadius: 6, background: '#007bff', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }} disabled={loadingMetadata}>
+                {loadingMetadata ? 'Rescanning...' : 'Rescan KML Metadata'}
+              </button>
               <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Admin: Upload KML Files</h2>
               <input
                 ref={fileInputRef}
