@@ -15,7 +15,11 @@ L.Icon.Default.mergeOptions({
 const CAPE_TOWN_LAT = -33.9249;
 const CAPE_TOWN_LON = 18.4241;
 const SEARCH_RADIUS_NM = 50; // nautical miles
-const BACKEND_URL = 'http://localhost:4000';
+
+// Dynamic backend URL - use current domain in production, localhost in development
+const BACKEND_URL = window.location.hostname === 'localhost' 
+  ? 'http://localhost:4000'
+  : window.location.origin;
 
 function isInTableMountainArea(lat, lon) {
   // Rough bounding box for Table Mountain National Park
@@ -283,12 +287,13 @@ function App() {
       // Add the TMNP boundary as a persistent layer
       tmnpLayerRef.current = omnivore.kml('/tmnp.kml')
         .on('ready', function() {
-          this.setStyle({
+          this.setStyle(() => ({
             color: '#ff0000',
             weight: 3,
             opacity: 0.7,
-            fillOpacity: 0.1
-          });
+            fillColor: '#ff0000',
+            fillOpacity: 0.25
+          }));
           mapRef.current.fitBounds(this.getBounds(), { padding: [20, 20] });
         })
         .addTo(mapRef.current)
@@ -633,6 +638,9 @@ function App() {
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
                           {kml.url ? (
                             <button onClick={async () => {
+                              // Scroll to top to show the map update
+                              window.scrollTo({ top: 0, behavior: 'smooth' });
+                              
                               setLastViewedFilename(meta.filename);
                               // Remove previous KML layer and markers
                               if (kmlLayerRef.current) {
@@ -644,11 +652,11 @@ function App() {
                               // Add new KML layer
                               kmlLayerRef.current = omnivore.kml(`${BACKEND_URL}${kml.url}`)
                                 .on('ready', function() {
-                                  this.setStyle({
+                                  this.setStyle(() => ({
                                     color: '#0000ff',
                                     weight: 4,
                                     opacity: 0.8
-                                  });
+                                  }));
                                   // Fit bounds to both TMNP and the new KML if both are present
                                   if (tmnpLayerRef.current) {
                                     const group = L.featureGroup([tmnpLayerRef.current, this]);
