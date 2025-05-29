@@ -4,6 +4,14 @@ import 'leaflet/dist/leaflet.css'
 import './App.css'
 import omnivore from 'leaflet-omnivore'
 
+// Fix Leaflet's default icon path for production
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: '/marker-icon-2x.png',
+  iconUrl: '/marker-icon.png',
+  shadowUrl: '/marker-shadow.png',
+});
+
 const CAPE_TOWN_LAT = -33.9249;
 const CAPE_TOWN_LON = 18.4241;
 const SEARCH_RADIUS_NM = 50; // nautical miles
