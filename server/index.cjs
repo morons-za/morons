@@ -6,7 +6,7 @@ const fs = require('fs');
 const { XMLParser } = require('fast-xml-parser');
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
