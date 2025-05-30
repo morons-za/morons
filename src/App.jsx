@@ -166,11 +166,7 @@ function App() {
   const kmlLayerRef = useRef(null)
   const tmnpLayerRef = useRef(null)
   const [flightTrack, setFlightTrack] = useState(null)
-  const [adminModalOpen, setAdminModalOpen] = useState(false)
-  const [adminEmail, setAdminEmail] = useState('')
-  const [adminPassword, setAdminPassword] = useState('')
-  const [adminError, setAdminError] = useState('')
-  const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('isAdmin') === 'true')
+  const [isAdmin, setIsAdmin] = useState(false)
   const [uploadedKmls, setUploadedKmls] = useState([])
   const flightTrackLayerRef = useRef(null)
   const [uploading, setUploading] = useState(false)
@@ -190,6 +186,7 @@ function App() {
   const [dateEnd, setDateEnd] = useState('')
   const [showFilters, setShowFilters] = useState(false)
   const [lastViewedFilename, setLastViewedFilename] = useState('');
+  const [infoPopup, setInfoPopup] = useState({ open: false, idx: null });
 
   // Filter summary
   let filterSummary = 'All flights';
@@ -317,10 +314,19 @@ function App() {
     }
   }, [flightTrack])
 
-  // Persist admin login in localStorage
+  // Check admin session on mount
   useEffect(() => {
-    localStorage.setItem('isAdmin', isAdmin ? 'true' : 'false')
-  }, [isAdmin])
+    fetch(`${BACKEND_URL}/kml-metadata`, { credentials: 'include' })
+      .then(() => {
+        // Try to fetch an admin-only endpoint to check session
+        fetch(`${BACKEND_URL}/refresh-metadata`, { method: 'POST', credentials: 'include' })
+          .then(res => {
+            if (res.ok) setIsAdmin(true)
+            else setIsAdmin(false)
+          })
+          .catch(() => setIsAdmin(false))
+      })
+  }, [])
 
   // Placeholder for future backend/static bucket integration
   useEffect(() => {
@@ -341,20 +347,6 @@ function App() {
       })
     }
   }, [helicopters])
-
-  // Admin login handler
-  const handleAdminLogin = (e) => {
-    e.preventDefault()
-    if (adminEmail === 'test@test.com' && adminPassword === '123') {
-      setIsAdmin(true)
-      setAdminModalOpen(false)
-      setAdminError('')
-      setAdminEmail('')
-      setAdminPassword('')
-    } else {
-      setAdminError('Invalid credentials')
-    }
-  }
 
   // Handle KML upload
   const handleKmlUpload = async (e) => {
@@ -460,7 +452,21 @@ function App() {
   return (
     <div className="app-container">
       {/* Top Menu Bar */}
-      <div style={{ position: 'absolute', top: 24, right: 32, zIndex: 1000, display: 'flex', gap: 16, alignItems: 'center' }}>
+      <div style={{ 
+        position: 'fixed', 
+        top: 0, 
+        left: 0, 
+        right: 0, 
+        background: 'rgba(255, 255, 255, 0.95)', 
+        backdropFilter: 'blur(10px)',
+        borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
+        padding: '16px 32px', 
+        zIndex: 1000, 
+        display: 'flex', 
+        justifyContent: 'flex-end', 
+        gap: 16, 
+        alignItems: 'center' 
+      }}>
         <button
           style={{ background: 'none', border: 'none', color: '#007bff', fontWeight: 600, fontSize: 16, cursor: 'pointer', padding: '8px 12px' }}
           onClick={() => setShowFAQ(false)}
@@ -473,20 +479,10 @@ function App() {
         >
           FAQ
         </button>
-        {!isAdmin && (
-          <button onClick={() => setAdminModalOpen(true)} style={{ padding: '8px 18px', borderRadius: 6, background: '#222', color: '#fff', border: 'none', fontWeight: 600, cursor: 'pointer' }}>
-            Admin Login
-          </button>
-        )}
-        {isAdmin && (
-          <button onClick={() => setIsAdmin(false)} style={{ marginLeft: 12, padding: '8px 18px', borderRadius: 6, background: '#eee', color: '#222', border: 'none', fontWeight: 600, cursor: 'pointer' }}>
-            Logout
-          </button>
-        )}
       </div>
       {/* FAQ Page */}
       {showFAQ ? (
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: '70px' }}>
           <FAQ />
           <div style={{ textAlign: 'center', marginTop: 24 }}>
             <button onClick={() => setShowFAQ(false)} style={{ padding: '8px 24px', borderRadius: 6, background: '#007bff', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
@@ -495,7 +491,7 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="main-content">
+        <div className="main-content" style={{ paddingTop: '70px' }}>
           <h1 className="main-title" style={{ marginTop: 24, marginBottom: 16 }}>Misbehaving Operators Roaming Over National Sanctuaries</h1>
           <div id="map" style={{ height: '600px', width: '100%', marginTop: 0, marginBottom: 24 }}></div>
           <div style={{marginTop: 24, textAlign: 'left'}}>
@@ -602,19 +598,20 @@ function App() {
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Filename</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>KML</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Size</th>
+                  <th style={{ padding: 8, border: '1px solid #ddd' }}>Info</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>View Flight</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredMetadata.length === 0 && !fetchError && (
-                  <tr><td colSpan={7} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
+                  <tr><td colSpan={8} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
                 )}
                 {filteredMetadata
-                  .slice() // copy to avoid mutating state
+                  .slice()
                   .sort((a, b) => {
                     const dtA = a.date && a.time ? new Date(`${a.date}T${a.time}:00Z`).getTime() : 0;
                     const dtB = b.date && b.time ? new Date(`${b.date}T${b.time}:00Z`).getTime() : 0;
-                    return dtB - dtA; // most recent first
+                    return dtB - dtA;
                   })
                   .map((meta, idx) => {
                     const kml = uploadedKmls.find(k => k.filename === meta.filename) || {};
@@ -635,12 +632,50 @@ function App() {
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
                           {kmlSizes[meta.filename] ? `${kmlSizes[meta.filename]} MB` : '-'}
                         </td>
+                        <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center', position: 'relative' }}>
+                          <span
+                            style={{ cursor: 'pointer', display: 'inline-block' }}
+                            onClick={() => setInfoPopup(infoPopup.open && infoPopup.idx === idx ? { open: false, idx: null } : { open: true, idx })}
+                            onMouseEnter={() => setInfoPopup({ open: true, idx })}
+                            onMouseLeave={() => setTimeout(() => { if (infoPopup.idx === idx) setInfoPopup({ open: false, idx: null }); }, 200)}
+                          >
+                            <span role="img" aria-label="info" style={{ fontSize: 22, color: '#007bff' }}>ℹ️</span>
+                            {infoPopup.open && infoPopup.idx === idx && (
+                              <div style={{
+                                position: 'absolute',
+                                top: 30,
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                background: '#fff',
+                                border: '1px solid #ccc',
+                                borderRadius: 8,
+                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+                                padding: 12,
+                                zIndex: 100,
+                                minWidth: 220,
+                                maxWidth: 320,
+                                textAlign: 'center',
+                              }}
+                                onClick={e => e.stopPropagation()}
+                              >
+                                <div style={{ fontWeight: 600, color: '#333', marginBottom: 4 }}>
+                                  {meta.registration || 'No registration'}
+                                </div>
+                                {meta.imageUrl && (
+                                  <img src={meta.imageUrl} alt="Helicopter" style={{ width: '100%', maxWidth: 210, borderRadius: 6, marginBottom: 8 }} />
+                                )}
+                                {meta.owner && (
+                                  <div style={{ fontWeight: 600, color: '#333', marginTop: 4 }}>{meta.owner}</div>
+                                )}
+                              </div>
+                            )}
+                          </span>
+                        </td>
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
                           {kml.url ? (
                             <button onClick={async () => {
                               // Scroll to top to show the map update
                               window.scrollTo({ top: 0, behavior: 'smooth' });
-                              
                               setLastViewedFilename(meta.filename);
                               // Remove previous KML layer and markers
                               if (kmlLayerRef.current) {

@@ -1,17 +1,30 @@
+require('dotenv').config();
 const express = require('express');
 const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const { XMLParser } = require('fast-xml-parser');
+const session = require('express-session');
+const axios = require('axios'); // For downloading images
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// Admin credentials from environment variables
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change_this_password';
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir);
+}
+
+// Ensure images directory exists
+const imagesDir = path.join(__dirname, 'images');
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir);
 }
 
 // Multer setup
@@ -35,12 +48,39 @@ const upload = multer({
   }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
 app.use('/uploads', express.static(uploadsDir));
+app.use('/images', express.static(imagesDir));
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'change_this_secret',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { httpOnly: true, secure: false } // set secure: true if using HTTPS
+}));
 
 // In-memory KML metadata
 let kmlMetadata = [];
+
+// Load helicopter metadata from JSON file
+let helicopterMetadata = {};
+function loadHelicopterMetadata() {
+  try {
+    const helicopterDataPath = path.join(__dirname, 'helicopters.json');
+    if (fs.existsSync(helicopterDataPath)) {
+      helicopterMetadata = JSON.parse(fs.readFileSync(helicopterDataPath, 'utf8'));
+      console.log(`✅ Loaded metadata for ${Object.keys(helicopterMetadata).length} helicopters`);
+    } else {
+      console.log('⚠️ helicopters.json not found');
+    }
+  } catch (e) {
+    console.log('❌ Error loading helicopter metadata:', e.message);
+  }
+}
 
 function extractKmlInfoFromFile(filePath, filename) {
   try {
@@ -108,12 +148,53 @@ function extractKmlInfoFromFile(filePath, filename) {
         console.log(`[KML REGEX] Matched date/time in description: ${date} ${time}`);
       }
     }
+    // Extract image URL and owner from description (HTML)
+    let imageUrl = '';
+    let owner = '';
+    if (doc && doc.description) {
+      let desc = doc.description;
+      desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+      // Extract image URL
+      const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["']/i);
+      if (imgMatch) imageUrl = imgMatch[1];
+      // Extract owner: find first <div ...>...</div>, then text after <br/>
+      const divMatch = desc.match(/<div[^>]*>([\s\S]*?)<\/div>/i);
+      if (divMatch) {
+        const divContent = divMatch[1];
+        const brSplit = divContent.split(/<br\/?\s*>/i);
+        if (brSplit.length > 1) {
+          owner = brSplit[1].replace(/<[^>]+>/g, '').trim();
+        }
+      }
+    }
     // Debug log for each file
-    console.log(`[KML DEBUG] ${filename}: registration=${registration}, date=${date}, time=${time}`);
-    return { filename, registration, date, time };
+    console.log(`[KML DEBUG] ${filename}: registration=${registration}, date=${date}, time=${time}, imageUrl=${imageUrl}, owner=${owner}`);
+    return { filename, registration, date, time, imageUrl, owner };
   } catch (e) {
     console.log(`[KML ERROR] ${filename}:`, e.message);
-    return { filename, registration: '', date: '', time: '' };
+    return { filename, registration: '', date: '', time: '', imageUrl: '', owner: '' };
+  }
+}
+
+// Helper to download and cache image
+async function cacheImage(imageUrl, registration) {
+  if (!imageUrl || !registration) return '';
+  const ext = path.extname(imageUrl).split('?')[0] || '.jpg';
+  const localName = registration.replace(/[^A-Z0-9-]/gi, '_') + ext;
+  const localPath = path.join(imagesDir, localName);
+  const publicPath = `/images/${localName}`;
+  if (fs.existsSync(localPath)) return publicPath;
+  try {
+    const response = await axios.get(imageUrl, { responseType: 'stream', timeout: 10000 });
+    await new Promise((resolve, reject) => {
+      const stream = response.data.pipe(fs.createWriteStream(localPath));
+      stream.on('finish', resolve);
+      stream.on('error', reject);
+    });
+    return publicPath;
+  } catch (e) {
+    console.log(`[IMAGE CACHE ERROR] Failed to download ${imageUrl}:`, e.message);
+    return '';
   }
 }
 
@@ -122,31 +203,59 @@ function scanKmlMetadata() {
   kmlMetadata = files.map((filename, idx) => {
     const filePath = path.join(uploadsDir, filename);
     const meta = extractKmlInfoFromFile(filePath, filename);
-    if (idx === 0) {
-      // Debug: print parsed XML and extracted metadata for the first file
-      const xmlData = fs.readFileSync(filePath, 'utf8');
-      const parser = new XMLParser({ ignoreAttributes: false, processEntities: true });
-      const xml = parser.parse(xmlData);
-      console.log('--- DEBUG: Parsed XML for', filename, '---');
-      console.dir(xml, { depth: 6 });
-      console.log('--- DEBUG: Extracted metadata ---');
-      console.dir(meta);
-    }
-    return meta;
-  });
+    
+    // Only return basic flight data - helicopter metadata comes from helicopters.json
+    return {
+      filename: meta.filename,
+      registration: meta.registration,
+      date: meta.date,
+      time: meta.time
+    };
+  }).filter(meta => meta.registration); // Only include flights with valid registration
 }
 
 // Initial scan on startup
 scanKmlMetadata();
+loadHelicopterMetadata();
 
-app.post('/upload', upload.single('kml'), (req, res) => {
+// Middleware to check admin authentication
+function requireAdmin(req, res, next) {
+  if (req.session && req.session.isAdmin) return next();
+  return res.status(401).json({ error: 'Unauthorized' });
+}
+
+// Admin login endpoint
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
+    req.session.isAdmin = true;
+    return res.json({ success: true });
+  }
+  return res.status(401).json({ error: 'Invalid credentials' });
+});
+
+// Admin logout endpoint
+app.post('/logout', (req, res) => {
+  req.session.destroy(() => {
+    res.json({ success: true });
+  });
+});
+
+app.post('/upload', requireAdmin, upload.single('kml'), async (req, res) => {
   if (!req.file) {
     return res.status(409).json({ error: 'File already exists' });
+  }
+  // After upload, extract imageUrl and registration, cache image
+  const meta = extractKmlInfoFromFile(req.file.path, req.file.originalname);
+  if (meta.imageUrl && meta.registration) {
+    meta.imageUrl = await cacheImage(meta.imageUrl, meta.registration);
   }
   res.json({
     filename: req.file.originalname,
     originalname: req.file.originalname,
-    url: `/uploads/${req.file.originalname}`
+    url: `/uploads/${req.file.originalname}`,
+    imageUrl: meta.imageUrl || '',
+    owner: meta.owner || ''
   });
 });
 
@@ -166,14 +275,20 @@ app.get('/uploads', (req, res) => {
 
 // Endpoint to get KML metadata
 app.get('/kml-metadata', (req, res) => {
-  res.json(kmlMetadata);
+  // Merge flight data with helicopter metadata
+  const enrichedMetadata = kmlMetadata.map(flight => {
+    const heliData = helicopterMetadata[flight.registration] || {};
+    return {
+      ...flight,
+      owner: heliData.owner || '',
+      imageUrl: heliData.imageUrl || ''
+    };
+  });
+  res.json(enrichedMetadata);
 });
 
-// Endpoint to refresh KML metadata (admin only: ?admin=1)
-app.post('/refresh-metadata', (req, res) => {
-  if (req.query.admin !== '1') {
-    return res.status(403).json({ error: 'Forbidden' });
-  }
+// Endpoint to refresh KML metadata (admin only)
+app.post('/refresh-metadata', requireAdmin, (req, res) => {
   scanKmlMetadata();
   res.json({ success: true, count: kmlMetadata.length });
 });
