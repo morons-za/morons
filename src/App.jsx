@@ -35,6 +35,92 @@ function utcToSaTime(date, time) {
   return sa.toISOString().slice(11, 16); // 'HH:MM'
 }
 
+// Sticky Flight Details Panel Component
+function StickyFlightPanel({ flight, onClose, fileSize }) {
+  if (!flight) return null;
+  
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      color: 'white',
+      padding: '16px 20px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+      zIndex: 1000,
+      borderBottom: '1px solid rgba(255,255,255,0.2)'
+    }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 20 }}>
+        {/* Helicopter Image */}
+        {flight.imageUrl && (
+          <img 
+            src={flight.imageUrl} 
+            alt="Helicopter" 
+            style={{ 
+              width: 60, 
+              height: 60, 
+              borderRadius: 8, 
+              objectFit: 'cover',
+              border: '2px solid rgba(255,255,255,0.3)'
+            }} 
+          />
+        )}
+        
+        {/* Flight Details */}
+        <div style={{ flex: 1, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
+          <div>
+            <div style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 4 }}>
+              {flight.registration || 'Unknown Registration'}
+            </div>
+            {flight.owner && (
+              <div style={{ fontSize: 14, opacity: 0.9 }}>
+                {flight.owner}
+              </div>
+            )}
+          </div>
+          
+          <div style={{ fontSize: 14, opacity: 0.9 }}>
+            <div><strong>Date:</strong> {flight.date || '-'}</div>
+            <div><strong>Time (UTC):</strong> {flight.time || '-'}</div>
+            <div><strong>Time (SAST):</strong> {utcToSaTime(flight.date, flight.time)}</div>
+          </div>
+          
+          <div style={{ fontSize: 14, opacity: 0.9 }}>
+            <div><strong>File:</strong> {flight.filename || '-'}</div>
+            {fileSize && <div><strong>Size:</strong> {fileSize} MB</div>}
+          </div>
+        </div>
+        
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          style={{
+            background: 'rgba(255,255,255,0.2)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            color: 'white',
+            borderRadius: 6,
+            padding: '8px 16px',
+            cursor: 'pointer',
+            fontSize: 14,
+            fontWeight: 'bold',
+            transition: 'all 0.2s'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.3)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255,255,255,0.2)';
+          }}
+        >
+          ✕ Close
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
@@ -187,6 +273,7 @@ function App() {
   const [showFilters, setShowFilters] = useState(false)
   const [lastViewedFilename, setLastViewedFilename] = useState('');
   const [infoPopup, setInfoPopup] = useState({ open: false, idx: null });
+  const [selectedFlight, setSelectedFlight] = useState(null);
 
   // Filter summary
   let filterSummary = 'All flights';
@@ -451,16 +538,23 @@ function App() {
 
   return (
     <div className="app-container">
+      {/* Sticky Flight Details Panel */}
+      <StickyFlightPanel 
+        flight={selectedFlight} 
+        onClose={() => setSelectedFlight(null)} 
+        fileSize={selectedFlight ? kmlSizes[selectedFlight.filename] : null}
+      />
+      
       {/* Top Menu Bar */}
       <div style={{ 
         position: 'fixed', 
-        top: 0, 
+        top: selectedFlight ? 90 : 0, // Adjust for sticky panel height
         left: 0, 
         right: 0, 
         background: 'rgba(255, 255, 255, 0.95)', 
         backdropFilter: 'blur(10px)',
         borderBottom: '1px solid rgba(0, 0, 0, 0.1)',
-        padding: '16px 32px', 
+        padding: '16px 32px',
         zIndex: 1000, 
         display: 'flex', 
         justifyContent: 'flex-end', 
@@ -491,7 +585,7 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="main-content" style={{ paddingTop: '70px' }}>
+        <div className="main-content" style={{ paddingTop: selectedFlight ? '160px' : '70px' }}>
           <h1 className="main-title" style={{ marginTop: 24, marginBottom: 16 }}>Misbehaving Operators Roaming Over National Sanctuaries</h1>
           <div id="map" style={{ height: '600px', width: '100%', marginTop: 0, marginBottom: 24 }}></div>
           <div style={{marginTop: 24, textAlign: 'left'}}>
@@ -674,6 +768,9 @@ function App() {
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
                           {kml.url ? (
                             <button onClick={async () => {
+                              // Set selected flight for sticky panel
+                              setSelectedFlight(meta);
+                              
                               // Scroll to top to show the map update
                               window.scrollTo({ top: 0, behavior: 'smooth' });
                               setLastViewedFilename(meta.filename);
