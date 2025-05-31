@@ -293,6 +293,17 @@ app.post('/refresh-metadata', requireAdmin, (req, res) => {
   res.json({ success: true, count: kmlMetadata.length });
 });
 
+// Health check endpoint for Render
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    flights: kmlMetadata.length,
+    helicopters: Object.keys(helicopterMetadata).length
+  });
+});
+
 // Serve static files from the Vite build (../dist)
 app.use(express.static(path.join(__dirname, '../dist')));
 
@@ -301,6 +312,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Health check available at http://localhost:${PORT}/health`);
 }); 
