@@ -90,6 +90,9 @@ function extractKmlInfoFromFile(filePath, filename) {
     let registration = '';
     let date = '';
     let time = '';
+    let imageUrl = '';
+    let owner = '';
+    
     // Helper: recursively find first Placemark
     function findFirstPlacemark(obj) {
       if (!obj || typeof obj !== 'object') return null;
@@ -103,28 +106,112 @@ function extractKmlInfoFromFile(filePath, filename) {
       }
       return null;
     }
-    // Registration: extract from Document.name (e.g. -/ZTRMS)
+    
     const doc = xml.kml && xml.kml.Document ? xml.kml.Document : null;
-    if (doc && doc.name) {
-      // Match last 5 uppercase letters/numbers
-      const regMatch = doc.name.match(/[A-Z0-9]{5}$/);
-      if (regMatch) {
-        // Format as ZT-XXX
-        registration = 'ZT-' + regMatch[0].slice(2);
-        console.log(`[KML REGEX] Matched registration in name: ${registration}`);
+    
+    // Handle case where KML doesn't have Document wrapper (ADS-B Exchange)
+    const kmlRoot = doc || xml.kml;
+    
+    // Determine KML source and extract accordingly
+    const isFlightRadar24 = doc && doc.name && doc.name.includes('/Z');
+    const isAdsb = filename.includes('track') || (!doc && xml.kml.Folder);
+    
+    console.log(`[KML SOURCE] ${filename}: ${isFlightRadar24 ? 'FlightRadar24' : isAdsb ? 'ADS-B Exchange' : 'Unknown'}`);
+    
+    if (isFlightRadar24) {
+      // FlightRadar24 format parsing
+      if (doc.name) {
+        // Match last 5 uppercase letters/numbers
+        const regMatch = doc.name.match(/[A-Z0-9]{5}$/);
+        if (regMatch) {
+          registration = 'ZT-' + regMatch[0].slice(2);
+          console.log(`[KML REGEX] Matched registration in name: ${registration}`);
+        }
       }
-    }
-    // Fallback: try to extract from description (as a link)
-    if (!registration && doc && doc.description) {
-      let desc = doc.description;
-      desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
-      let regMatch = desc.match(/Registration<[^>]*>.*?<a [^>]*>([A-Z0-9-]+)<\/a>/i);
-      if (regMatch) {
-        registration = regMatch[1];
-        console.log(`[KML REGEX] Matched registration in description: ${registration}`);
+      
+      // Fallback: try to extract from description (as a link)
+      if (!registration && doc && doc.description) {
+        let desc = doc.description;
+        desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+        let regMatch = desc.match(/Registration<[^>]*>.*?<a [^>]*>([A-Z0-9-]+)<\/a>/i);
+        if (regMatch) {
+          registration = regMatch[1];
+          console.log(`[KML REGEX] Matched registration in description: ${registration}`);
+        }
       }
+      
+      // Extract image URL and owner from description (HTML)
+      if (doc && doc.description) {
+        let desc = doc.description;
+        desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+        // Extract image URL
+        const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["']/i);
+        if (imgMatch) imageUrl = imgMatch[1];
+        // Extract owner: find first <div ...>...</div>, then text after <br/>
+        const divMatch = desc.match(/<div[^>]*>([\s\S]*?)<\/div>/i);
+        if (divMatch) {
+          const divContent = divMatch[1];
+          const brSplit = divContent.split(/<br\/?\s*>/i);
+          if (brSplit.length > 1) {
+            owner = brSplit[1].replace(/<[^>]+>/g, '').trim();
+          }
+        }
+      }
+    } else if (isAdsb) {
+      // ADS-B Exchange format parsing
+      // First try to find registration in Placemark names (use kmlRoot instead of doc)
+      if (kmlRoot && kmlRoot.Folder) {
+        // Handle nested Folder structure (ADS-B Exchange has Folder.Folder)
+        let foldersToSearch = [];
+        
+        if (kmlRoot.Folder.Folder) {
+          // Nested folder structure (xml.kml.Folder.Folder)
+          if (Array.isArray(kmlRoot.Folder.Folder)) {
+            foldersToSearch = kmlRoot.Folder.Folder;
+          } else {
+            foldersToSearch = [kmlRoot.Folder.Folder];
+          }
+        } else {
+          // Direct folder structure with numeric keys
+          const folderKeys = Object.keys(kmlRoot.Folder).filter(key => !isNaN(key));
+          foldersToSearch = folderKeys.map(key => kmlRoot.Folder[key]);
+        }
+        
+        for (const folder of foldersToSearch) {
+          if (folder.Placemark) {
+            const placemarks = Array.isArray(folder.Placemark) ? folder.Placemark : [folder.Placemark];
+            for (const pm of placemarks) {
+              if (pm.name) {
+                // Look for registration pattern like "ZS-HMB"
+                const regMatch = pm.name.match(/^([A-Z0-9]{2}-[A-Z0-9]{2,3})$/);
+                if (regMatch) {
+                  registration = regMatch[1];
+                  console.log(`[KML REGEX] Matched registration in Placemark name: ${registration}`);
+                  break;
+                }
+              }
+            }
+            if (registration) break;
+          }
+        }
+      }
+      
+      // Fallback: try filename if not found in content
+      if (!registration) {
+        const fileRegMatch = filename.match(/^([A-Z0-9]{2}-[A-Z0-9]{3})/);
+        if (fileRegMatch) {
+          registration = fileRegMatch[1];
+          console.log(`[KML REGEX] Matched registration in filename: ${registration}`);
+        }
+      }
+      
+      // For ADS-B Exchange, we don't have owner/image data in the KML
+      // These will need to come from helicopters.json lookup
+      owner = '';
+      imageUrl = '';
     }
-    // Date/Time: try first Placemark name, else look for <span title="YYYY-MM-DD HH:MM">
+    
+    // Date/Time extraction (same for both formats)
     let placemark = null;
     if (doc) {
       placemark = findFirstPlacemark(doc);
@@ -137,6 +224,60 @@ function extractKmlInfoFromFile(filePath, filename) {
         console.log(`[KML REGEX] Matched date/time in Placemark name: ${date} ${time}`);
       }
     }
+    
+    // Try to find TimeStamp when elements (common in ADS-B Exchange)
+    if ((!date || !time) && kmlRoot && kmlRoot.Folder) {
+      // Handle nested Folder structure (ADS-B Exchange has Folder.Folder)
+      let foldersToSearch = [];
+      
+      if (kmlRoot.Folder.Folder) {
+        // Nested folder structure (xml.kml.Folder.Folder)
+        if (Array.isArray(kmlRoot.Folder.Folder)) {
+          foldersToSearch = kmlRoot.Folder.Folder;
+        } else {
+          foldersToSearch = [kmlRoot.Folder.Folder];
+        }
+      } else {
+        // Direct folder structure with numeric keys
+        const folderKeys = Object.keys(kmlRoot.Folder).filter(key => !isNaN(key));
+        foldersToSearch = folderKeys.map(key => kmlRoot.Folder[key]);
+      }
+      
+      for (const folder of foldersToSearch) {
+        if (folder.Placemark) {
+          const placemarks = Array.isArray(folder.Placemark) ? folder.Placemark : [folder.Placemark];
+          for (const pm of placemarks) {
+            // Check for TimeStamp when elements
+            if (pm.TimeStamp && pm.TimeStamp.when) {
+              // Parse ISO format: "2025-05-18T08:37:34.130Z"
+              const whenMatch = pm.TimeStamp.when.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+              if (whenMatch) {
+                date = whenMatch[1];
+                time = whenMatch[2];
+                console.log(`[KML REGEX] Matched date/time in TimeStamp when: ${date} ${time}`);
+                break;
+              }
+            }
+            // Check for gx:Track when elements (ADS-B Exchange format)
+            if (pm['gx:Track'] && pm['gx:Track'].when) {
+              const whenElements = Array.isArray(pm['gx:Track'].when) ? pm['gx:Track'].when : [pm['gx:Track'].when];
+              if (whenElements.length > 0) {
+                const firstWhen = whenElements[0];
+                const whenMatch = firstWhen.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+                if (whenMatch) {
+                  date = whenMatch[1];
+                  time = whenMatch[2];
+                  console.log(`[KML REGEX] Matched date/time in gx:Track when: ${date} ${time}`);
+                  break;
+                }
+              }
+            }
+          }
+          if (date && time) break;
+        }
+      }
+    }
+    
     // Fallback: try <span title="YYYY-MM-DD HH:MM"> in description
     if ((!date || !time) && doc && doc.description) {
       let desc = doc.description;
@@ -148,25 +289,7 @@ function extractKmlInfoFromFile(filePath, filename) {
         console.log(`[KML REGEX] Matched date/time in description: ${date} ${time}`);
       }
     }
-    // Extract image URL and owner from description (HTML)
-    let imageUrl = '';
-    let owner = '';
-    if (doc && doc.description) {
-      let desc = doc.description;
-      desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
-      // Extract image URL
-      const imgMatch = desc.match(/<img[^>]+src=["']([^"']+)["']/i);
-      if (imgMatch) imageUrl = imgMatch[1];
-      // Extract owner: find first <div ...>...</div>, then text after <br/>
-      const divMatch = desc.match(/<div[^>]*>([\s\S]*?)<\/div>/i);
-      if (divMatch) {
-        const divContent = divMatch[1];
-        const brSplit = divContent.split(/<br\/?\s*>/i);
-        if (brSplit.length > 1) {
-          owner = brSplit[1].replace(/<[^>]+>/g, '').trim();
-        }
-      }
-    }
+    
     // Debug log for each file
     console.log(`[KML DEBUG] ${filename}: registration=${registration}, date=${date}, time=${time}, imageUrl=${imageUrl}, owner=${owner}`);
     return { filename, registration, date, time, imageUrl, owner };
@@ -199,8 +322,37 @@ async function cacheImage(imageUrl, registration) {
 }
 
 function scanKmlMetadata() {
+  // First, try to load from cache
+  const cacheFile = path.join(__dirname, 'kml-metadata-cache.json');
+  if (fs.existsSync(cacheFile)) {
+    try {
+      const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+      console.log(`📋 Loaded ${cached.length} flights from cache`);
+      
+      // Verify cache is still valid by checking file count
+      const currentFiles = fs.readdirSync(uploadsDir).filter(f => f.toLowerCase().endsWith('.kml'));
+      if (cached.length === currentFiles.length) {
+        kmlMetadata = cached.map(flight => ({
+          filename: flight.filename,
+          registration: flight.registration,
+          date: flight.date,
+          time: flight.time
+        }));
+        console.log(`✅ Cache is up to date with ${currentFiles.length} files`);
+        return;
+      } else {
+        console.log(`⚠️ Cache outdated: ${cached.length} cached vs ${currentFiles.length} files. Rescanning...`);
+      }
+    } catch (e) {
+      console.log(`❌ Error reading cache: ${e.message}. Rescanning...`);
+    }
+  }
+  
+  // Fallback: scan all files (original behavior)
+  console.log(`🔍 Scanning all KML files...`);
   const files = fs.readdirSync(uploadsDir).filter(f => f.toLowerCase().endsWith('.kml'));
   kmlMetadata = files.map((filename, idx) => {
+    if (idx % 50 === 0) console.log(`Processing file ${idx + 1}/${files.length}...`);
     const filePath = path.join(uploadsDir, filename);
     const meta = extractKmlInfoFromFile(filePath, filename);
     
@@ -212,6 +364,14 @@ function scanKmlMetadata() {
       time: meta.time
     };
   }).filter(meta => meta.registration); // Only include flights with valid registration
+  
+  // Save to cache for next time
+  try {
+    fs.writeFileSync(cacheFile, JSON.stringify(kmlMetadata, null, 2));
+    console.log(`💾 Saved ${kmlMetadata.length} flights to cache`);
+  } catch (e) {
+    console.log(`❌ Error saving cache: ${e.message}`);
+  }
 }
 
 // Initial scan on startup
@@ -245,11 +405,35 @@ app.post('/upload', requireAdmin, upload.single('kml'), async (req, res) => {
   if (!req.file) {
     return res.status(409).json({ error: 'File already exists' });
   }
+  
   // After upload, extract imageUrl and registration, cache image
   const meta = extractKmlInfoFromFile(req.file.path, req.file.originalname);
   if (meta.imageUrl && meta.registration) {
     meta.imageUrl = await cacheImage(meta.imageUrl, meta.registration);
   }
+  
+  // Invalidate cache and add new file to metadata
+  const cacheFile = path.join(__dirname, 'kml-metadata-cache.json');
+  if (fs.existsSync(cacheFile)) {
+    try {
+      fs.unlinkSync(cacheFile);
+      console.log(`🗑️ Invalidated cache after new upload: ${req.file.originalname}`);
+    } catch (e) {
+      console.log(`❌ Error deleting cache: ${e.message}`);
+    }
+  }
+  
+  // Add to current metadata immediately
+  if (meta.registration) {
+    kmlMetadata.push({
+      filename: meta.filename,
+      registration: meta.registration,
+      date: meta.date,
+      time: meta.time
+    });
+    console.log(`✅ Added ${meta.registration} to metadata`);
+  }
+  
   res.json({
     filename: req.file.originalname,
     originalname: req.file.originalname,
@@ -289,6 +473,17 @@ app.get('/kml-metadata', (req, res) => {
 
 // Endpoint to refresh KML metadata (admin only)
 app.post('/refresh-metadata', requireAdmin, (req, res) => {
+  // Force full rescan by deleting cache
+  const cacheFile = path.join(__dirname, 'kml-metadata-cache.json');
+  if (fs.existsSync(cacheFile)) {
+    try {
+      fs.unlinkSync(cacheFile);
+      console.log(`🗑️ Deleted cache for full rescan`);
+    } catch (e) {
+      console.log(`❌ Error deleting cache: ${e.message}`);
+    }
+  }
+  
   scanKmlMetadata();
   res.json({ success: true, count: kmlMetadata.length });
 });
@@ -315,4 +510,4 @@ app.get('*', (req, res) => {
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Health check available at http://localhost:${PORT}/health`);
-}); 
+});

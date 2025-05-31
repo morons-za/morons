@@ -17,88 +17,182 @@ function loadHelicopterMetadata() {
 }
 
 function extractKmlInfoFromFile(filePath, filename) {
-  const xmlData = fs.readFileSync(filePath, 'utf8');
-  const parser = new XMLParser({
-    ignoreAttributes: false,
-    parseAttributeValue: false,
-    parseTagValue: false,
-    isArray: (name, jpath, isLeafNode, isAttribute) => false
-  });
-  
-  const doc = parser.parse(xmlData);
-  let kmlDoc = doc.kml?.Document || doc.Document || doc.kml || doc;
-  
-  // Look for registration in the document name
-  let registration = '';
-  if (kmlDoc?.name && typeof kmlDoc.name === 'string') {
-    console.log(`[DEBUG] Document name: "${kmlDoc.name}"`);
+  try {
+    const xmlData = fs.readFileSync(filePath, 'utf8');
+    const parser = new XMLParser({ ignoreAttributes: false, processEntities: true });
+    const xml = parser.parse(xmlData);
+    let registration = '';
+    let date = '';
+    let time = '';
+    let imageUrl = '';
+    let owner = '';
     
-    // Check for patterns like "-/ZTREG" or "ZT-HBO" in the name
-    let regMatch = kmlDoc.name.match(/([A-Z]{2}-[A-Z0-9]{3})/);
-    if (!regMatch) {
-      // Try pattern like "-/ZTREG" and convert to "ZT-REG"
-      const altMatch = kmlDoc.name.match(/-\/ZT([A-Z0-9]{3})/);
-      if (altMatch) {
-        registration = `ZT-${altMatch[1]}`;
+    const doc = xml.kml && xml.kml.Document ? xml.kml.Document : null;
+    const kmlRoot = doc || xml.kml;
+    
+    // Determine KML source and extract accordingly
+    const isFlightRadar24 = doc && doc.name && doc.name.includes('/Z');
+    const isAdsb = filename.includes('track') || (!doc && xml.kml.Folder);
+    
+    console.log(`[KML SOURCE] ${filename}: ${isFlightRadar24 ? 'FlightRadar24' : isAdsb ? 'ADS-B Exchange' : 'Unknown'}`);
+    
+    if (isFlightRadar24) {
+      // FlightRadar24 format parsing
+      if (doc.name) {
+        // Match last 5 uppercase letters/numbers
+        const regMatch = doc.name.match(/[A-Z0-9]{5}$/);
+        if (regMatch) {
+          registration = 'ZT-' + regMatch[0].slice(2);
+          console.log(`[KML REGEX] Matched registration in name: ${registration}`);
+        }
+      }
+      
+      // Fallback: try to extract from description (as a link)
+      if (!registration && doc && doc.description) {
+        let desc = doc.description;
+        desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+        let regMatch = desc.match(/Registration<[^>]*>.*?<a [^>]*>([A-Z0-9-]+)<\/a>/i);
+        if (regMatch) {
+          registration = regMatch[1];
+          console.log(`[KML REGEX] Matched registration in description: ${registration}`);
+        }
+      }
+    } else if (isAdsb) {
+      // ADS-B Exchange format parsing
+      if (kmlRoot && kmlRoot.Folder) {
+        // Handle nested Folder structure (ADS-B Exchange has Folder.Folder)
+        let foldersToSearch = [];
+        
+        if (kmlRoot.Folder.Folder) {
+          // Nested folder structure (xml.kml.Folder.Folder)
+          if (Array.isArray(kmlRoot.Folder.Folder)) {
+            foldersToSearch = kmlRoot.Folder.Folder;
+          } else {
+            foldersToSearch = [kmlRoot.Folder.Folder];
+          }
+        } else {
+          // Direct folder structure with numeric keys
+          const folderKeys = Object.keys(kmlRoot.Folder).filter(key => !isNaN(key));
+          foldersToSearch = folderKeys.map(key => kmlRoot.Folder[key]);
+        }
+        
+        for (const folder of foldersToSearch) {
+          if (folder.Placemark) {
+            const placemarks = Array.isArray(folder.Placemark) ? folder.Placemark : [folder.Placemark];
+            for (const pm of placemarks) {
+              if (pm.name) {
+                // Look for registration pattern like "ZS-HMB"
+                const regMatch = pm.name.match(/^([A-Z0-9]{2}-[A-Z0-9]{2,3})$/);
+                if (regMatch) {
+                  registration = regMatch[1];
+                  console.log(`[KML REGEX] Matched registration in Placemark name: ${registration}`);
+                  break;
+                }
+              }
+            }
+            if (registration) break;
+          }
+        }
+      }
+      
+      // Fallback: try filename if not found in content
+      if (!registration) {
+        const fileRegMatch = filename.match(/^([A-Z0-9]{2}-[A-Z0-9]{3})/);
+        if (fileRegMatch) {
+          registration = fileRegMatch[1];
+          console.log(`[KML REGEX] Matched registration in filename: ${registration}`);
+        }
+      }
+    }
+    
+    // Date/Time extraction (same for both formats)
+    let placemark = null;
+    if (doc) {
+      // Helper: recursively find first Placemark
+      function findFirstPlacemark(obj) {
+        if (!obj || typeof obj !== 'object') return null;
+        if (obj.Placemark) {
+          if (Array.isArray(obj.Placemark)) return obj.Placemark[0];
+          return obj.Placemark;
+        }
+        for (const key of Object.keys(obj)) {
+          const found = findFirstPlacemark(obj[key]);
+          if (found) return found;
+        }
+        return null;
+      }
+      placemark = findFirstPlacemark(doc);
+    }
+    if (placemark && placemark.name) {
+      const dtMatch = placemark.name.match(/(\d{4}-\d{2}-\d{2})[ T](\d{2}:\d{2})/);
+      if (dtMatch) {
+        date = dtMatch[1];
+        time = dtMatch[2];
+        console.log(`[KML REGEX] Matched date/time in Placemark name: ${date} ${time}`);
+      }
+    }
+    
+    // Try to find TimeStamp when elements (common in ADS-B Exchange)
+    if ((!date || !time) && kmlRoot && kmlRoot.Folder) {
+      // Handle nested Folder structure (ADS-B Exchange has Folder.Folder)
+      let foldersToSearch = [];
+      
+      if (kmlRoot.Folder.Folder) {
+        // Nested folder structure (xml.kml.Folder.Folder)
+        if (Array.isArray(kmlRoot.Folder.Folder)) {
+          foldersToSearch = kmlRoot.Folder.Folder;
+        } else {
+          foldersToSearch = [kmlRoot.Folder.Folder];
+        }
       } else {
-        // Try pattern like "-/ZSHBO" and convert to "ZT-HBO" 
-        const altMatch2 = kmlDoc.name.match(/-\/ZS([A-Z0-9]{3})/);
-        if (altMatch2) {
-          registration = `ZT-${altMatch2[1]}`;
-        }
+        // Direct folder structure with numeric keys
+        const folderKeys = Object.keys(kmlRoot.Folder).filter(key => !isNaN(key));
+        foldersToSearch = folderKeys.map(key => kmlRoot.Folder[key]);
       }
-    } else {
-      registration = regMatch[1];
-    }
-  }
-  
-  // Try to find Placemark data for date/time - check folders
-  let date = '', time = '';
-  let placemarksToCheck = [];
-  
-  if (kmlDoc?.Folder) {
-    // Handle case where Folder is parsed as array-like with numeric keys
-    if (kmlDoc.Folder['0']) {
-      const folderKeys = Object.keys(kmlDoc.Folder).filter(key => !isNaN(key));
-      for (const key of folderKeys) {
-        const folder = kmlDoc.Folder[key];
+      
+      for (const folder of foldersToSearch) {
         if (folder.Placemark) {
-          const folderPlacemarks = Array.isArray(folder.Placemark) ? folder.Placemark : [folder.Placemark];
-          placemarksToCheck.push(...folderPlacemarks);
+          const placemarks = Array.isArray(folder.Placemark) ? folder.Placemark : [folder.Placemark];
+          for (const pm of placemarks) {
+            // Check for gx:Track when elements (ADS-B Exchange format)
+            if (pm['gx:Track'] && pm['gx:Track'].when) {
+              const whenElements = Array.isArray(pm['gx:Track'].when) ? pm['gx:Track'].when : [pm['gx:Track'].when];
+              if (whenElements.length > 0) {
+                const firstWhen = whenElements[0];
+                const whenMatch = firstWhen.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+                if (whenMatch) {
+                  date = whenMatch[1];
+                  time = whenMatch[2];
+                  console.log(`[KML REGEX] Matched date/time in gx:Track when: ${date} ${time}`);
+                  break;
+                }
+              }
+            }
+          }
+          if (date && time) break;
         }
       }
-    } else if (kmlDoc.Folder.Placemark) {
-      // Handle single folder case
-      placemarksToCheck = Array.isArray(kmlDoc.Folder.Placemark) ? kmlDoc.Folder.Placemark : [kmlDoc.Folder.Placemark];
     }
-  } else if (kmlDoc?.Placemark) {
-    // Handle direct placemarks
-    placemarksToCheck = Array.isArray(kmlDoc.Placemark) ? kmlDoc.Placemark : [kmlDoc.Placemark];
-  }
-  
-  // Look for earliest timestamp in placemarks
-  for (const placemark of placemarksToCheck) {
-    if (placemark?.name && typeof placemark.name === 'string') {
-      // Look for patterns like "2025-03-23 10:03:13 UTC"
-      const dateTimeMatch = placemark.name.match(/(\d{4}-\d{2}-\d{2})\s+(\d{2}:\d{2})/);
-      if (dateTimeMatch) {
-        date = dateTimeMatch[1];
-        time = dateTimeMatch[2];
-        console.log(`[DEBUG] Found date/time: ${date} ${time}`);
-        break; // Take the first timestamp found
+    
+    // Fallback: try <span title="YYYY-MM-DD HH:MM"> in description
+    if ((!date || !time) && doc && doc.description) {
+      let desc = doc.description;
+      desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+      let dtMatch = desc.match(/<span[^>]+title=\"(\d{4}-\d{2}-\d{2}) (\d{2}:\d{2})\">/);
+      if (dtMatch) {
+        date = dtMatch[1];
+        time = dtMatch[2];
+        console.log(`[KML REGEX] Matched date/time in description: ${date} ${time}`);
       }
     }
+    
+    // Debug log for each file
+    console.log(`[KML DEBUG] ${filename}: registration=${registration}, date=${date}, time=${time}, imageUrl=${imageUrl}, owner=${owner}`);
+    return { filename, registration, date, time, imageUrl, owner };
+  } catch (e) {
+    console.log(`[KML ERROR] ${filename}:`, e.message);
+    return { filename, registration: '', date: '', time: '', imageUrl: '', owner: '' };
   }
-  
-  const result = {
-    filename,
-    registration: registration || '-',
-    date: date || '-',
-    time: time || '-'
-  };
-  
-  console.log(`[DEBUG] Final result for ${filename}:`, result);
-  return result;
 }
 
 function scanKmlMetadata() {

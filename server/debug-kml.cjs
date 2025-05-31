@@ -39,7 +39,12 @@ if (kmlDoc.Folder) {
   }
 }
 
-console.log('\nDocument top-level keys:', Object.keys(kmlDoc));
+console.log('Document top-level keys:', Object.keys(doc));
+
+// NEW: Debug document name and description
+console.log('\nDocument details:');
+console.log('Document name:', doc.name || 'NO NAME');
+console.log('Document description:', doc.description || 'NO DESCRIPTION');
 
 console.log('\nDirect Placemark check:');
 if (kmlDoc.Placemark) {

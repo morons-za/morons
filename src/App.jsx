@@ -184,7 +184,7 @@ function FAQ() {
         <div>
           <p>The purpose of this exercise is not trivial nor is it retributive. NEMPAA exists for many valid reasons. There are very good reasons to care about this and to report offenders, including:</p>
           <p style={{ fontWeight: 'bold', marginTop: 24 }}>Environmental protection</p>
-          <p>TMNP is a protected area and noisy, low-flying powered aircraft <a href="#" style={{ color: 'red', textDecoration: 'underline' }}>disturb</a>:</p>
+          <p>TMNP is a protected area and noisy, low-flying powered aircraft disturb:</p>
           <ul>
             <li>Wildlife (especially nesting birds, but also other mammals)</li>
             <li>Visitors to the natural World Heritage Site</li>
