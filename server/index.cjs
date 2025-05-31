@@ -7,6 +7,7 @@ const fs = require('fs');
 const { XMLParser } = require('fast-xml-parser');
 const session = require('express-session');
 const axios = require('axios'); // For downloading images
+const SmartKMLManager = require('./smart-kml-manager.cjs');
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -321,8 +322,20 @@ async function cacheImage(imageUrl, registration) {
   }
 }
 
-function scanKmlMetadata() {
-  // First, try to load from cache
+async function scanKmlMetadata() {
+  // First, process any new files with the smart manager
+  console.log('🧠 Running Smart KML Manager...');
+  const manager = new SmartKMLManager();
+  try {
+    const results = await manager.processNewFiles();
+    if (results.processed > 0) {
+      console.log(`✨ Smart Manager processed ${results.processed} new files, renamed ${results.renamed}, found ${results.duplicates} duplicates`);
+    }
+  } catch (error) {
+    console.log(`⚠️ Smart Manager error: ${error.message}`);
+  }
+
+  // Then load from cache
   const cacheFile = path.join(__dirname, 'kml-metadata-cache.json');
   if (fs.existsSync(cacheFile)) {
     try {
@@ -374,9 +387,11 @@ function scanKmlMetadata() {
   }
 }
 
-// Initial scan on startup
-scanKmlMetadata();
-loadHelicopterMetadata();
+// Initial scan on startup (make it async)
+(async () => {
+  await scanKmlMetadata();
+  loadHelicopterMetadata();
+})();
 
 // Middleware to check admin authentication
 function requireAdmin(req, res, next) {

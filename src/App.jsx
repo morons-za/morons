@@ -90,32 +90,51 @@ function StickyFlightPanel({ flight, onClose, fileSize }) {
           <div style={{ fontSize: 14, opacity: 0.9 }}>
             <div><strong>File:</strong> {flight.filename || '-'}</div>
             {fileSize && <div><strong>Size:</strong> {fileSize} MB</div>}
+            <div>
+              <strong>Download:</strong>{' '}
+              <a
+                href={`${BACKEND_URL}/uploads/${flight.filename}`}
+                download={flight.filename}
+                title="Download KML file"
+                style={{
+                  color: 'white',
+                  textDecoration: 'none',
+                  fontSize: '1.2em',
+                  opacity: 0.9
+                }}
+              >
+                ⬇️
+              </a>
+            </div>
           </div>
         </div>
         
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          style={{
-            background: 'rgba(255,255,255,0.2)',
-            border: '1px solid rgba(255,255,255,0.3)',
-            color: 'white',
-            borderRadius: 6,
-            padding: '8px 16px',
-            cursor: 'pointer',
-            fontSize: 14,
-            fontWeight: 'bold',
-            transition: 'all 0.2s'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = 'rgba(255,255,255,0.3)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'rgba(255,255,255,0.2)';
-          }}
-        >
-          ✕ Close
-        </button>
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+          {/* Close Button */}
+          <button
+            onClick={onClose}
+            style={{
+              background: 'rgba(255,255,255,0.2)',
+              border: '1px solid rgba(255,255,255,0.3)',
+              color: 'white',
+              borderRadius: 6,
+              padding: '8px 16px',
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 'bold',
+              transition: 'all 0.2s'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255,255,255,0.3)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255,255,255,0.2)';
+            }}
+          >
+            ✕ Close
+          </button>
+        </div>
       </div>
     </div>
   );
