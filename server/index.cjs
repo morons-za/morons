@@ -28,6 +28,12 @@ if (!fs.existsSync(imagesDir)) {
   fs.mkdirSync(imagesDir);
 }
 
+// Ensure flight-maps directory exists
+const flightMapsDir = path.join(__dirname, 'flight-maps');
+if (!fs.existsSync(flightMapsDir)) {
+  fs.mkdirSync(flightMapsDir);
+}
+
 // Multer setup
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -55,6 +61,7 @@ app.use(cors({
 }));
 app.use('/uploads', express.static(uploadsDir));
 app.use('/images', express.static(imagesDir));
+app.use('/flight-maps', express.static(flightMapsDir));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(session({

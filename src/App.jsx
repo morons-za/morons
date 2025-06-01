@@ -140,6 +140,240 @@ function StickyFlightPanel({ flight, onClose, fileSize }) {
   );
 }
 
+// Report Modal Component
+function ReportModal({ isOpen, onClose, flightData }) {
+  if (!isOpen || !flightData) return null;
+
+  const registration = flightData.registration || 'UNKNOWN';
+  const owner = flightData.owner ? ` (${flightData.owner})` : '';
+  const date = flightData.date || 'UNKNOWN DATE';
+  
+  const reportText = `It appears that a helicopter, registration ${registration}${owner}, entered restricted NP17 airspace over Table Mountain on ${date}.`;
+  
+  // Generate flight map image path
+  const imageFilename = flightData.filename ? flightData.filename.replace('.kml', '.png') : null;
+  const imagePath = imageFilename ? `${BACKEND_URL}/flight-maps/${imageFilename}` : null;
+
+  const handleCopyText = async () => {
+    try {
+      await navigator.clipboard.writeText(reportText);
+      alert('Report text copied to clipboard!');
+    } catch (err) {
+      alert(`Report text:\n\n"${reportText}"\n\n(Please copy manually)`);
+    }
+  };
+
+  const handleSaveImage = async () => {
+    if (!imagePath) {
+      alert('Flight map image not available');
+      return;
+    }
+    
+    try {
+      // Show loading state
+      const button = document.activeElement;
+      const originalText = button.textContent;
+      button.textContent = '⬇️ Downloading...';
+      button.disabled = true;
+      
+      // Fetch the image as a blob
+      const response = await fetch(imagePath);
+      if (!response.ok) {
+        throw new Error('Failed to fetch image');
+      }
+      
+      const blob = await response.blob();
+      
+      // Create a blob URL and trigger download
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = imageFilename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      // Clean up the blob URL
+      URL.revokeObjectURL(blobUrl);
+      
+      // Restore button state
+      button.textContent = originalText;
+      button.disabled = false;
+      
+      // Show success feedback
+      const tempText = button.textContent;
+      button.textContent = '✅ Downloaded!';
+      setTimeout(() => {
+        button.textContent = tempText;
+      }, 2000);
+      
+    } catch (error) {
+      console.error('Download error:', error);
+      alert('Failed to download image. Please try again.');
+      
+      // Restore button state on error
+      const button = document.activeElement;
+      button.textContent = '💾 Save Image';
+      button.disabled = false;
+    }
+  };
+
+  return (
+    <div style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0,0,0,0.7)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 2000,
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: 'white',
+        borderRadius: '12px',
+        padding: '24px',
+        maxWidth: '600px',
+        width: '100%',
+        maxHeight: '90vh',
+        overflow: 'auto',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
+      }}>
+        {/* Header */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          marginBottom: '20px',
+          borderBottom: '1px solid #eee',
+          paddingBottom: '16px'
+        }}>
+          <h2 style={{ margin: 0, color: '#333' }}>Flight Violation Report</h2>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666',
+              padding: '4px'
+            }}
+            title="Close"
+          >
+            ✕
+          </button>
+        </div>
+
+        {/* Flight Map Image */}
+        <div style={{ marginBottom: '24px', textAlign: 'center' }}>
+          <h3 style={{ marginBottom: '12px', color: '#555' }}>Flight Path Map</h3>
+          {imagePath ? (
+            <div>
+              <img
+                src={imagePath}
+                alt={`Flight map for ${registration}`}
+                style={{
+                  maxWidth: '100%',
+                  height: 'auto',
+                  maxHeight: '400px',
+                  borderRadius: '8px',
+                  border: '1px solid #ddd',
+                  marginBottom: '12px'
+                }}
+                onError={(e) => {
+                  e.target.style.display = 'none';
+                  e.target.nextElementSibling.style.display = 'block';
+                }}
+              />
+              <div style={{ display: 'none', color: '#666', fontStyle: 'italic' }}>
+                Flight map image not available
+              </div>
+              <div>
+                <button
+                  onClick={handleSaveImage}
+                  style={{
+                    padding: '8px 16px',
+                    backgroundColor: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}
+                  title="Save flight map image"
+                >
+                  💾 Save Image
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ color: '#666', fontStyle: 'italic', padding: '40px' }}>
+              Flight map image not available
+            </div>
+          )}
+        </div>
+
+        {/* Report Text */}
+        <div style={{ marginBottom: '24px' }}>
+          <h3 style={{ marginBottom: '12px', color: '#555' }}>Violation Report Text</h3>
+          <div style={{
+            backgroundColor: '#f8f9fa',
+            padding: '16px',
+            borderRadius: '8px',
+            border: '1px solid #dee2e6',
+            marginBottom: '12px',
+            fontFamily: 'monospace',
+            fontSize: '14px',
+            lineHeight: '1.5'
+          }}>
+            {reportText}
+          </div>
+          <button
+            onClick={handleCopyText}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600'
+            }}
+            title="Copy report text to clipboard"
+          >
+            📋 Copy Text
+          </button>
+        </div>
+
+        {/* Close Button */}
+        <div style={{ textAlign: 'center', paddingTop: '16px', borderTop: '1px solid #eee' }}>
+          <button
+            onClick={onClose}
+            style={{
+              padding: '10px 24px',
+              backgroundColor: '#6c757d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '600'
+            }}
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function FAQ() {
   const [open, setOpen] = useState(null);
   const faqs = [
@@ -293,6 +527,7 @@ function App() {
   const [lastViewedFilename, setLastViewedFilename] = useState('');
   const [infoPopup, setInfoPopup] = useState({ open: false, idx: null });
   const [selectedFlight, setSelectedFlight] = useState(null);
+  const [reportModal, setReportModal] = useState({ isOpen: false, flightData: null });
 
   // Filter summary
   let filterSummary = 'All flights';
@@ -713,11 +948,12 @@ function App() {
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Size</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Info</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>View Flight</th>
+                  <th style={{ padding: 8, border: '1px solid #ddd' }}>Take action</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredMetadata.length === 0 && !fetchError && (
-                  <tr><td colSpan={8} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
+                  <tr><td colSpan={10} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
                 )}
                 {filteredMetadata
                   .slice()
@@ -857,6 +1093,33 @@ function App() {
                             </button>
                           ) : '-'}
                         </td>
+                        <td style={{ padding: 8, border: '1px solid #ddd' }}>
+                          <button 
+                            onClick={() => {
+                              // Open report modal with flight data
+                              setReportModal({ 
+                                isOpen: true, 
+                                flightData: meta 
+                              });
+                            }} 
+                            style={{ 
+                              padding: '6px 12px', 
+                              borderRadius: 4, 
+                              background: '#dc3545', 
+                              color: '#fff', 
+                              border: 'none', 
+                              cursor: 'pointer', 
+                              fontSize: '18px',
+                              fontWeight: '600',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '4px'
+                            }} 
+                            title="Generate violation report"
+                          >
+                            👮‍♂️
+                          </button>
+                        </td>
                       </tr>
                     );
                   })}
@@ -885,6 +1148,13 @@ function App() {
           )}
         </div>
       )}
+      
+      {/* Report Modal */}
+      <ReportModal 
+        isOpen={reportModal.isOpen}
+        onClose={() => setReportModal({ isOpen: false, flightData: null })}
+        flightData={reportModal.flightData}
+      />
     </div>
   )
 }
