@@ -122,10 +122,12 @@ function extractKmlInfoFromFile(filePath, filename) {
     if (isFlightRadar24) {
       // FlightRadar24 format parsing
       if (doc.name) {
-        // Match last 5 uppercase letters/numbers
-        const regMatch = doc.name.match(/[A-Z0-9]{5}$/);
+        // Handle formats like "-/ZSHMB" or "FlightRadar24/ZSHMB"
+        const regMatch = doc.name.match(/[A-Z]{2}[A-Z0-9]{3}$/);
         if (regMatch) {
-          registration = 'ZT-' + regMatch[0].slice(2);
+          const rawReg = regMatch[0]; // e.g., "ZSHMB"
+          // Convert to proper format: ZSHMB -> ZS-HMB
+          registration = rawReg.slice(0, 2) + '-' + rawReg.slice(2);
           console.log(`[KML REGEX] Matched registration in name: ${registration}`);
         }
       }
@@ -505,12 +507,80 @@ app.post('/refresh-metadata', requireAdmin, (req, res) => {
 
 // Health check endpoint for Render
 app.get('/health', (req, res) => {
-  res.status(200).json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    flights: kmlMetadata.length,
-    helicopters: Object.keys(helicopterMetadata).length
+  const isReady = kmlMetadata.length > 0 && Object.keys(helicopterMetadata).length > 0;
+  
+  if (isReady) {
+    res.status(200).json({ 
+      status: 'ok', 
+      ready: true,
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      flights: kmlMetadata.length,
+      helicopters: Object.keys(helicopterMetadata).length,
+      memory: process.memoryUsage(),
+      version: process.version
+    });
+  } else {
+    res.status(503).json({
+      status: 'starting',
+      ready: false,
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      flights: kmlMetadata.length,
+      helicopters: Object.keys(helicopterMetadata).length,
+      message: 'Application is still loading data...'
+    });
+  }
+});
+
+// Readiness probe endpoint (alternative for Render)
+app.get('/ready', (req, res) => {
+  const isReady = kmlMetadata.length > 0;
+  if (isReady) {
+    res.status(200).send('OK');
+  } else {
+    res.status(503).send('Not Ready');
+  }
+});
+
+// Hot reload endpoint - reload metadata without restart
+app.post('/hot-reload', (req, res) => {
+  console.log('🔄 Hot reloading metadata...');
+  
+  // Get current file count
+  const currentFiles = fs.readdirSync(uploadsDir).filter(f => f.toLowerCase().endsWith('.kml'));
+  const currentCount = currentFiles.length;
+  const cacheCount = kmlMetadata.length;
+  
+  if (currentCount === cacheCount) {
+    console.log(`✅ No new files detected (${currentCount} files)`);
+    return res.json({ 
+      success: true, 
+      message: 'No new files to process',
+      flights: currentCount 
+    });
+  }
+  
+  console.log(`📊 Detected ${currentCount - cacheCount} new files (${cacheCount} → ${currentCount})`);
+  
+  // Force cache reload for new files only
+  const cacheFile = path.join(__dirname, 'kml-metadata-cache.json');
+  if (fs.existsSync(cacheFile)) {
+    fs.unlinkSync(cacheFile);
+  }
+  
+  // Reload metadata
+  scanKmlMetadata().then(() => {
+    console.log(`✅ Hot reload complete: ${kmlMetadata.length} total flights`);
+    res.json({ 
+      success: true, 
+      oldCount: cacheCount,
+      newCount: kmlMetadata.length,
+      added: kmlMetadata.length - cacheCount
+    });
+  }).catch(error => {
+    console.error('❌ Hot reload error:', error);
+    res.status(500).json({ error: error.message });
   });
 });
 
@@ -522,7 +592,13 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
-app.listen(PORT, '0.0.0.0', () => {
+// Start server immediately, then process files in background
+const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
   console.log(`Health check available at http://localhost:${PORT}/health`);
+  
+  // Process KML files in background after server starts
+  setTimeout(async () => {
+    await scanKmlMetadata();
+  }, 100);
 });

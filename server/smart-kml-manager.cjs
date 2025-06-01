@@ -67,9 +67,12 @@ class SmartKMLManager {
       if (isFlightRadar24) {
         // FlightRadar24 parsing logic
         if (doc.name) {
-          const regMatch = doc.name.match(/[A-Z0-9]{5}$/);
+          // Handle formats like "-/ZSHMB" or "FlightRadar24/ZSHMB"
+          const regMatch = doc.name.match(/[A-Z]{2}[A-Z0-9]{3}$/);
           if (regMatch) {
-            registration = 'ZT-' + regMatch[0].slice(2);
+            const rawReg = regMatch[0]; // e.g., "ZSHMB"
+            // Convert to proper format: ZSHMB -> ZS-HMB
+            registration = rawReg.slice(0, 2) + '-' + rawReg.slice(2);
           }
         }
       } else if (isAdsb) {
@@ -312,8 +315,9 @@ class SmartKMLManager {
       const serverCacheFile = path.join(__dirname, 'kml-metadata-cache.json');
       if (fs.existsSync(serverCacheFile)) {
         try {
-          fs.unlinkSync(serverCacheFile);
-          console.log(`🗑️ Invalidated server metadata cache (${newFiles.length} new files processed)`);
+          // fs.unlinkSync(serverCacheFile);
+          // console.log(`🗑️ Invalidated server metadata cache (${newFiles.length} new files processed)`);
+          console.log(`📝 Note: ${newFiles.length} new files processed. Use hot-reload endpoint or restart server to update metadata.`);
         } catch (e) {
           console.log(`⚠️ Could not invalidate cache: ${e.message}`);
         }

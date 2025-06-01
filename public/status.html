@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Status - Helicopter Tracking</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            text-align: center;
+            max-width: 600px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 40px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        .status {
+            font-size: 1.2em;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .retry-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+            transition: all 0.2s;
+        }
+        .retry-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .details {
+            margin-top: 30px;
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚁 Helicopter Tracking</h1>
+        <div class="status" id="status">
+            <div class="loading"></div>
+            Checking service status...
+        </div>
+        <button class="retry-btn" onclick="checkStatus()">Check Again</button>
+        <div class="details">
+            <p>If you're seeing this page, the service may be updating with new features or data.</p>
+            <p>Deployments typically take 5-10 minutes to complete.</p>
+            <p><strong>Last checked:</strong> <span id="lastCheck">-</span></p>
+        </div>
+    </div>
+
+    <script>
+        async function checkStatus() {
+            const statusEl = document.getElementById('status');
+            const lastCheckEl = document.getElementById('lastCheck');
+            
+            statusEl.innerHTML = '<div class="loading"></div>Checking service status...';
+            lastCheckEl.textContent = new Date().toLocaleTimeString();
+            
+            try {
+                const response = await fetch('/health');
+                const data = await response.json();
+                
+                if (response.ok && data.ready) {
+                    statusEl.innerHTML = '✅ Service is running normally';
+                    statusEl.style.background = 'rgba(34, 197, 94, 0.3)';
+                    setTimeout(() => {
+                        window.location.href = '/';
+                    }, 2000);
+                } else {
+                    statusEl.innerHTML = '🔄 Service is starting up...';
+                    statusEl.style.background = 'rgba(251, 191, 36, 0.3)';
+                    setTimeout(checkStatus, 5000); // Auto-retry in 5 seconds
+                }
+            } catch (error) {
+                statusEl.innerHTML = '⚠️ Service is currently unavailable';
+                statusEl.style.background = 'rgba(239, 68, 68, 0.3)';
+                setTimeout(checkStatus, 10000); // Auto-retry in 10 seconds
+            }
+        }
+        
+        // Start checking immediately
+        checkStatus();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(checkStatus, 30000);
+    </script>
+</body>
+</html> 
