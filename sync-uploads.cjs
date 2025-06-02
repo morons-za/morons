@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const PRODUCTION_URL = 'https://heli-map.onrender.com';
+const PRODUCTION_URL = 'https://morons.onrender.com';
 const LOCAL_UPLOADS_DIR = path.join(__dirname, 'server', 'uploads');
 
 async function fetchProductionUploads() {

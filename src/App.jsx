@@ -108,7 +108,6 @@ function SelectedFlightSection({ flight, onClose, fileSize, onJumpToTable, onRep
               <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Filename</th>
               <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>KML</th>
               <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Size</th>
-              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Info</th>
               <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Take action</th>
             </tr>
           </thead>
@@ -128,9 +127,6 @@ function SelectedFlightSection({ flight, onClose, fileSize, onJumpToTable, onRep
               </td>
               <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
                 {fileSize ? `${fileSize} MB` : '-'}
-              </td>
-              <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
-                <span style={{ fontSize: '22px', color: '#007bff' }}>ℹ️</span>
               </td>
               <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
                 <button 
@@ -163,10 +159,10 @@ function ReportModal({ isOpen, onClose, flightData }) {
   if (!isOpen || !flightData) return null;
 
   const registration = flightData.registration || 'UNKNOWN';
-  const owner = flightData.owner ? ` (${flightData.owner})` : '';
+  const owner = flightData.owner || 'Private owner';
   const date = flightData.date || 'UNKNOWN DATE';
   
-  const reportText = `It appears that a helicopter, registration ${registration}${owner}, entered restricted NP17 airspace over Table Mountain on ${date}.`;
+  const reportText = `It appears that a helicopter, registration ${registration} (${owner}), entered restricted NP17 airspace over Table Mountain on ${date}.`;
   
   // Generate flight map image path
   const imageFilename = flightData.filename ? flightData.filename.replace('.kml', '.png') : null;
@@ -288,19 +284,17 @@ function ReportModal({ isOpen, onClose, flightData }) {
 
         {/* Flight Map Image */}
         <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-          <h3 style={{ marginBottom: '12px', color: '#555' }}>Flight Path Map</h3>
           {imagePath ? (
-            <div>
+            <div style={{ position: 'relative', display: 'inline-block' }}>
               <img
                 src={imagePath}
                 alt={`Flight map for ${registration}`}
                 style={{
-                  maxWidth: '100%',
-                  height: 'auto',
-                  maxHeight: '400px',
+                  width: '320px',
+                  height: '320px',
+                  objectFit: 'contain',
                   borderRadius: '8px',
-                  border: '1px solid #ddd',
-                  marginBottom: '12px'
+                  border: '1px solid #ddd'
                 }}
                 onError={(e) => {
                   e.target.style.display = 'none';
@@ -310,24 +304,27 @@ function ReportModal({ isOpen, onClose, flightData }) {
               <div style={{ display: 'none', color: '#666', fontStyle: 'italic' }}>
                 Flight map image not available
               </div>
-              <div>
-                <button
-                  onClick={handleSaveImage}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '600'
-                  }}
-                  title="Save flight map image"
-                >
-                  💾 Save Image
-                </button>
-              </div>
+              <button
+                onClick={handleSaveImage}
+                style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  right: '8px',
+                  padding: '6px 12px',
+                  backgroundColor: 'rgba(40, 167, 69, 0.9)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '4px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '600',
+                  backdropFilter: 'blur(4px)',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                }}
+                title="Save flight map image"
+              >
+                💾 Save Image
+              </button>
             </div>
           ) : (
             <div style={{ color: '#666', fontStyle: 'italic', padding: '40px' }}>
@@ -338,7 +335,6 @@ function ReportModal({ isOpen, onClose, flightData }) {
 
         {/* Report Text */}
         <div style={{ marginBottom: '24px' }}>
-          <h3 style={{ marginBottom: '12px', color: '#555' }}>Violation Report Text</h3>
           <div style={{
             backgroundColor: '#f8f9fa',
             padding: '16px',
@@ -347,26 +343,104 @@ function ReportModal({ isOpen, onClose, flightData }) {
             marginBottom: '12px',
             fontFamily: 'monospace',
             fontSize: '14px',
-            lineHeight: '1.5'
+            lineHeight: '1.5',
+            textAlign: 'left',
+            position: 'relative'
           }}>
             {reportText}
+            <button
+              onClick={handleCopyText}
+              style={{
+                position: 'absolute',
+                bottom: '8px',
+                right: '8px',
+                padding: '4px 8px',
+                backgroundColor: '#007bff',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '600'
+              }}
+              title="Copy report text to clipboard"
+            >
+              📋 Copy text
+            </button>
           </div>
-          <button
-            onClick={handleCopyText}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#007bff',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '600'
-            }}
-            title="Copy report text to clipboard"
-          >
-            📋 Copy Text
-          </button>
+          
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', justifyContent: 'center' }}>
+            {/* Report to SACAA */}
+            <button
+              onClick={() => {
+                const mailtoUrl = `mailto:enforcement@caa.co.za?subject=Helicopter Airspace Violation Report - ${registration}&body=${encodeURIComponent(`Dear sir/madam,
+
+
+It appears that a helicopter, registration ${registration} (${owner}), entered restricted airspace (NEMPAA NP17) over Table Mountain on ${date}. Please find a flight map here: ${imagePath ? imagePath.replace(/^https?:\/\/[^\/]+/, 'https://morons.onrender.com') : 'Flight map not available'}.
+
+
+Could you please confirm receipt of my complaint and any relevant steps that might be taken? I greatly appreciate your assistance in the matter!
+
+
+Regards,`)}`;
+                window.open(mailtoUrl);
+              }}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#dc3545',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '600'
+              }}
+              title="Report to South African Civil Aviation Authority"
+            >
+              ✈️ Report to SACAA
+            </button>
+            
+            {/* Report to SanParks */}
+            <button
+              onClick={() => {
+                const mailtoUrl = `mailto:TableM@sanparks.org?subject=Table Mountain Airspace Violation Report - ${registration}&body=${encodeURIComponent(`Dear sir/madam,
+
+
+It appears that a helicopter, registration ${registration} (${owner}), entered restricted airspace (NEMPAA NP17) over Table Mountain on ${date}. Please find a flight map here: ${imagePath ? imagePath.replace(/^https?:\/\/[^\/]+/, 'https://morons.onrender.com') : 'Flight map not available'}.
+
+
+Could you please confirm receipt of my complaint and any relevant steps that might be taken? I greatly appreciate your assistance in the matter!
+
+
+Regards,`)}`;
+                window.open(mailtoUrl);
+              }}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#28a745',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontWeight: '600'
+              }}
+              title="Report to South African National Parks"
+            >
+              🏔️ Report to SanParks
+            </button>
+          </div>
+          
+          {/* Fallback email addresses */}
+          <div style={{ 
+            marginTop: '12px', 
+            fontSize: '12px', 
+            color: '#666',
+            fontStyle: 'italic',
+            textAlign: 'left'
+          }}>
+            Email links will open a pre-written email in a new tab. If they don't work: you can save the image and the text above (or write your own complaint) and send it to: <strong>enforcement@caa.co.za</strong> (SACAA) • <strong>TableM@sanparks.org</strong> (SanParks)
+          </div>
         </div>
 
         {/* Close Button */}
@@ -980,14 +1054,13 @@ function App() {
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Filename</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>KML</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Size</th>
-                  <th style={{ padding: 8, border: '1px solid #ddd' }}>Info</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>View Flight</th>
                   <th style={{ padding: 8, border: '1px solid #ddd' }}>Take action</th>
                 </tr>
               </thead>
               <tbody>
                 {filteredMetadata.length === 0 && !fetchError && (
-                  <tr><td colSpan={10} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
+                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: 16, color: '#888' }}>No files found.</td></tr>
                 )}
                 {filteredMetadata
                   .slice()
@@ -1014,45 +1087,6 @@ function App() {
                         </td>
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
                           {kmlSizes[meta.filename] ? `${kmlSizes[meta.filename]} MB` : '-'}
-                        </td>
-                        <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center', position: 'relative' }}>
-                          <span
-                            style={{ cursor: 'pointer', display: 'inline-block' }}
-                            onClick={() => setInfoPopup(infoPopup.open && infoPopup.idx === idx ? { open: false, idx: null } : { open: true, idx })}
-                            onMouseEnter={() => setInfoPopup({ open: true, idx })}
-                            onMouseLeave={() => setTimeout(() => { if (infoPopup.idx === idx) setInfoPopup({ open: false, idx: null }); }, 200)}
-                          >
-                            <span role="img" aria-label="info" style={{ fontSize: 22, color: '#007bff' }}>ℹ️</span>
-                            {infoPopup.open && infoPopup.idx === idx && (
-                              <div style={{
-                                position: 'absolute',
-                                top: 30,
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                background: '#fff',
-                                border: '1px solid #ccc',
-                                borderRadius: 8,
-                                boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-                                padding: 12,
-                                zIndex: 100,
-                                minWidth: 220,
-                                maxWidth: 320,
-                                textAlign: 'center',
-                              }}
-                                onClick={e => e.stopPropagation()}
-                              >
-                                <div style={{ fontWeight: 600, color: '#333', marginBottom: 4 }}>
-                                  {meta.registration || 'No registration'}
-                                </div>
-                                {meta.imageUrl && (
-                                  <img src={meta.imageUrl} alt="Helicopter" style={{ width: '100%', maxWidth: 210, borderRadius: 6, marginBottom: 8 }} />
-                                )}
-                                {meta.owner && (
-                                  <div style={{ fontWeight: 600, color: '#333', marginTop: 4 }}>{meta.owner}</div>
-                                )}
-                              </div>
-                            )}
-                          </span>
                         </td>
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
                           {kml.url ? (
