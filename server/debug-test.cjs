@@ -30,9 +30,9 @@ function extractKmlInfoFromFile(filePath) {
       const regMatch = doc.name.match(/([A-Z0-9]{5})$/);
       console.log('🔍 Regex match:', regMatch);
       if (regMatch) {
-        // Convert ZSHBO to ZT-HBO format
+        // Convert ZSHMB format to ZS-HMB format (preserve the original prefix)
         const reg = regMatch[1];
-        registration = `ZT-${reg.slice(2)}`; // ZSHBO -> ZT-HBO
+        registration = reg.slice(0, 2) + '-' + reg.slice(2);
         console.log('✅ Registration extracted:', registration);
       }
     }

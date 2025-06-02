@@ -99,6 +99,30 @@ Each KML file has a corresponding PNG flight map showing:
 - **98.6% Data Accuracy**: False positives removed through validation
 - **100% File Parity**: Each KML has corresponding PNG map
 
+## 🚁 Tracked Helicopters
+
+Below is a list of helicopters for which we have found flight tracks. There are undoubtedly more helicopters operating in the Cape Town area that we have not yet captured data for.
+
+**⚠️ Data Accuracy Disclaimer**: The owner information listed below may contain errors and cannot be guaranteed to be completely accurate. This information was compiled from various sources including social media, company promotional pages, and third-party databases. If you notice any inaccuracies, please report them through GitHub issues.
+
+| **Registration** | **Owner/Operator** | **Tracked Flights** |
+|------------------|-------------------|---------------------|
+| **ZS-HBO** | Cape Town Helicopters | 72 flights |
+| **ZS-HIE** | Cape Town Helicopters | 74 flights |
+| **ZS-HIM** | Cape Town Helicopters | 33 flights |
+| **ZS-HMB** | Sport Helicopters | 12 flights |
+| **ZS-RTG** | Cape Town Helicopters | 85 flights |
+| **ZT-HOT** | Cape Town Helicopters | 69 flights |
+| **ZT-REG** | NAC | 65 flights |
+| **ZT-RMS** | Cape Town Helicopters | 7 flights |
+
+### Fleet Summary by Operator
+- **Cape Town Helicopters**: 6 aircraft (ZS-HBO, ZS-HIE, ZS-HIM, ZS-RTG, ZT-HOT, ZT-RMS) - 340 flights
+- **NAC**: 1 aircraft (ZT-REG) - 65 flights  
+- **Sport Helicopters**: 1 aircraft (ZS-HMB) - 12 flights
+
+*Note: This represents only helicopters with recorded airspace violations. Many more helicopters operate legally in the Cape Town area without entering restricted airspace.*
+
 ## 🚀 Getting Started
 
 ### Prerequisites

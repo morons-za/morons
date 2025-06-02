@@ -36,25 +36,29 @@ function extractKmlInfoFromFile(filePath, filename) {
     
     console.log(`[KML SOURCE] ${filename}: ${isFlightRadar24 ? 'FlightRadar24' : isAdsb ? 'ADS-B Exchange' : 'Unknown'}`);
     
-    if (isFlightRadar24) {
+    if (!isAdsb) {
       // FlightRadar24 format parsing
-      if (doc.name) {
-        // Match last 5 uppercase letters/numbers
-        const regMatch = doc.name.match(/[A-Z0-9]{5}$/);
+      // First try to extract from description (as a link) - this preserves the correct format
+      if (doc && doc.description) {
+        let desc = doc.description;
+        desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+        // Look for registration link pattern like: <a href="https://www.flightradar24.com/reg/zs-hmb">ZS-HMB</a>
+        let regMatch = desc.match(/<a[^>]*href="[^"]*\/reg\/([a-z0-9-]+)"[^>]*>([A-Z0-9-]+)<\/a>/i);
         if (regMatch) {
-          registration = 'ZT-' + regMatch[0].slice(2);
-          console.log(`[KML REGEX] Matched registration in name: ${registration}`);
+          registration = regMatch[2]; // Use the display text (ZS-HMB) not the URL part (zs-hmb)
+          console.log(`[KML REGEX] Matched registration in description link: ${registration}`);
         }
       }
       
-      // Fallback: try to extract from description (as a link)
-      if (!registration && doc && doc.description) {
-        let desc = doc.description;
-        desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
-        let regMatch = desc.match(/Registration<[^>]*>.*?<a [^>]*>([A-Z0-9-]+)<\/a>/i);
+      // Fallback: try name if description didn't work
+      if (!registration && doc.name) {
+        // Match last 5 uppercase letters/numbers and convert to proper format
+        const regMatch = doc.name.match(/[A-Z0-9]{5}$/);
         if (regMatch) {
-          registration = regMatch[1];
-          console.log(`[KML REGEX] Matched registration in description: ${registration}`);
+          const match = regMatch[0];
+          // Convert ZSHMB format to ZS-HMB format
+          registration = match.slice(0, 2) + '-' + match.slice(2);
+          console.log(`[KML REGEX] Matched registration in name: ${registration}`);
         }
       }
     } else if (isAdsb) {

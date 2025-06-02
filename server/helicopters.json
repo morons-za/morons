@@ -1,37 +1,52 @@
 {
-  "ZT-HBO": {
-    "registration": "ZT-HBO",
+  "ZS-HBO": {
+    "registration": "ZS-HBO",
     "owner": "Cape Town Helicopters",
     "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0"
   },
-  "ZT-REG": {
-    "registration": "ZT-REG",
-    "owner": "Private owner",
-    "imageUrl": "https://cdn.jetphotos.com/200/6/58588_1562879091_tb.jpg?v=0"
+  "ZS-HIE": {
+    "registration": "ZS-HIE",
+    "owner": "Cape Town Helicopters",
+    "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0"
+  },
+  "ZS-HIM": {
+    "registration": "ZS-HIM",
+    "owner": "Cape Town Helicopters",
+    "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0"
+  },
+  "ZS-HMB": {
+    "registration": "ZS-HMB",
+    "owner": "Sport Helicopters",
+    "imageUrl": ""
+  },
+  "ZS-RTG": {
+    "registration": "ZS-RTG",
+    "owner": "Cape Town Helicopters",
+    "imageUrl": "https://cdn.jetphotos.com/200/5/541479_1728643363_tb.jpg?v=0"
+  },
+  "ZS-RLC": {
+    "registration": "ZS-RLC",
+    "owner": "NAC",
+    "imageUrl": ""
   },
   "ZT-HOT": {
     "registration": "ZT-HOT",
     "owner": "Cape Town Helicopters",
     "imageUrl": ""
   },
-  "ZT-RTG": {
-    "registration": "ZT-RTG",
-    "owner": "Cape Town Helicopters",
-    "imageUrl": "https://cdn.jetphotos.com/200/5/541479_1728643363_tb.jpg?v=0"
+  "ZT-REG": {
+    "registration": "ZT-REG",
+    "owner": "NAC",
+    "imageUrl": "https://cdn.jetphotos.com/200/6/58588_1562879091_tb.jpg?v=0"
   },
   "ZT-RMS": {
     "registration": "ZT-RMS",
-    "owner": "Private owner",
+    "owner": "Cape Town Helicopters",
     "imageUrl": "https://cdn.jetphotos.com/200/6/1266217_1691655199_tb.jpg?v=0"
   },
-  "ZT-HIE": {
-    "registration": "ZT-HIE",
-    "owner": "Cape Town Helicopters",
-    "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0"
-  },
-  "ZT-HIM": {
-    "registration": "ZT-HIM",
-    "owner": "Private owner",
-    "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0"
+  "ZT-RPG": {
+    "registration": "ZT-RPG",
+    "owner": "NAC",
+    "imageUrl": ""
   }
 }
