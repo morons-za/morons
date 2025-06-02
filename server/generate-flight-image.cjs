@@ -797,61 +797,57 @@ function clusterViolations(violations, coordToPixel, maxDistance = 50) {
   return clusters;
 }
 
-// Generate maps for ALL flights in uploads directory
-const uploadsDir = path.join(__dirname, 'uploads');
-const allKmlFiles = fs.readdirSync(uploadsDir)
-  .filter(file => file.endsWith('.kml'))
-  .sort(); // Sort for consistent processing order
-
-console.log(`🚁 Found ${allKmlFiles.length} KML files to process...`);
-console.log(`🚀 Starting bulk flight map generation...`);
-
-// Enhanced batch processing with progress tracking
-async function generateAllFlightMaps() {
-  let successCount = 0;
-  let errorCount = 0;
-  let violationStats = [];
+// If no specific KML file provided, process all KML files
+async function processAllFiles() {
+  console.log('Processing ALL KML files...');
   
+  // Define directories
+  const uploadsDir = path.join(__dirname, 'uploads');
+  const outputDir = path.join(__dirname, 'flight-maps');
+  
+  const kmlFiles = fs.readdirSync(uploadsDir).filter(f => f.endsWith('.kml'));
+  console.log(`📁 Found ${kmlFiles.length} KML files to check`);
+
+  let processed = 0;
+  let skipped = 0;
+  let errors = 0;
   const startTime = Date.now();
-  
-  for (let i = 0; i < allKmlFiles.length; i++) {
-    const fileName = allKmlFiles[i];
-    const progress = `${i + 1}/${allKmlFiles.length}`;
-    
-    console.log(`\n📋 Processing ${progress}: ${fileName}`);
-    
+
+  for (const filename of kmlFiles) {
     try {
-      const result = await generateFlightImage(fileName);
-      if (result !== false) {
-        successCount++;
-        console.log(`✅ Success (${successCount}/${allKmlFiles.length})`);
-      } else {
-        errorCount++;
-        console.log(`❌ Failed (${errorCount} errors so far)`);
+      // Check if PNG already exists
+      const pngFilename = filename.replace('.kml', '.png');
+      const pngPath = path.join(outputDir, pngFilename);
+      
+      if (fs.existsSync(pngPath)) {
+        skipped++;
+        if (skipped % 50 === 0) {
+          console.log(`⏭️  Skipped ${skipped} existing files...`);
+        }
+        continue;
       }
+      
+      processed++;
+      const kmlPath = path.join(uploadsDir, filename);
+      
+      if (processed % 10 === 0) {
+        const elapsed = (Date.now() - startTime) / 1000;
+        const rate = processed / elapsed;
+        const remaining = kmlFiles.length - processed - skipped;
+        const eta = remaining / rate;
+        console.log(`🔄 Processed ${processed}, skipped ${skipped}, remaining ${remaining} (${rate.toFixed(1)}/s, ETA: ${Math.round(eta)}s)`);
+      }
+      
+      await generateFlightImage(filename);
     } catch (error) {
-      errorCount++;
-      console.log(`💥 Error processing ${fileName}:`, error.message);
-    }
-    
-    // Progress update every 25 files
-    if ((i + 1) % 25 === 0) {
-      const elapsed = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
-      const rate = ((i + 1) / elapsed).toFixed(1);
-      console.log(`\n📊 Progress: ${i + 1}/${allKmlFiles.length} (${((i + 1) / allKmlFiles.length * 100).toFixed(1)}%)`);
-      console.log(`⏱️ Time elapsed: ${elapsed} min, Rate: ${rate} files/min`);
-      console.log(`✅ Successful: ${successCount}, ❌ Errors: ${errorCount}`);
+      errors++;
+      console.error(`❌ Error processing ${filename}:`, error.message);
     }
   }
-  
-  const totalTime = ((Date.now() - startTime) / 1000 / 60).toFixed(1);
-  
-  console.log(`\n🎉 BATCH COMPLETE!`);
-  console.log(`📁 Processed: ${allKmlFiles.length} files in ${totalTime} minutes`);
-  console.log(`✅ Successful: ${successCount}`);
-  console.log(`❌ Errors: ${errorCount}`);
-  console.log(`📈 Success rate: ${(successCount / allKmlFiles.length * 100).toFixed(1)}%`);
-  console.log(`📁 Check the flight-maps/ directory for all results`);
+
+  console.log(`✅ Bulk processing complete!`);
+  console.log(`📊 Results: ${processed} generated, ${skipped} skipped, ${errors} errors`);
+  console.log(`⏱️  Total time: ${((Date.now() - startTime) / 1000).toFixed(1)}s`);
 }
 
-generateAllFlightMaps(); 
+processAllFiles().catch(console.error); 

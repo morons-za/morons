@@ -35,106 +35,124 @@ function utcToSaTime(date, time) {
   return sa.toISOString().slice(11, 16); // 'HH:MM'
 }
 
-// Sticky Flight Details Panel Component
-function StickyFlightPanel({ flight, onClose, fileSize }) {
+// Selected Flight Row Component (replaces StickyFlightPanel)
+function SelectedFlightSection({ flight, onClose, fileSize, onJumpToTable, onReport }) {
   if (!flight) return null;
+  
+  const kml = flight.kmlData || {};
   
   return (
     <div style={{
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      color: 'white',
-      padding: '16px 20px',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-      zIndex: 1000,
-      borderBottom: '1px solid rgba(255,255,255,0.2)'
+      background: '#f8f9fa',
+      border: '1px solid #dee2e6',
+      borderRadius: '8px',
+      margin: '16px 0',
+      overflow: 'hidden',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
     }}>
-      <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', gap: 20 }}>
-        {/* Helicopter Image */}
-        {flight.imageUrl && (
-          <img 
-            src={flight.imageUrl} 
-            alt="Helicopter" 
-            style={{ 
-              width: 60, 
-              height: 60, 
-              borderRadius: 8, 
-              objectFit: 'cover',
-              border: '2px solid rgba(255,255,255,0.3)'
-            }} 
-          />
-        )}
-        
-        {/* Flight Details */}
-        <div style={{ flex: 1, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-          <div>
-            <div style={{ fontSize: 18, fontWeight: 'bold', marginBottom: 4 }}>
-              {flight.registration || 'Unknown Registration'}
-            </div>
-            {flight.owner && (
-              <div style={{ fontSize: 14, opacity: 0.9 }}>
-                {flight.owner}
-              </div>
-            )}
-          </div>
-          
-          <div style={{ fontSize: 14, opacity: 0.9 }}>
-            <div><strong>Date:</strong> {flight.date || '-'}</div>
-            <div><strong>Time (UTC):</strong> {flight.time || '-'}</div>
-            <div><strong>Time (SAST):</strong> {utcToSaTime(flight.date, flight.time)}</div>
-          </div>
-          
-          <div style={{ fontSize: 14, opacity: 0.9 }}>
-            <div><strong>File:</strong> {flight.filename || '-'}</div>
-            {fileSize && <div><strong>Size:</strong> {fileSize} MB</div>}
-            <div>
-              <strong>Download:</strong>{' '}
-              <a
-                href={`${BACKEND_URL}/uploads/${flight.filename}`}
-                download={flight.filename}
-                title="Download KML file"
-                style={{
-                  color: 'white',
-                  textDecoration: 'none',
-                  fontSize: '1.2em',
-                  opacity: 0.9
-                }}
-              >
-                ⬇️
-              </a>
-            </div>
-          </div>
-        </div>
-        
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
-          {/* Close Button */}
+      {/* Header */}
+      <div style={{
+        background: '#e9ecef',
+        padding: '12px 16px',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        borderBottom: '1px solid #dee2e6'
+      }}>
+        <h3 style={{ margin: 0, fontSize: '16px', color: '#495057' }}>
+          Viewing Flight: {flight.registration || 'Unknown'}
+        </h3>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <button
+            onClick={onJumpToTable}
+            style={{
+              background: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '6px 12px',
+              cursor: 'pointer',
+              fontSize: '14px'
+            }}
+            title="Jump to table row"
+          >
+            📋 Jump to Table
+          </button>
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.2)',
-              border: '1px solid rgba(255,255,255,0.3)',
+              background: '#6c757d',
               color: 'white',
-              borderRadius: 6,
-              padding: '8px 16px',
+              border: 'none',
+              borderRadius: '4px',
+              padding: '6px 12px',
               cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 'bold',
-              transition: 'all 0.2s'
+              fontSize: '14px'
             }}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.3)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255,255,255,0.2)';
-            }}
+            title="Close flight view"
           >
             ✕ Close
           </button>
         </div>
+      </div>
+      
+      {/* Table Header */}
+      <div style={{ overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+          <thead>
+            <tr style={{ background: '#f0f0f0' }}>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Date</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>UTC Time</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>SA Time</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Registration</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Filename</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>KML</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Size</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Info</th>
+              <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Take action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style={{ background: '#e6f7ff' }}>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{flight.date || '-'}</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{flight.time || '-'}</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{utcToSaTime(flight.date, flight.time)}</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{flight.registration || '-'}</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd' }}>{flight.filename || '-'}</td>
+              <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
+                {kml.url ? (
+                  <a href={`${BACKEND_URL}${kml.url}`} download={flight.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
+                    ⬇️
+                  </a>
+                ) : '-'}
+              </td>
+              <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
+                {fileSize ? `${fileSize} MB` : '-'}
+              </td>
+              <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
+                <span style={{ fontSize: '22px', color: '#007bff' }}>ℹ️</span>
+              </td>
+              <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
+                <button 
+                  onClick={() => onReport && onReport(flight)} 
+                  style={{ 
+                    padding: '6px 12px', 
+                    borderRadius: 4, 
+                    background: '#dc3545', 
+                    color: '#fff', 
+                    border: 'none', 
+                    cursor: 'pointer', 
+                    fontSize: '18px',
+                    fontWeight: '600'
+                  }} 
+                  title="Generate violation report"
+                >
+                  👮‍♂️
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );
@@ -792,17 +810,10 @@ function App() {
 
   return (
     <div className="app-container">
-      {/* Sticky Flight Details Panel */}
-      <StickyFlightPanel 
-        flight={selectedFlight} 
-        onClose={() => setSelectedFlight(null)} 
-        fileSize={selectedFlight ? kmlSizes[selectedFlight.filename] : null}
-      />
-      
       {/* Top Menu Bar */}
       <div style={{ 
         position: 'fixed', 
-        top: selectedFlight ? 90 : 0, // Adjust for sticky panel height
+        top: 0, // Remove conditional padding
         left: 0, 
         right: 0, 
         background: 'rgba(255, 255, 255, 0.95)', 
@@ -839,9 +850,32 @@ function App() {
           </div>
         </div>
       ) : (
-        <div className="main-content" style={{ paddingTop: selectedFlight ? '160px' : '70px' }}>
+        <div className="main-content" style={{ paddingTop: '70px' }}>
           <h1 className="main-title" style={{ marginTop: 24, marginBottom: 16 }}>Misbehaving Operators Roaming Over National Sanctuaries</h1>
+          
+          {/* Selected Flight Section (above map for better visibility) */}
+          <SelectedFlightSection 
+            flight={selectedFlight} 
+            onClose={() => setSelectedFlight(null)} 
+            fileSize={selectedFlight ? kmlSizes[selectedFlight.filename] : null}
+            onJumpToTable={() => {
+              // Scroll to the highlighted row in the table
+              const tableElement = document.getElementById('violations-table');
+              if (tableElement) {
+                tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }
+            }}
+            onReport={(flight) => {
+              // Open report modal with flight data
+              setReportModal({ 
+                isOpen: true, 
+                flightData: flight 
+              });
+            }}
+          />
+          
           <div id="map" style={{ height: '600px', width: '100%', marginTop: 0, marginBottom: 24 }}></div>
+          
           <div style={{marginTop: 24, textAlign: 'left'}}>
             {helicopters.length > 0 && (
               <div>
@@ -857,7 +891,7 @@ function App() {
             )}
           </div>
           {/* Violations Table */}
-          <div style={{ width: '100%', maxWidth: 800, margin: '32px auto 0 auto' }}>
+          <div id="violations-table" style={{ width: '100%', maxWidth: 800, margin: '32px auto 0 auto' }}>
             {/* Summary Section */}
             <div style={{ margin: '0 0 18px 0', fontSize: 18, color: '#223', fontWeight: 500, textAlign: 'center' }}>
               Summary: <strong>{flightCount} flight{flightCount === 1 ? '' : 's'} shown</strong> with <i>likely</i> <strong>NP17</strong> airspace violations over Table Mountain National Park, from <strong>{uniqueHelis} helicopter{uniqueHelis === 1 ? '' : 's'}</strong>, with flight logs shown from <strong>{dates.length > 0 ? dates[0] : ''}</strong> <span style={{ fontWeight: 500 }}>to</span> <strong>{dates.length > 0 ? dates[dates.length - 1] : ''}</strong>
@@ -1023,8 +1057,11 @@ function App() {
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
                           {kml.url ? (
                             <button onClick={async () => {
-                              // Set selected flight for sticky panel
-                              setSelectedFlight(meta);
+                              // Set selected flight with KML data for SelectedFlightSection
+                              setSelectedFlight({
+                                ...meta,
+                                kmlData: kml
+                              });
                               
                               // Scroll to top to show the map update
                               window.scrollTo({ top: 0, behavior: 'smooth' });
