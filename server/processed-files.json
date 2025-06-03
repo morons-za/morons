@@ -4219,7 +4219,77 @@
         "date": "2025-05-31",
         "time": "14:22"
       }
+    },
+    "2025-06-01-ZS-HBO-3a986b16.kml": {
+      "originalName": "2025-06-01-ZS-HBO-3a986b16.kml",
+      "processedAt": "2025-06-02T02:34:29.969Z",
+      "contentHash": "de0866ff16ef3c666b6c45c00a848ba9",
+      "metadata": {
+        "registration": "ZS-HBO",
+        "date": "2025-06-01",
+        "time": "08:06"
+      }
+    },
+    "2025-06-01-ZS-RTG-3a9862ef.kml": {
+      "originalName": "2025-06-01-ZS-RTG-3a9862ef.kml",
+      "processedAt": "2025-06-02T02:34:30.156Z",
+      "contentHash": "c9a0d921b052cb2d812680853050331e",
+      "metadata": {
+        "registration": "ZS-RTG",
+        "date": "2025-06-01",
+        "time": "07:53"
+      }
+    },
+    "2025-06-01-ZS-HMB-3a98523b.kml": {
+      "originalName": "2025-06-01-ZS-HMB-3a98523b.kml",
+      "processedAt": "2025-06-03T03:34:41.666Z",
+      "contentHash": "ef91aa61691daca1dfb607226c533080",
+      "metadata": {
+        "registration": "ZS-HMB",
+        "date": "2025-06-01",
+        "time": "07:18"
+      }
+    },
+    "2025-06-02-ZS-HBO-3a9d2359.kml": {
+      "originalName": "2025-06-02-ZS-HBO-3a9d2359.kml",
+      "processedAt": "2025-06-03T03:34:41.695Z",
+      "contentHash": "c0bc75c177f3ce5bcf4fc70a149c8580",
+      "metadata": {
+        "registration": "ZS-HBO",
+        "date": "2025-06-02",
+        "time": "14:28"
+      }
+    },
+    "2025-06-02-ZS-HIE-3a9c1c79.kml": {
+      "originalName": "2025-06-02-ZS-HIE-3a9c1c79.kml",
+      "processedAt": "2025-06-03T03:34:41.727Z",
+      "contentHash": "6a08f8d29b58046f8654186b193107e9",
+      "metadata": {
+        "registration": "ZS-HIE",
+        "date": "2025-06-02",
+        "time": "08:49"
+      }
+    },
+    "2025-06-02-ZS-HIE-3a9c5825.kml": {
+      "originalName": "2025-06-02-ZS-HIE-3a9c5825.kml",
+      "processedAt": "2025-06-03T03:34:41.744Z",
+      "contentHash": "fd64cf74766c0b377bfcaabaefb9e019",
+      "metadata": {
+        "registration": "ZS-HIE",
+        "date": "2025-06-02",
+        "time": "10:29"
+      }
+    },
+    "2025-06-02-ZS-HIE-3a9d1206.kml": {
+      "originalName": "2025-06-02-ZS-HIE-3a9d1206.kml",
+      "processedAt": "2025-06-03T03:34:41.763Z",
+      "contentHash": "24b96155401112cfcbf7ba476df2dbe2",
+      "metadata": {
+        "registration": "ZS-HIE",
+        "date": "2025-06-02",
+        "time": "14:09"
+      }
     }
   },
-  "lastScan": "2025-06-01T03:28:42.569Z"
+  "lastScan": "2025-06-03T03:34:41.763Z"
 }

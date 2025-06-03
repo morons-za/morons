@@ -723,7 +723,7 @@ function pointInTMNP(lat, lon, tmnpPolygons) {
         if (pointInPolygon([lon, lat], hole)) {
           inHole = true;
           break;
-        }
+}
       }
       
       // If in outer boundary but not in any hole, it's inside TMNP

@@ -254,23 +254,37 @@ async function main() {
       await generatePNGs(renamedFiles);
       console.log('\n🎉 All done! New files processed successfully.');
       console.log(`📊 Final summary: ${renamedFiles.length} files renamed and PNG files generated`);
+      
+      // Step 3: Update master metadata incrementally for new files only
+      console.log('🔄 Updating master metadata with new flights...');
+      await updateMasterMetadataIncremental(renamedFiles);
+      
     } else {
       console.log('\n✅ No new files to process.');
     }
     
-    // Step 3: Always clear cache to ensure server picks up any new files
+    // Step 4: Always clear cache to ensure server picks up any new files
     clearCache();
     console.log('🔄 Cache cleared - server will refresh metadata on next request');
-    
-    // Step 4: Regenerate master metadata file for fast server startup
-    console.log('\n🔄 Regenerating master metadata file...');
-    await generateMasterMetadata();
-    console.log('✅ Master metadata updated - server will start quickly!');
     
   } catch (error) {
     console.error('❌ Error:', error.message);
     process.exit(1);
   }
+}
+
+// Function to update master metadata incrementally
+async function updateMasterMetadataIncremental(newFiles) {
+  if (newFiles.length === 0) return;
+  
+  const { generateMasterMetadata } = require('./generate-master-metadata.cjs');
+  
+  console.log(`📝 Adding ${newFiles.length} new flights to master metadata...`);
+  
+  // Regenerate master metadata (it's smart enough to be fast)
+  await generateMasterMetadata();
+  
+  console.log('✅ Master metadata updated with new flights');
 }
 
 main(); 

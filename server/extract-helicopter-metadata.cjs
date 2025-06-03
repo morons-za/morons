@@ -23,7 +23,7 @@ function extractKmlInfoFromFile(filePath) {
         // Convert ZSHMB format to ZS-HMB format (preserve the original prefix)
         const reg = regMatch[1];
         registration = reg.slice(0, 2) + '-' + reg.slice(2);
-      }
+    }
     }
     
     // Extract image URL and owner from description (HTML)
