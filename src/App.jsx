@@ -190,6 +190,11 @@ function ReportModal({ isOpen, onClose, flightData }) {
       button.textContent = '⬇️ Downloading...';
       button.disabled = true;
       
+      // Create a hidden iframe for download to prevent page reload on mobile
+      const iframe = document.createElement('iframe');
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+      
       // Fetch the image as a blob
       const response = await fetch(imagePath);
       if (!response.ok) {
@@ -198,28 +203,32 @@ function ReportModal({ isOpen, onClose, flightData }) {
       
       const blob = await response.blob();
       
-      // Create a blob URL and trigger download
+      // Create a blob URL and trigger download through the iframe
       const blobUrl = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = blobUrl;
       link.download = imageFilename;
-      document.body.appendChild(link);
+      
+      // Use the iframe's document to trigger the download
+      iframe.contentWindow.document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
       
-      // Clean up the blob URL
-      URL.revokeObjectURL(blobUrl);
-      
-      // Restore button state
-      button.textContent = originalText;
-      button.disabled = false;
-      
-      // Show success feedback
-      const tempText = button.textContent;
-      button.textContent = '✅ Downloaded!';
+      // Clean up
       setTimeout(() => {
-        button.textContent = tempText;
-      }, 2000);
+        URL.revokeObjectURL(blobUrl);
+        document.body.removeChild(iframe);
+        
+        // Restore button state
+        button.textContent = originalText;
+        button.disabled = false;
+        
+        // Show success feedback
+        const tempText = button.textContent;
+        button.textContent = '✅ Downloaded!';
+        setTimeout(() => {
+          button.textContent = tempText;
+        }, 2000);
+      }, 1000);
       
     } catch (error) {
       console.error('Download error:', error);
