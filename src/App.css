@@ -139,3 +139,33 @@ td,
     max-height: 200px;
   }
 }
+
+/* Sticky table header for violations table */
+#violations-table {
+  position: relative;
+  width: 100%;
+  max-width: 800px;
+  margin: 32px auto 0 auto;
+}
+
+#violations-table table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+#violations-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+}
+
+#violations-table th {
+  background: #f0f0f0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+}

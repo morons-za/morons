@@ -667,24 +667,6 @@ function App() {
     fetchKmls();
   }, []);
 
-  // Fetch file sizes for table
-  useEffect(() => {
-    async function fetchSizes() {
-      const sizes = {};
-      for (const kml of uploadedKmls) {
-        try {
-          const headRes = await fetch(`${BACKEND_URL}${kml.url}`, { method: 'HEAD' })
-          const size = headRes.headers.get('content-length')
-          if (size) sizes[kml.filename] = (Number(size) / (1024 * 1024)).toFixed(2)
-        } catch {
-          sizes[kml.filename] = null;
-        }
-      }
-      setKmlSizes(sizes);
-    }
-    if (uploadedKmls.length > 0) fetchSizes();
-  }, [uploadedKmls]);
-
   // Admin: Rescan KML Metadata
   const handleRescanMetadata = async () => {
     setLoadingMetadata(true);
@@ -814,25 +796,6 @@ function App() {
     fetchKmls()
   }
 
-  // Fetch and parse KML info for each uploaded file
-  useEffect(() => {
-    async function fetchAllKmlInfo() {
-      const sizes = {};
-      for (const kml of uploadedKmls) {
-        try {
-          // Fetch file size using HEAD request
-          const headRes = await fetch(`${BACKEND_URL}${kml.url}`, { method: 'HEAD' })
-          const size = headRes.headers.get('content-length')
-          if (size) sizes[kml.filename] = (Number(size) / (1024 * 1024)).toFixed(2)
-        } catch {
-          sizes[kml.filename] = null;
-        }
-      }
-      setKmlSizes(sizes);
-    }
-    if (uploadedKmls.length > 0) fetchAllKmlInfo();
-  }, [uploadedKmls]);
-
   // Get unique registrations for filter dropdown
   const uniqueRegistrations = Array.from(new Set(kmlMetadata.map(m => m.registration).filter(r => r && r !== '-'))).sort();
   const filteredRegOptions = registrationInput
@@ -931,12 +894,18 @@ function App() {
           <SelectedFlightSection 
             flight={selectedFlight} 
             onClose={() => setSelectedFlight(null)} 
-            fileSize={selectedFlight ? kmlSizes[selectedFlight.filename] : null}
+            fileSize={selectedFlight ? selectedFlight.fileSizeMB : null}
             onJumpToTable={() => {
-              // Scroll to the highlighted row in the table
-              const tableElement = document.getElementById('violations-table');
-              if (tableElement) {
-                tableElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              // Scroll to the specific flight row
+              const rowElement = document.getElementById(`flight-${selectedFlight.filename}`);
+              if (rowElement) {
+                rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                // Flash effect to highlight the row
+                rowElement.style.transition = 'background-color 0.5s';
+                rowElement.style.backgroundColor = '#fff7e6';
+                setTimeout(() => {
+                  rowElement.style.backgroundColor = '#e6f7ff';
+                }, 1000);
               }
             }}
             onReport={(flight) => {
@@ -965,7 +934,7 @@ function App() {
             )}
           </div>
           {/* Violations Table */}
-          <div id="violations-table" style={{ width: '100%', maxWidth: 800, margin: '32px auto 0 auto' }}>
+          <div id="violations-table">
             {/* Summary Section */}
             <div style={{ margin: '0 0 18px 0', fontSize: 18, color: '#223', fontWeight: 500, textAlign: 'center' }}>
               Summary: <strong>{flightCount} flight{flightCount === 1 ? '' : 's'} shown</strong> with <i>likely</i> <strong>NP17</strong> airspace violations over Table Mountain National Park, from <strong>{uniqueHelis} helicopter{uniqueHelis === 1 ? '' : 's'}</strong>, with flight logs shown from <strong>{dates.length > 0 ? dates[0] : ''}</strong> <span style={{ fontWeight: 500 }}>to</span> <strong>{dates.length > 0 ? dates[dates.length - 1] : ''}</strong>
@@ -1072,7 +1041,11 @@ function App() {
                   .map((meta, idx) => {
                     const kml = uploadedKmls.find(k => k.filename === meta.filename) || {};
                     return (
-                      <tr key={idx} style={lastViewedFilename === meta.filename ? { background: '#e6f7ff' } : {}}>
+                      <tr 
+                        key={idx} 
+                        id={`flight-${meta.filename}`}
+                        style={lastViewedFilename === meta.filename ? { background: '#e6f7ff' } : {}}
+                      >
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.date || '-'}</td>
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.time || '-'}</td>
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>{utcToSaTime(meta.date, meta.time)}</td>
@@ -1086,7 +1059,7 @@ function App() {
                           ) : '-'}
                         </td>
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
-                          {kmlSizes[meta.filename] ? `${kmlSizes[meta.filename]} MB` : '-'}
+                          {meta.fileSizeMB ? `${meta.fileSizeMB} MB` : '-'}
                         </td>
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
                           {kml.url ? (
