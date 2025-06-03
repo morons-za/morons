@@ -39,7 +39,71 @@ Table Mountain National Park has restricted airspace to protect wildlife and ens
 
 The data helps aviation authorities, park management, and concerned citizens understand the scope of violations and take appropriate action.
 
-## 📁 Project Structure
+## 🚀 Quick Start
+
+### Development Setup
+
+1. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+2. **Generate master metadata for fast server startup:**
+   ```bash
+   node generate-master-metadata.cjs
+   ```
+
+3. **Start the development servers:**
+   ```bash
+   npm run dev:all
+   ```
+   This runs both frontend (http://localhost:5173) and backend (http://localhost:4000)
+
+4. **Or start production server:**
+   ```bash
+   npm run build  # Build frontend first
+   npm start      # Serves built app on http://localhost:4000
+   ```
+
+### Adding New KML Files
+
+1. **Drop KML files** into `server/uploads/`
+
+2. **Process new files:**
+   ```bash
+   node process-new-kmls.cjs
+   ```
+   This script will:
+   - Rename files to proper format (YYYY-MM-DD-REGISTRATION-ID.kml)
+   - Generate PNG flight path images
+   - Clear server cache
+   - **Regenerate master metadata for fast server startup**
+
+3. **Restart server** to see new flights (if needed)
+
+### Performance Notes
+
+🚀 **Fast Startup**: The server now loads flight data from a pre-generated `server/master-metadata.json` file instead of scanning all KML files on startup. This reduces startup time from minutes to seconds.
+
+- **Before**: Scanned 423 KML files individually (very slow)
+- **After**: Reads one 105KB JSON file (extremely fast)
+
+⚠️ **Important**: Always run `node process-new-kmls.cjs` after adding new KML files to regenerate the master metadata.
+
+### Manual Metadata Regeneration
+
+If you need to manually regenerate the master metadata:
+
+```bash
+node generate-master-metadata.cjs
+```
+
+This should be run:
+- After adding new KML files
+- Before deploying to production
+- If helicopter metadata changes
+
+## �� Project Structure
 
 ```
 heli-map/

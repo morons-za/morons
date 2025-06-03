@@ -331,7 +331,38 @@ async function cacheImage(imageUrl, registration) {
   }
 }
 
+// Fast metadata loading from pre-generated file
+async function loadMetadataFromMasterFile() {
+  const masterFile = path.join(__dirname, 'master-metadata.json');
+  
+  if (fs.existsSync(masterFile)) {
+    try {
+      const masterData = JSON.parse(fs.readFileSync(masterFile, 'utf8'));
+      kmlMetadata = masterData.flights;
+      console.log(`🚀 Loaded ${kmlMetadata.length} flights from master metadata (generated: ${masterData.generated})`);
+      console.log(`📊 Total files: ${masterData.totalFiles}, Valid flights: ${masterData.validFlights}`);
+      return true;
+    } catch (error) {
+      console.log(`❌ Error reading master metadata: ${error.message}`);
+      return false;
+    }
+  }
+  
+  console.log(`⚠️ Master metadata file not found. Run 'node generate-master-metadata.cjs' to generate it.`);
+  return false;
+}
+
 async function scanKmlMetadata() {
+  // Try to load from master file first (FAST!)
+  const masterLoaded = await loadMetadataFromMasterFile();
+  if (masterLoaded) {
+    return; // We're done! Super fast startup 🚀
+  }
+  
+  // Fallback to legacy scanning (SLOW - only if master file missing)
+  console.log('⚠️ Falling back to legacy KML scanning (this is slow)...');
+  console.log('💡 Generate master metadata with: node generate-master-metadata.cjs');
+  
   // First, process any new files with the smart manager
   console.log('🧠 Running Smart KML Manager...');
   const manager = new SmartKMLManager();
@@ -483,16 +514,25 @@ app.get('/uploads', (req, res) => {
 
 // Endpoint to get KML metadata
 app.get('/kml-metadata', (req, res) => {
-  // Merge flight data with helicopter metadata
-  const enrichedMetadata = kmlMetadata.map(flight => {
-    const heliData = helicopterMetadata[flight.registration] || {};
-    return {
-      ...flight,
-      owner: heliData.owner || '',
-      imageUrl: heliData.imageUrl || ''
-    };
-  });
-  res.json(enrichedMetadata);
+  // Check if data is already enriched (from master file)
+  const firstFlight = kmlMetadata[0];
+  const isEnriched = firstFlight && (firstFlight.hasOwnProperty('owner') || firstFlight.hasOwnProperty('imageUrl'));
+  
+  if (isEnriched) {
+    // Data is already enriched from master file - serve as-is
+    res.json(kmlMetadata);
+  } else {
+    // Legacy format - need to merge with helicopter metadata
+    const enrichedMetadata = kmlMetadata.map(flight => {
+      const heliData = helicopterMetadata[flight.registration] || {};
+      return {
+        ...flight,
+        owner: heliData.owner || '',
+        imageUrl: heliData.imageUrl || ''
+      };
+    });
+    res.json(enrichedMetadata);
+  }
 });
 
 // Endpoint to refresh KML metadata (admin only)

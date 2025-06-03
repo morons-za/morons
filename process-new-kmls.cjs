@@ -3,6 +3,7 @@
 const fs = require('fs');
 const path = require('path');
 const { XMLParser } = require('fast-xml-parser');
+const { generateMasterMetadata } = require('./generate-master-metadata.cjs');
 
 console.log('🚁 Processing new KML files...');
 
@@ -233,10 +234,12 @@ processSpecificFiles().catch(console.error);
 
 // Function to clear cache
 function clearCache() {
-  const cacheFile = path.join(serverDir, 'flight-metadata-cache.json');
+  const cacheFile = path.join(serverDir, 'kml-metadata-cache.json');
   if (fs.existsSync(cacheFile)) {
     fs.unlinkSync(cacheFile);
     console.log('🗑️  Cleared metadata cache');
+  } else {
+    console.log('ℹ️  No metadata cache found to clear');
   }
 }
 
@@ -249,15 +252,20 @@ async function main() {
     // Step 2: Generate PNGs
     if (renamedFiles.length > 0) {
       await generatePNGs(renamedFiles);
-      
-      // Step 3: Clear cache
-      clearCache();
-      
       console.log('\n🎉 All done! New files processed successfully.');
       console.log(`📊 Final summary: ${renamedFiles.length} files renamed and PNG files generated`);
     } else {
       console.log('\n✅ No new files to process.');
     }
+    
+    // Step 3: Always clear cache to ensure server picks up any new files
+    clearCache();
+    console.log('🔄 Cache cleared - server will refresh metadata on next request');
+    
+    // Step 4: Regenerate master metadata file for fast server startup
+    console.log('\n🔄 Regenerating master metadata file...');
+    await generateMasterMetadata();
+    console.log('✅ Master metadata updated - server will start quickly!');
     
   } catch (error) {
     console.error('❌ Error:', error.message);
