@@ -172,6 +172,27 @@ async function generateMasterMetadata() {
   const helicopterMetadata = loadHelicopterMetadata();
   console.log(`📊 Loaded helicopter data for ${Object.keys(helicopterMetadata).length} registrations`);
   
+  // Check if uploads directory exists
+  if (!fs.existsSync(uploadsDir)) {
+    console.log('⚠️ Uploads directory not found - creating empty master metadata');
+    const metadata = {
+      generated: new Date().toISOString(),
+      totalFiles: 0,
+      validFlights: 0,
+      flights: []
+    };
+    
+    // Ensure server directory exists
+    const serverDir = path.dirname(masterMetadataFile);
+    if (!fs.existsSync(serverDir)) {
+      fs.mkdirSync(serverDir, { recursive: true });
+    }
+    
+    fs.writeFileSync(masterMetadataFile, JSON.stringify(metadata, null, 2));
+    console.log('✅ Empty master metadata file created for deployment');
+    return;
+  }
+  
   // Get all KML files
   const files = fs.readdirSync(uploadsDir).filter(f => f.toLowerCase().endsWith('.kml'));
   console.log(`📁 Found ${files.length} KML files to process`);

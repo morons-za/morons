@@ -8,6 +8,7 @@
     "backend": "node server/index.cjs",
     "dev:all": "concurrently \"npm run dev\" \"npm run backend\"",
     "build": "vite build",
+    "build:render": "vite build && node generate-master-metadata.cjs",
     "start": "node server/index.cjs",
     "build:prod": "npm install && vite build",
     "lint": "eslint .",
