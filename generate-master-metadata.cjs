@@ -212,13 +212,18 @@ async function generateMasterMetadata() {
     if (meta.registration) {
       const heliData = helicopterMetadata[meta.registration] || {};
       
+      // Calculate file size in MB
+      const fileSizeBytes = fs.statSync(filePath).size;
+      const fileSizeMB = parseFloat((fileSizeBytes / (1024 * 1024)).toFixed(2));
+      
       allFlights.push({
         filename: meta.filename,
         registration: meta.registration,
         date: meta.date,
         time: meta.time,
         owner: heliData.owner || '',
-        imageUrl: heliData.imageUrl || ''
+        imageUrl: heliData.imageUrl || '',
+        fileSizeMB: fileSizeMB
       });
     }
   });
@@ -246,7 +251,13 @@ async function generateMasterMetadata() {
   console.log(`   • Total KML files: ${files.length}`);
   console.log(`   • Valid flights: ${allFlights.length}`);
   console.log(`   • Excluded files: ${files.length - allFlights.length} (missing registration)`);
-  console.log(`   • File size: ${Math.round(fs.statSync(masterMetadataFile).size / 1024)} KB`);
+  
+  // Calculate total file size
+  const totalSizeMB = allFlights.reduce((sum, flight) => sum + flight.fileSizeMB, 0);
+  console.log(`   • Total flight data: ${totalSizeMB.toFixed(2)} MB`);
+  console.log(`   • Average file size: ${(totalSizeMB / allFlights.length).toFixed(2)} MB`);
+  
+  console.log(`   • Metadata file size: ${Math.round(fs.statSync(masterMetadataFile).size / 1024)} KB`);
   console.log(`   • Output: ${path.relative(process.cwd(), masterMetadataFile)}`);
   console.log('');
   console.log('🚀 Server can now start quickly by reading this file!');
