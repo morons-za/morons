@@ -639,6 +639,19 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
+// Add specific route for KML files to ensure correct content type
+app.get('/kml/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const filePath = path.join(uploadsDir, filename);
+  
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).send('KML file not found');
+  }
+  
+  res.setHeader('Content-Type', 'application/vnd.google-earth.kml+xml');
+  res.sendFile(filePath);
+});
+
 // Start server immediately, then process files in background
 const server = app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

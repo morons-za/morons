@@ -21,7 +21,71 @@ if (!fs.existsSync(uploadsDir)) {
 function isProperlyNamed(filename) {
   // Should match: YYYY-MM-DD-REGISTRATION-HASH.kml
   const pattern = /^\d{4}-\d{2}-\d{2}-[A-Z]{2}-[A-Z0-9]{3}-[a-f0-9]{8}\.kml$/;
-  return pattern.test(filename);
+  const specialPattern = /^\d{4}-\d{2}-\d{2}-(UNKNOWN|ZS-[A-Z0-9]{3}-[A-Z0-9]+)\.kml$/;
+  return pattern.test(filename) || specialPattern.test(filename);
+}
+
+// Function to extract registration from KML content
+function extractRegistrationFromKML(kmlPath) {
+  try {
+    const xmlData = fs.readFileSync(kmlPath, 'utf8');
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const xml = parser.parse(xmlData);
+
+    // Recursively search for Placemark name
+    function findPlacemarkName(obj) {
+      if (!obj || typeof obj !== 'object') return null;
+      if (obj.name && typeof obj.name === 'string') {
+        // 6-char hex or alphanum registration
+        const regMatch = obj.name.match(/^([A-Z0-9]{6})$/);
+        if (regMatch) {
+          const rawReg = regMatch[1];
+          return rawReg.slice(0, 2) + '-' + rawReg.slice(2);
+        }
+        // ZS-XXX format
+        const zsMatch = obj.name.match(/^ZS-[A-Z0-9]{3}$/);
+        if (zsMatch) {
+          return zsMatch[0];
+        }
+      }
+      for (const key in obj) {
+        if (typeof obj[key] === 'object') {
+          const result = findPlacemarkName(obj[key]);
+          if (result) return result;
+        }
+      }
+      return null;
+    }
+
+    // Try recursive search
+    const reg = findPlacemarkName(xml);
+    if (reg) return reg;
+
+    // Fallback: previous logic
+    if (xml.kml && xml.kml.Folder && xml.kml.Folder.Folder) {
+      const folder = xml.kml.Folder.Folder;
+      if (folder.name && folder.name.includes('track')) {
+        const regMatch = folder.name.match(/([A-Z0-9]{2}-[A-Z0-9]{3})/);
+        if (regMatch) {
+          return regMatch[1];
+        }
+      }
+    }
+    if (xml.kml && xml.kml.Document) {
+      const doc = xml.kml.Document;
+      if (doc.name) {
+        const regMatch = doc.name.match(/[A-Z]{2}[A-Z0-9]{3}$/);
+        if (regMatch) {
+          const rawReg = regMatch[0];
+          return rawReg.slice(0, 2) + '-' + rawReg.slice(2);
+        }
+      }
+    }
+    return null;
+  } catch (error) {
+    console.error('Error extracting registration from KML:', error.message);
+    return null;
+  }
 }
 
 // Function to extract metadata from KML
@@ -33,56 +97,52 @@ function extractKMLMetadata(kmlPath) {
     
     let registration = '';
     let date = '';
-    let time = '';
     
-    // Extract registration from name (FlightRadar24 format: -/ZSRTG -> ZS-RTG)
-    function findNameElement(obj) {
+    // Recursively search for registration in Placemark name
+    function findPlacemarkName(obj) {
       if (!obj || typeof obj !== 'object') return null;
-      
       if (obj.name && typeof obj.name === 'string') {
-        const nameMatch = obj.name.match(/-\/([A-Z]{2})([A-Z0-9]{3})/);
-        if (nameMatch) {
-          return `${nameMatch[1]}-${nameMatch[2]}`;
+        // 6-char hex or alphanum registration
+        const regMatch = obj.name.match(/^([A-Z0-9]{6})$/);
+        if (regMatch) {
+          const rawReg = regMatch[1];
+          return rawReg.slice(0, 2) + '-' + rawReg.slice(2);
         }
-        
-        // Alternative format
-        const altMatch = obj.name.match(/([A-Z]{2}-[A-Z0-9]{3})/);
-        if (altMatch) {
-          return altMatch[1];
+        // ZS-XXX format
+        const zsMatch = obj.name.match(/^ZS-[A-Z0-9]{3}$/);
+        if (zsMatch) {
+          return zsMatch[0];
         }
       }
-      
-      // Recursively search
       for (const key in obj) {
         if (typeof obj[key] === 'object') {
-          const result = findNameElement(obj[key]);
+          const result = findPlacemarkName(obj[key]);
           if (result) return result;
         }
       }
       return null;
     }
-    
-    // Extract date from when elements
-    function findWhenElement(obj) {
+
+    // Recursively search for the first <when> element
+    function findWhen(obj) {
       if (!obj || typeof obj !== 'object') return null;
-      
       if (obj.when && typeof obj.when === 'string') {
         return obj.when;
       }
-      
-      // Recursively search
+      if (Array.isArray(obj.when) && obj.when.length > 0) {
+        return obj.when[0];
+      }
       for (const key in obj) {
         if (typeof obj[key] === 'object') {
-          const result = findWhenElement(obj[key]);
+          const result = findWhen(obj[key]);
           if (result) return result;
         }
       }
       return null;
     }
-    
-    registration = findNameElement(xml);
-    const whenString = findWhenElement(xml);
-    
+
+    registration = findPlacemarkName(xml);
+    const whenString = findWhen(xml);
     if (whenString) {
       // Parse: 2025-06-01T07:53:48+00:00
       const dateMatch = whenString.match(/(\d{4}-\d{2}-\d{2})/);
@@ -90,7 +150,6 @@ function extractKMLMetadata(kmlPath) {
         date = dateMatch[1];
       }
     }
-    
     return { registration, date };
   } catch (error) {
     console.error('Error parsing KML:', error.message);
@@ -119,7 +178,15 @@ async function processNewKMLs() {
     console.log(`\n🔍 Processing ${filename}...`);
     
     const filePath = path.join(uploadsDir, filename);
-    const metadata = extractKMLMetadata(filePath);
+    let metadata = extractKMLMetadata(filePath);
+    
+    // If metadata extraction failed, try to extract registration directly
+    if (!metadata || !metadata.registration) {
+      const registration = extractRegistrationFromKML(filePath);
+      if (registration) {
+        metadata = { ...metadata, registration };
+      }
+    }
     
     if (!metadata || !metadata.registration || !metadata.date) {
       console.log(`❌ Could not extract metadata from ${filename}, skipping`);
@@ -243,6 +310,20 @@ function clearCache() {
   }
 }
 
+// Function to update master metadata incrementally
+async function updateMasterMetadataIncremental(newFiles) {
+  if (newFiles.length === 0) return;
+  
+  const { generateMasterMetadata } = require('./generate-master-metadata.cjs');
+  
+  console.log(`📝 Adding ${newFiles.length} new flights to master metadata...`);
+  
+  // Regenerate master metadata (it's smart enough to be fast)
+  await generateMasterMetadata();
+  
+  console.log('✅ Master metadata updated with new flights');
+}
+
 // Main execution
 async function main() {
   try {
@@ -271,20 +352,6 @@ async function main() {
     console.error('❌ Error:', error.message);
     process.exit(1);
   }
-}
-
-// Function to update master metadata incrementally
-async function updateMasterMetadataIncremental(newFiles) {
-  if (newFiles.length === 0) return;
-  
-  const { generateMasterMetadata } = require('./generate-master-metadata.cjs');
-  
-  console.log(`📝 Adding ${newFiles.length} new flights to master metadata...`);
-  
-  // Regenerate master metadata (it's smart enough to be fast)
-  await generateMasterMetadata();
-  
-  console.log('✅ Master metadata updated with new flights');
 }
 
 main(); 
