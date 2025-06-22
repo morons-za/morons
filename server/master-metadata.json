@@ -1,8 +1,35 @@
 {
-  "generated": "2025-06-17T23:35:26.296Z",
-  "totalFiles": 450,
-  "validFlights": 449,
+  "generated": "2025-06-22T01:33:51.511Z",
+  "totalFiles": 453,
+  "validFlights": 452,
   "flights": [
+    {
+      "filename": "2025-06-21-ZT-HOT-3ae6be8c.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-06-21",
+      "time": "09:43",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 4.42
+    },
+    {
+      "filename": "2025-06-21-ZS-HBO-3ae65223.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-06-21",
+      "time": "06:54",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 4.16
+    },
+    {
+      "filename": "2025-06-19-ZS-RTG-3ade6811.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-06-19",
+      "time": "08:57",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/541479_1728643363_tb.jpg?v=0",
+      "fileSizeMB": 2.11
+    },
     {
       "filename": "2025-06-15-ZS-RTG-3acf1843.kml",
       "registration": "ZS-RTG",

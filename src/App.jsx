@@ -650,6 +650,8 @@ function App() {
       const data = await res.json();
       setKmlMetadata(data);
       console.log('DEBUG: kmlMetadata from backend', data);
+      console.log('DEBUG: Total flights received:', data.length);
+      console.log('DEBUG: Backend URL:', BACKEND_URL);
     } catch (err) {
       setFetchError('Could not fetch KML metadata. Is the backend running?');
       setKmlMetadata([]);
@@ -826,6 +828,11 @@ function App() {
   const uniqueHelis = Array.from(new Set(filteredMetadata.map(m => m.registration).filter(r => r && r !== '-'))).length;
   const dates = filteredMetadata.map(m => m.date).filter(Boolean).sort();
   const dateRange = dates.length > 0 ? `${dates[0]} to ${dates[dates.length - 1]}` : 'N/A';
+
+  // Debug logging
+  console.log('DEBUG: Total kmlMetadata:', kmlMetadata.length);
+  console.log('DEBUG: Filtered metadata:', filteredMetadata.length);
+  console.log('DEBUG: Active filters:', { registrationFilter, dateStart, dateEnd });
 
   // CSV export function
   function exportCSV() {

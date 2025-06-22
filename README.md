@@ -45,6 +45,11 @@ The data helps aviation authorities, park management, and concerned citizens und
 
 ## 🚀 Quick Start
 
+Note! 
+Always restart the server after running node generate-master-metadata.cjs
+Or run node generate-master-metadata.cjs before starting the server
+Check the server logs for messages like "🚀 Loaded X flights from master metadata" to confirm it's using the fast path
+
 ### Development Setup
 
 1. **Install dependencies:**
@@ -56,7 +61,7 @@ The data helps aviation authorities, park management, and concerned citizens und
    ```bash
    node generate-master-metadata.cjs
    ```
-   *This processes all 423 KML files once and creates optimized metadata for instant loading*
+   *This processes all KML files once and creates optimized metadata for instant loading*
 
 3. **Start the development servers:**
    ```bash
