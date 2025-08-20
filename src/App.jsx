@@ -3,6 +3,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import './App.css'
 import omnivore from 'leaflet-omnivore'
+import KMLValidationPortal from './KMLValidationPortal'
 
 // Fix Leaflet's default icon path for production
 delete L.Icon.Default.prototype._getIconUrl;
@@ -617,6 +618,7 @@ function App() {
   const [kmlSizes, setKmlSizes] = useState({})
   const placemarkMarkersRef = useRef([])
   const [showFAQ, setShowFAQ] = useState(false)
+  const [showValidationPortal, setShowValidationPortal] = useState(false)
   const [kmlMetadata, setKmlMetadata] = useState([])
   const [loadingMetadata, setLoadingMetadata] = useState(false)
   const [registrationFilter, setRegistrationFilter] = useState('')
@@ -678,6 +680,15 @@ function App() {
     fetchKmls();
   }, []);
 
+  // Handle URL-based routing for validation portal
+  useEffect(() => {
+    console.log('🔍 Current pathname:', window.location.pathname);
+    if (window.location.pathname === '/validate') {
+      console.log('🚁 Setting showValidationPortal to true');
+      setShowValidationPortal(true);
+    }
+  }, []);
+
   // Admin: Rescan KML Metadata
   const handleRescanMetadata = async () => {
     setLoadingMetadata(true);
@@ -693,8 +704,8 @@ function App() {
   };
 
   useEffect(() => {
-    if (showFAQ) {
-      // Remove the map if FAQ is open
+    if (showFAQ || showValidationPortal) {
+      // Remove the map if FAQ or validation portal is open
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
@@ -902,6 +913,15 @@ function App() {
             </button>
           </div>
         </div>
+      ) : showValidationPortal ? (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', paddingTop: '70px' }}>
+          <KMLValidationPortal />
+          <div style={{ textAlign: 'center', marginTop: 24 }}>
+            <button onClick={() => setShowValidationPortal(false)} style={{ padding: '8px 24px', borderRadius: 6, background: '#007bff', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }}>
+              Back
+            </button>
+          </div>
+        </div>
       ) : (
         <div className="main-content" style={{ paddingTop: '70px' }}>
           <h1 className="main-title" style={{ marginTop: 24, marginBottom: 16 }}>Misbehaving Operators Roaming Over National Sanctuaries</h1>
@@ -1022,6 +1042,13 @@ function App() {
                         Export CSV
                       </button>
                     </div>
+                    {/* KML Validation Portal Button */}
+                    <div>
+                      <button onClick={() => setShowValidationPortal(true)} style={{ padding: '8px 24px', borderRadius: 6, background: '#667eea', color: '#fff', border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>
+                        🚁 Validate KML
+                      </button>
+                    </div>
+
                   </div>
                 )}
               </div>
@@ -1189,10 +1216,14 @@ function App() {
           {/* Admin Interface */}
           {isAdmin && (
             <div style={{ margin: '40px auto', padding: 24, background: '#f9f9f9', borderRadius: 8, maxWidth: 500, boxShadow: '0 2px 8px rgba(0,0,0,0.07)' }}>
+              <h2 style={{ textAlign: 'center', marginBottom: 24, color: '#495057' }}>🔧 Admin Tools</h2>
+              <p style={{ textAlign: 'center', marginBottom: 20, color: '#6c757d', fontSize: '14px' }}>
+                This section is only visible to admin users. Use the "Refresh Metadata" button above for general use.
+              </p>
               <button onClick={handleRescanMetadata} style={{ marginBottom: 18, padding: '8px 24px', borderRadius: 6, background: '#007bff', color: '#fff', border: 'none', fontWeight: 600, fontSize: 16, cursor: 'pointer' }} disabled={loadingMetadata}>
                 {loadingMetadata ? 'Rescanning...' : 'Rescan KML Metadata'}
               </button>
-              <h2 style={{ textAlign: 'center', marginBottom: 24 }}>Admin: Upload KML Files</h2>
+              <h3 style={{ textAlign: 'center', marginBottom: 24 }}>Upload KML Files</h3>
               <input
                 ref={fileInputRef}
                 type="file"

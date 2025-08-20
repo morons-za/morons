@@ -309,6 +309,359 @@ function extractKmlInfoFromFile(filePath, filename) {
   }
 }
 
+// Point-in-polygon detection using ray casting algorithm
+function pointInPolygon(point, polygon) {
+  const [x, y] = point;
+  let inside = false;
+  
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+    const [xi, yi] = polygon[i];
+    const [xj, yj] = polygon[j];
+    
+    if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+      inside = !inside;
+    }
+  }
+  
+  return inside;
+}
+
+// Check if a point is inside TMNP (considering holes)
+function pointInTMNP(lat, lon, tmnpPolygons) {
+  if (!tmnpPolygons || tmnpPolygons.length === 0) return false;
+  
+  for (const polygon of tmnpPolygons) {
+    // Check if point is in outer boundary
+    const inOuter = pointInPolygon([lon, lat], polygon.outer);
+    
+    if (inOuter) {
+      // Check if point is in any holes (inner boundaries)
+      let inHole = false;
+      for (const hole of polygon.inner) {
+        if (pointInPolygon([lon, lat], hole)) {
+          inHole = true;
+          break;
+        }
+      }
+      
+      // If in outer boundary but not in any hole, it's inside TMNP
+      if (!inHole) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
+// Load TMNP coordinates from KML file
+function loadTMNPCoordinates() {
+  try {
+    const kmlPath = path.join(__dirname, '..', 'public', 'tmnp.kml');
+    const xmlData = fs.readFileSync(kmlPath, 'utf8');
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const xml = parser.parse(xmlData);
+    
+    const polygons = [];
+    
+    function processPolygon(polygonObj) {
+      if (!polygonObj || !polygonObj.outerBoundaryIs) return;
+      
+      const outer = [];
+      const inner = [];
+      
+      // Extract outer boundary
+      const outerCoords = polygonObj.outerBoundaryIs.LinearRing.coordinates;
+      if (outerCoords) {
+        const coordStr = typeof outerCoords === 'string' ? outerCoords : outerCoords.toString();
+        const coordLines = coordStr.trim().split(/\s+/);
+        
+        for (const line of coordLines) {
+          const parts = line.split(',');
+          if (parts.length >= 2) {
+            const lon = parseFloat(parts[0]);
+            const lat = parseFloat(parts[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+              outer.push([lon, lat]);
+            }
+          }
+        }
+      }
+      
+      // Extract inner boundaries (holes)
+      if (polygonObj.innerBoundaryIs) {
+        const innerBoundaries = Array.isArray(polygonObj.innerBoundaryIs) ? 
+          polygonObj.innerBoundaryIs : [polygonObj.innerBoundaryIs];
+        
+        for (const innerBoundary of innerBoundaries) {
+          if (innerBoundary.LinearRing && innerBoundary.LinearRing.coordinates) {
+            const innerCoords = innerBoundary.LinearRing.coordinates;
+            const coordStr = typeof innerCoords === 'string' ? innerCoords : innerCoords.toString();
+            const coordLines = coordStr.trim().split(/\s+/);
+            
+            const hole = [];
+            for (const line of coordLines) {
+              const parts = line.split(',');
+              if (parts.length >= 2) {
+                const lon = parseFloat(parts[0]);
+                const lat = parseFloat(parts[1]);
+                if (!isNaN(lat) && !isNaN(lon)) {
+                  hole.push([lon, lat]);
+                }
+              }
+            }
+            
+            if (hole.length > 0) {
+              inner.push(hole);
+            }
+          }
+        }
+      }
+      
+      if (outer.length > 0) {
+        polygons.push({ outer, inner });
+      }
+    }
+    
+    // Find and process all Polygon elements
+    function findPolygons(obj) {
+      if (!obj || typeof obj !== 'object') return;
+      
+      if (obj.Polygon) {
+        const polygonElements = Array.isArray(obj.Polygon) ? obj.Polygon : [obj.Polygon];
+        for (const polygon of polygonElements) {
+          processPolygon(polygon);
+        }
+      }
+      
+      // Recursively search
+      for (const key in obj) {
+        if (typeof obj[key] === 'object') {
+          findPolygons(obj[key]);
+        }
+      }
+    }
+    
+    findPolygons(xml);
+    return polygons;
+    
+  } catch (error) {
+    console.error('❌ Error loading TMNP coordinates:', error.message);
+    return [];
+  }
+}
+
+// Check if KML file contains violations (enters TMNP airspace)
+async function checkForViolations(filePath) {
+  try {
+    const xmlData = fs.readFileSync(filePath, 'utf8');
+    const parser = new XMLParser({ ignoreAttributes: false });
+    const xml = parser.parse(xmlData);
+    
+    // Extract coordinates from KML
+    const coordinates = [];
+    
+    function extractCoords(obj) {
+      if (!obj || typeof obj !== 'object') return;
+      
+      // Check for gx:Track coordinates (ADS-B Exchange format)
+      if (obj['gx:Track'] && obj['gx:Track'].coord) {
+        const coordElements = Array.isArray(obj['gx:Track'].coord) ? obj['gx:Track'].coord : [obj['gx:Track'].coord];
+        for (const coord of coordElements) {
+          const parts = coord.split(' ');
+          if (parts.length >= 2) {
+            const lon = parseFloat(parts[0]);
+            const lat = parseFloat(parts[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+              coordinates.push({ lat, lon });
+            }
+          }
+        }
+      }
+      
+      // Check for LineString coordinates (FlightRadar24 format)
+      if (obj.LineString && obj.LineString.coordinates) {
+        const coordStr = obj.LineString.coordinates;
+        const coordLines = coordStr.trim().split(/\s+/);
+        for (const line of coordLines) {
+          const parts = line.split(',');
+          if (parts.length >= 2) {
+            const lon = parseFloat(parts[0]);
+            const lat = parseFloat(parts[1]);
+            if (!isNaN(lat) && !isNaN(lon)) {
+              coordinates.push({ lat, lon });
+            }
+          }
+        }
+      }
+      
+      // Recursively search other objects
+      for (const key in obj) {
+        if (typeof obj[key] === 'object') {
+          extractCoords(obj[key]);
+        }
+      }
+    }
+    
+    extractCoords(xml);
+    
+    if (coordinates.length === 0) {
+      console.log('⚠️ No coordinates found in KML file');
+      return false;
+    }
+    
+    console.log(`📍 Found ${coordinates.length} coordinate points`);
+    
+    // Load TMNP boundary and check for violations
+    const tmnpPolygons = loadTMNPCoordinates();
+    if (tmnpPolygons.length === 0) {
+      console.log('⚠️ TMNP boundary not found or invalid');
+      return false;
+    }
+    
+    console.log(`🗺️ Loaded ${tmnpPolygons.length} TMNP polygon(s)`);
+    
+    // Check each coordinate point for TMNP violations
+    let hasViolations = false;
+    let violationCount = 0;
+    
+    for (const coord of coordinates) {
+      if (pointInTMNP(coord.lat, coord.lon, tmnpPolygons)) {
+        hasViolations = true;
+        violationCount++;
+      }
+    }
+    
+    if (hasViolations) {
+      console.log(`🚁 Flight enters TMNP airspace: ${violationCount} violation point(s) out of ${coordinates.length} total`);
+    } else {
+      console.log(`✅ Flight does not enter TMNP airspace (0/${coordinates.length} points)`);
+    }
+    
+    return hasViolations;
+    
+  } catch (error) {
+    console.error('❌ Error checking violations:', error.message);
+    return false;
+  }
+}
+
+// Check if a flight already exists (smart duplicate detection)
+function isDuplicateFlight(kmlInfo, filePath) {
+  try {
+    // Check 1: Flight signature (registration + date + time)
+    const flightSignature = `${kmlInfo.registration}-${kmlInfo.date}-${kmlInfo.time}`;
+    
+    // Check if we already have a flight with this signature
+    const existingFlight = kmlMetadata.find(flight => 
+      flight.registration === kmlInfo.registration &&
+      flight.date === kmlInfo.date &&
+      flight.time === kmlInfo.time
+    );
+    
+    if (existingFlight) {
+      console.log(`🔄 Duplicate flight detected: ${flightSignature} (already exists as ${existingFlight.filename})`);
+      return {
+        isDuplicate: true,
+        reason: 'FLIGHT_SIGNATURE_MATCH',
+        existingFile: existingFlight.filename,
+        details: `Flight ${kmlInfo.registration} on ${kmlInfo.date} at ${kmlInfo.time} already exists`
+      };
+    }
+    
+    // Check 2: Content hash (optional, for exact file duplicates)
+    try {
+      const fileContent = fs.readFileSync(filePath);
+      const contentHash = require('crypto').createHash('md5').update(fileContent).digest('hex');
+      
+      // Check if any existing file has the same content hash
+      for (const flight of kmlMetadata) {
+        const existingFilePath = path.join(uploadsDir, flight.filename);
+        if (fs.existsSync(existingFilePath)) {
+          const existingContent = fs.readFileSync(existingFilePath);
+          const existingHash = require('crypto').createHash('md5').update(existingContent).digest('hex');
+          
+          if (contentHash === existingHash) {
+            console.log(`🔄 Exact file duplicate detected: same content as ${flight.filename}`);
+            return {
+              isDuplicate: true,
+              reason: 'CONTENT_HASH_MATCH',
+              existingFile: flight.filename,
+              details: `File content is identical to existing file ${flight.filename}`
+            };
+          }
+        }
+      }
+    } catch (hashError) {
+      console.log(`⚠️ Could not check content hash: ${hashError.message}`);
+    }
+    
+    return { isDuplicate: false };
+    
+  } catch (error) {
+    console.log(`⚠️ Error checking for duplicates: ${error.message}`);
+    return { isDuplicate: false };
+  }
+}
+
+// Generate PNG flight map for a KML file
+async function generateFlightMap(filename) {
+  try {
+    const { exec } = require('child_process');
+    const { promisify } = require('util');
+    const execAsync = promisify(exec);
+    
+    // Use the existing flight image generator
+    const generatorPath = path.join(__dirname, 'generate-flight-image.cjs');
+    if (!fs.existsSync(generatorPath)) {
+      console.log('⚠️ Flight image generator not found, skipping PNG generation');
+      return false;
+    }
+    
+    // Create a temporary script for this specific file
+    const originalScript = fs.readFileSync(generatorPath, 'utf8');
+    const modifiedScript = originalScript.replace(
+      'const kmlFiles = fs.readdirSync(uploadsDir).filter(f => f.endsWith(\'.kml\'));',
+      `const kmlFiles = ['${filename}'];`
+    ).replace(
+      'processAllFiles().catch(console.error);',
+      `
+async function processSpecificFile() {
+  console.log('Generating PNG for: ${filename}');
+  try {
+    await generateFlightImage('${filename}');
+    console.log('✅ PNG generated successfully');
+  } catch (error) {
+    console.error('❌ Error generating PNG:', error.message);
+    throw error;
+  }
+}
+
+processSpecificFile().catch(console.error);
+      `
+    );
+    
+    // Write and execute the temporary script
+    const tempScript = path.join(__dirname, 'temp-flight-map.cjs');
+    fs.writeFileSync(tempScript, modifiedScript);
+    
+    try {
+      const { stdout, stderr } = await execAsync(`node temp-flight-map.cjs`, { cwd: __dirname });
+      if (stderr) console.error('PNG generation stderr:', stderr);
+      return true;
+    } finally {
+      // Clean up
+      if (fs.existsSync(tempScript)) {
+        fs.unlinkSync(tempScript);
+      }
+    }
+    
+  } catch (error) {
+    console.error(`❌ Error generating flight map for ${filename}:`, error.message);
+    return false;
+  }
+}
+
 // Helper to download and cache image
 async function cacheImage(imageUrl, registration) {
   if (!imageUrl || !registration) return '';
@@ -650,6 +1003,262 @@ app.get('/kml/:filename', (req, res) => {
   
   res.setHeader('Content-Type', 'application/vnd.google-earth.kml+xml');
   res.sendFile(filePath);
+});
+
+// KML Validation Portal endpoint
+app.post('/api/validate-kml', 
+  // Security middleware
+  (req, res, next) => {
+    // Only allow local connections for security
+    const clientIP = req.ip || req.connection.remoteAddress || req.socket.remoteAddress;
+    const isLocal = clientIP.includes('127.0.0.1') || 
+                     clientIP.includes('::1') || 
+                     clientIP.includes('localhost') ||
+                     clientIP.includes('192.168.') ||
+                     clientIP.includes('10.') ||
+                     clientIP.includes('172.');
+    
+    if (!isLocal) {
+      console.log(`🚫 Access denied to validation endpoint from IP: ${clientIP}`);
+      return res.status(403).json({ 
+        error: 'Access denied - validation endpoint is local-only for security',
+        clientIP: clientIP
+      });
+    }
+    next();
+  },
+  // File upload middleware
+  upload.array('kml', 20),
+  // Main handler
+  async (req, res) => {
+  try {
+    console.log(`🚁 Processing ${req.files.length} KML files for validation...`);
+    const results = [];
+    
+    for (const file of req.files) {
+      console.log(`📁 Validating: ${file.originalname}`);
+      
+      try {
+        // Extract metadata and check for violations
+        const kmlInfo = extractKmlInfoFromFile(file.path, file.originalname);
+        
+        if (!kmlInfo.registration) {
+          results.push({
+            filename: file.originalname,
+            status: 'INVALID',
+            error: 'No registration found in KML file',
+            saved: false
+          });
+          continue;
+        }
+        
+        // Check if flight has violations (enters TMNP airspace)
+        const hasViolations = await checkForViolations(file.path);
+        
+        if (hasViolations) {
+          // Check for duplicates before processing
+          const duplicateCheck = isDuplicateFlight(kmlInfo, file.path);
+          
+          if (duplicateCheck.isDuplicate) {
+            console.log(`⏭️ Skipping duplicate: ${duplicateCheck.details}`);
+            results.push({
+              filename: file.originalname,
+              status: 'DUPLICATE_SKIPPED',
+              registration: kmlInfo.registration,
+              date: kmlInfo.date,
+              time: kmlInfo.time,
+              reason: duplicateCheck.reason,
+              existingFile: duplicateCheck.existingFile,
+              details: duplicateCheck.details,
+              saved: false
+            });
+            
+            // Clean up temp file and continue to next file
+            try {
+              if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+                console.log(`🗑️ Cleaned up temp file for duplicate: ${file.path}`);
+              }
+            } catch (cleanupError) {
+              console.log(`⚠️ Could not clean up temp file for duplicate: ${cleanupError.message}`);
+            }
+            continue;
+          }
+          console.log(`🚁 Processing violating flight: ${file.originalname}`);
+          
+          // Save violating flight with original name first
+          const savedPath = path.join(uploadsDir, file.originalname);
+          console.log(`📁 Attempting to save to: ${savedPath}`);
+          
+          try {
+            fs.copyFileSync(file.path, savedPath);
+            console.log(`✅ File copied successfully to: ${savedPath}`);
+            
+            // Verify file exists
+            if (fs.existsSync(savedPath)) {
+              console.log(`✅ File exists after copy: ${savedPath}`);
+              const stats = fs.statSync(savedPath);
+              console.log(`📊 File size: ${stats.size} bytes`);
+            } else {
+              console.log(`❌ File does not exist after copy: ${savedPath}`);
+            }
+            
+            // Generate proper filename (YYYY-MM-DD-REGISTRATION-HASH.kml)
+            const hash = require('crypto').createHash('md5').update(file.originalname).digest('hex').slice(0, 8);
+            const newFilename = `${kmlInfo.date}-${kmlInfo.registration}-${hash}.kml`;
+            const newFilePath = path.join(uploadsDir, newFilename);
+            
+            console.log(`🔄 Attempting to rename to: ${newFilename}`);
+            
+            try {
+              // Rename to proper format
+              fs.renameSync(savedPath, newFilePath);
+              console.log(`📝 Successfully renamed to: ${newFilename}`);
+              
+              // Verify renamed file exists
+              if (fs.existsSync(newFilePath)) {
+                console.log(`✅ Renamed file exists: ${newFilePath}`);
+              } else {
+                console.log(`❌ Renamed file does not exist: ${newFilePath}`);
+              }
+              
+                          // Generate PNG flight map
+            console.log(`🖼️ Starting PNG generation for: ${newFilename}`);
+            const pngResult = await generateFlightMap(newFilename);
+            console.log(`🖼️ PNG generation result: ${pngResult ? 'SUCCESS' : 'FAILED'}`);
+            
+            // Add to metadata with new filename
+            const flightData = {
+              filename: newFilename,
+              registration: kmlInfo.registration,
+              date: kmlInfo.date,
+              time: kmlInfo.time,
+              owner: kmlInfo.owner || 'Unknown',
+              fileSizeMB: (file.size / (1024 * 1024)).toFixed(2)
+            };
+            
+            kmlMetadata.push(flightData);
+            console.log(`📝 Added to metadata: ${JSON.stringify(flightData)}`);
+            
+            results.push({
+              filename: file.originalname,
+              newFilename: newFilename,
+              status: 'VIOLATION_DETECTED',
+              registration: kmlInfo.registration,
+              date: kmlInfo.date,
+              time: kmlInfo.time,
+              violations: hasViolations,
+              saved: true,
+              pngGenerated: pngResult
+            });
+            
+            console.log(`✅ Successfully processed violating flight: ${newFilename}`);
+            
+            // Clean up temporary file NOW (after we're done with it)
+            try {
+              if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+                console.log(`🗑️ Cleaned up temp file: ${file.path}`);
+              }
+            } catch (cleanupError) {
+              console.log(`⚠️ Could not clean up temp file: ${cleanupError.message}`);
+            }
+            
+          } catch (renameError) {
+              console.error(`❌ Error during rename/PNG generation:`, renameError.message);
+              throw renameError;
+            }
+            
+          } catch (copyError) {
+            console.error(`❌ Error during file copy:`, copyError.message);
+            throw copyError;
+          }
+          
+        } else {
+          // Don't save non-violating flights
+          results.push({
+            filename: file.originalname,
+            status: 'NO_VIOLATIONS',
+            registration: kmlInfo.registration,
+            date: kmlInfo.date,
+            time: kmlInfo.time,
+            violations: [],
+            saved: false
+          });
+          
+          console.log(`❌ Rejected non-violating flight: ${file.originalname}`);
+        }
+        
+      } catch (error) {
+        console.error(`❌ Error processing ${file.originalname}:`, error.message);
+        results.push({
+          filename: file.originalname,
+          status: 'ERROR',
+          error: error.message,
+          saved: false
+        });
+        
+        // Clean up on error
+        try {
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+            console.log(`🗑️ Cleaned up temp file on error: ${file.path}`);
+          }
+        } catch (cleanupError) {
+          console.log(`⚠️ Could not clean up temp file on error: ${cleanupError.message}`);
+        }
+      }
+    }
+    
+    // Generate summary
+    const savedCount = results.filter(r => r.saved).length;
+    const rejectedCount = results.filter(r => !r.saved && r.status !== 'ERROR').length;
+    const errorCount = results.filter(r => r.status === 'ERROR').length;
+    
+    console.log(`📊 Validation complete: ${savedCount} saved, ${rejectedCount} rejected, ${errorCount} errors`);
+    
+    // Clear cache and refresh metadata if we saved any files
+    if (savedCount > 0) {
+      try {
+        // Clear metadata cache
+        const cacheFile = path.join(__dirname, 'kml-metadata-cache.json');
+        if (fs.existsSync(cacheFile)) {
+          fs.unlinkSync(cacheFile);
+          console.log('🗑️ Cleared metadata cache');
+        }
+        
+        // Clear master metadata cache to force refresh
+        const masterCacheFile = path.join(__dirname, 'master-metadata.json');
+        if (fs.existsSync(masterCacheFile)) {
+          fs.unlinkSync(masterCacheFile);
+          console.log('🗑️ Cleared master metadata cache');
+        }
+        
+        console.log('🔄 Metadata caches cleared - system will refresh on next request');
+      } catch (error) {
+        console.error('⚠️ Warning: Could not clear cache:', error.message);
+      }
+    }
+    
+    res.json({
+      success: true,
+      results: results,
+      summary: {
+        total: req.files.length,
+        saved: savedCount,
+        rejected: rejectedCount,
+        errors: errorCount
+      },
+      cacheCleared: savedCount > 0
+    });
+    
+  } catch (error) {
+    console.error('❌ Validation endpoint error:', error);
+    res.status(500).json({ 
+      error: 'Validation failed', 
+      details: error.message 
+    });
+  }
 });
 
 // Start server immediately, then process files in background

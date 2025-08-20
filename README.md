@@ -50,6 +50,38 @@ Always restart the server after running node generate-master-metadata.cjs
 Or run node generate-master-metadata.cjs before starting the server
 Check the server logs for messages like "🚀 Loaded X flights from master metadata" to confirm it's using the fast path
 
+### 🚁 KML Validation Portal
+
+The system includes a **KML Validation Portal** accessible at:
+- **Local Development**: `http://localhost:4000/validate`
+- **Production**: `https://yourdomain.com/validate`
+
+**🚀 Complete Workflow Integration**: The validation portal now automatically handles the entire process that previously required manual steps. After uploading KML files, it automatically:
+- Renames files to proper format (YYYY-MM-DD-REGISTRATION-HASH.kml)
+- Generates PNG flight path images
+- Updates master metadata
+- Clears server cache
+- Makes flights immediately accessible in the main interface
+
+**Features:**
+- **Drag & Drop Interface**: Upload multiple KML files at once
+- **Automatic Validation**: Checks if flights enter TMNP restricted airspace
+- **Complete Processing**: Automatically renames files, generates PNG maps, and updates metadata
+- **Smart Filtering**: Only saves violating flights, rejects non-violating ones
+- **Real-time Results**: Immediate feedback on validation status with processing details
+- **Ready to Use**: Violating flights immediately appear in main tracking interface
+- **Local-Only Access**: Endpoint is secured to prevent external abuse
+
+**How to Use:**
+1. Navigate to `/validate` in your browser
+2. Drag & drop KML files or click "Choose Files"
+3. Click "Validate Files" to process
+4. Review results - only violating flights are saved to your system
+5. **Automatic processing** - Files are renamed, PNG maps generated, and metadata updated
+6. **Ready to use** - Flights immediately appear in your main tracking interface with full functionality
+
+**Security Note**: The validation endpoint only accepts connections from local networks (127.0.0.1, 192.168.x.x, 10.x.x.x, 172.x.x.x) to prevent external abuse while keeping your code public.
+
 ### Development Setup
 
 1. **Install dependencies:**
@@ -136,7 +168,8 @@ heli-map/
 ├── index.html                        # Main HTML entry point
 ├── src/                              # Frontend React application
 │   ├── App.jsx                       # Main React component
-│   └── App.css                       # Styles
+│   ├── App.css                       # Styles
+│   └── KMLValidationPortal.jsx      # 🚁 KML validation portal component
 ├── server/                           # Backend Node.js application
 │   ├── index.cjs                     # ⭐ Express server (optimized for fast startup)
 │   ├── master-metadata.json          # ⭐ Pre-generated flight metadata (105KB)
@@ -254,6 +287,9 @@ KML files must contain:
 ### Flight Data
 - `GET /api/flights` - Get all flight metadata (loads from master-metadata.json)
 - `GET /api/flights/:id` - Get specific flight details
+
+### KML Validation
+- `POST /api/validate-kml` - Validate KML files for airspace violations (local-only access)
 
 ### File Serving  
 - `GET /flight-maps/:filename` - Serve PNG flight maps
