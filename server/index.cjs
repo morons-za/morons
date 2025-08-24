@@ -546,10 +546,39 @@ async function checkForViolations(filePath) {
   }
 }
 
-// Check if a flight already exists (smart duplicate detection)
+// 🚀 OPTIMIZED: Pre-load existing file hashes for fast duplicate detection
+let existingFileHashes = null;
+let existingFileHashesLoaded = false;
+
+function loadExistingFileHashes() {
+  if (existingFileHashesLoaded) return existingFileHashes;
+  
+  console.log('⚡ Pre-loading existing file hashes for fast duplicate detection...');
+  existingFileHashes = new Map();
+  
+  try {
+    for (const flight of kmlMetadata) {
+      const existingFilePath = path.join(uploadsDir, flight.filename);
+      if (fs.existsSync(existingFilePath)) {
+        const existingContent = fs.readFileSync(existingFilePath);
+        const existingHash = require('crypto').createHash('md5').update(existingContent).digest('hex');
+        existingFileHashes.set(existingHash, flight.filename);
+      }
+    }
+    existingFileHashesLoaded = true;
+    console.log(`✅ Pre-loaded ${existingFileHashes.size} file hashes for fast duplicate detection`);
+  } catch (error) {
+    console.log(`⚠️ Error pre-loading file hashes: ${error.message}`);
+    existingFileHashes = new Map();
+  }
+  
+  return existingFileHashes;
+}
+
+// Check if a flight already exists (OPTIMIZED for speed)
 function isDuplicateFlight(kmlInfo, filePath) {
   try {
-    // Check 1: Flight signature (registration + date + time)
+    // Check 1: Flight signature (registration + date + time) - FAST
     const flightSignature = `${kmlInfo.registration}-${kmlInfo.date}-${kmlInfo.time}`;
     
     // Check if we already have a flight with this signature
@@ -569,28 +598,23 @@ function isDuplicateFlight(kmlInfo, filePath) {
       };
     }
     
-    // Check 2: Content hash (optional, for exact file duplicates)
+    // Check 2: Content hash (OPTIMIZED - uses pre-loaded hashes)
     try {
       const fileContent = fs.readFileSync(filePath);
       const contentHash = require('crypto').createHash('md5').update(fileContent).digest('hex');
       
-      // Check if any existing file has the same content hash
-      for (const flight of kmlMetadata) {
-        const existingFilePath = path.join(uploadsDir, flight.filename);
-        if (fs.existsSync(existingFilePath)) {
-          const existingContent = fs.readFileSync(existingFilePath);
-          const existingHash = require('crypto').createHash('md5').update(existingContent).digest('hex');
-          
-          if (contentHash === existingHash) {
-            console.log(`🔄 Exact file duplicate detected: same content as ${flight.filename}`);
-            return {
-              isDuplicate: true,
-              reason: 'CONTENT_HASH_MATCH',
-              existingFile: flight.filename,
-              details: `File content is identical to existing file ${flight.filename}`
-            };
-          }
-        }
+      // Use pre-loaded hashes instead of reading all files again
+      const existingFileHashes = loadExistingFileHashes();
+      const existingFile = existingFileHashes.get(contentHash);
+      
+      if (existingFile) {
+        console.log(`🔄 Exact file duplicate detected: same content as ${existingFile}`);
+        return {
+          isDuplicate: true,
+          reason: 'CONTENT_HASH_MATCH',
+          existingFile: existingFile,
+          details: `File content is identical to existing file ${existingFile}`
+        };
       }
     } catch (hashError) {
       console.log(`⚠️ Could not check content hash: ${hashError.message}`);
@@ -1035,55 +1059,64 @@ app.post('/api/validate-kml',
     console.log(`🚁 Processing ${req.files.length} KML files for validation...`);
     const results = [];
     
-    for (const file of req.files) {
+    // 🚀 OPTIMIZATION: Process all files in parallel instead of sequentially
+    // This makes the validation portal as fast as the fast method!
+    // All files are processed simultaneously, including PNG generation
+    console.log(`⚡ Processing ${req.files.length} files in parallel for maximum speed...`);
+    
+    // Pre-load existing file hashes once for fast duplicate detection
+    loadExistingFileHashes();
+    
+    const processPromises = req.files.map(async (file) => {
       console.log(`📁 Validating: ${file.originalname}`);
       
       try {
-        // Extract metadata and check for violations
+        // Extract metadata first (fast)
         const kmlInfo = extractKmlInfoFromFile(file.path, file.originalname);
         
         if (!kmlInfo.registration) {
-          results.push({
+          return {
             filename: file.originalname,
             status: 'INVALID',
             error: 'No registration found in KML file',
             saved: false
-          });
-          continue;
+          };
         }
         
-        // Check if flight has violations (enters TMNP airspace)
+        // 🚀 OPTIMIZATION: Check for duplicates FIRST (fast) before expensive violation detection
+        const duplicateCheck = isDuplicateFlight(kmlInfo, file.path);
+        
+        if (duplicateCheck.isDuplicate) {
+          console.log(`⏭️ Skipping duplicate: ${duplicateCheck.details}`);
+          
+          // Clean up temp file for duplicate
+          try {
+            if (fs.existsSync(file.path)) {
+              fs.unlinkSync(file.path);
+              console.log(`🗑️ Cleaned up temp file for duplicate: ${file.path}`);
+            }
+          } catch (cleanupError) {
+            console.log(`⚠️ Could not clean up temp file for duplicate: ${cleanupError.message}`);
+          }
+          
+          return {
+            filename: file.originalname,
+            status: 'DUPLICATE_SKIPPED',
+            registration: kmlInfo.registration,
+            date: kmlInfo.date,
+            time: kmlInfo.time,
+            reason: duplicateCheck.reason,
+            existingFile: duplicateCheck.existingFile,
+            details: duplicateCheck.details,
+            saved: false
+          };
+        }
+        
+        // Only check for violations if it's NOT a duplicate (expensive operation)
+        console.log(`🚁 Checking violations for non-duplicate flight: ${file.originalname}`);
         const hasViolations = await checkForViolations(file.path);
         
         if (hasViolations) {
-          // Check for duplicates before processing
-          const duplicateCheck = isDuplicateFlight(kmlInfo, file.path);
-          
-          if (duplicateCheck.isDuplicate) {
-            console.log(`⏭️ Skipping duplicate: ${duplicateCheck.details}`);
-            results.push({
-              filename: file.originalname,
-              status: 'DUPLICATE_SKIPPED',
-              registration: kmlInfo.registration,
-              date: kmlInfo.date,
-              time: kmlInfo.time,
-              reason: duplicateCheck.reason,
-              existingFile: duplicateCheck.existingFile,
-              details: duplicateCheck.details,
-              saved: false
-            });
-            
-            // Clean up temp file and continue to next file
-            try {
-              if (fs.existsSync(file.path)) {
-                fs.unlinkSync(file.path);
-                console.log(`🗑️ Cleaned up temp file for duplicate: ${file.path}`);
-              }
-            } catch (cleanupError) {
-              console.log(`⚠️ Could not clean up temp file for duplicate: ${cleanupError.message}`);
-            }
-            continue;
-          }
           console.log(`🚁 Processing violating flight: ${file.originalname}`);
           
           // Save violating flight with original name first
@@ -1122,49 +1155,47 @@ app.post('/api/validate-kml',
                 console.log(`❌ Renamed file does not exist: ${newFilePath}`);
               }
               
-                          // Generate PNG flight map
-            console.log(`🖼️ Starting PNG generation for: ${newFilename}`);
-            const pngResult = await generateFlightMap(newFilename);
-            console.log(`🖼️ PNG generation result: ${pngResult ? 'SUCCESS' : 'FAILED'}`);
-            
-            // Add to metadata with new filename
-            const flightData = {
-              filename: newFilename,
-              registration: kmlInfo.registration,
-              date: kmlInfo.date,
-              time: kmlInfo.time,
-              owner: kmlInfo.owner || 'Unknown',
-              fileSizeMB: (file.size / (1024 * 1024)).toFixed(2)
-            };
-            
-            kmlMetadata.push(flightData);
-            console.log(`📝 Added to metadata: ${JSON.stringify(flightData)}`);
-            
-            results.push({
-              filename: file.originalname,
-              newFilename: newFilename,
-              status: 'VIOLATION_DETECTED',
-              registration: kmlInfo.registration,
-              date: kmlInfo.date,
-              time: kmlInfo.time,
-              violations: hasViolations,
-              saved: true,
-              pngGenerated: pngResult
-            });
-            
-            console.log(`✅ Successfully processed violating flight: ${newFilename}`);
-            
-            // Clean up temporary file NOW (after we're done with it)
-            try {
-              if (fs.existsSync(file.path)) {
-                fs.unlinkSync(file.path);
-                console.log(`🗑️ Cleaned up temp file: ${file.path}`);
+              // Generate PNG flight map (this will run in parallel with other files)
+              console.log(`🖼️ Starting PNG generation for: ${newFilename}`);
+              const pngResult = await generateFlightMap(newFilename);
+              console.log(`🖼️ PNG generation result: ${pngResult ? 'SUCCESS' : 'FAILED'}`);
+              
+              // Add to metadata with new filename
+              const flightData = {
+                filename: newFilename,
+                registration: kmlInfo.registration,
+                date: kmlInfo.date,
+                time: kmlInfo.time,
+                owner: kmlInfo.owner || 'Unknown',
+                fileSizeMB: (file.size / (1024 * 1024)).toFixed(2)
+              };
+              
+              kmlMetadata.push(flightData);
+              console.log(`📝 Added to metadata: ${JSON.stringify(flightData)}`);
+              
+              // Clean up temporary file NOW (after we're done with it)
+              try {
+                if (fs.existsSync(file.path)) {
+                  fs.unlinkSync(file.path);
+                  console.log(`🗑️ Cleaned up temp file: ${file.path}`);
+                }
+              } catch (cleanupError) {
+                console.log(`⚠️ Could not clean up temp file: ${cleanupError.message}`);
               }
-            } catch (cleanupError) {
-              console.log(`⚠️ Could not clean up temp file: ${cleanupError.message}`);
-            }
-            
-          } catch (renameError) {
+              
+              return {
+                filename: file.originalname,
+                newFilename: newFilename,
+                status: 'VIOLATION_DETECTED',
+                registration: kmlInfo.registration,
+                date: kmlInfo.date,
+                time: kmlInfo.time,
+                violations: hasViolations,
+                saved: true,
+                pngGenerated: pngResult
+              };
+              
+            } catch (renameError) {
               console.error(`❌ Error during rename/PNG generation:`, renameError.message);
               throw renameError;
             }
@@ -1176,7 +1207,18 @@ app.post('/api/validate-kml',
           
         } else {
           // Don't save non-violating flights
-          results.push({
+          console.log(`❌ Rejected non-violating flight: ${file.originalname}`);
+          
+          // Clean up temp file for non-violating flights
+          try {
+            if (fs.existsSync(file.path)) {
+              fs.unlinkSync(file.path);
+            }
+          } catch (cleanupError) {
+            console.log(`⚠️ Could not clean up temp file for non-violating flight: ${cleanupError.message}`);
+          }
+          
+          return {
             filename: file.originalname,
             status: 'NO_VIOLATIONS',
             registration: kmlInfo.registration,
@@ -1184,31 +1226,33 @@ app.post('/api/validate-kml',
             time: kmlInfo.time,
             violations: [],
             saved: false
-          });
-          
-          console.log(`❌ Rejected non-violating flight: ${file.originalname}`);
+          };
         }
         
       } catch (error) {
         console.error(`❌ Error processing ${file.originalname}:`, error.message);
-        results.push({
-          filename: file.originalname,
-          status: 'ERROR',
-          error: error.message,
-          saved: false
-        });
         
-        // Clean up on error
+        // Clean up temp file on error
         try {
           if (fs.existsSync(file.path)) {
             fs.unlinkSync(file.path);
-            console.log(`🗑️ Cleaned up temp file on error: ${file.path}`);
           }
         } catch (cleanupError) {
           console.log(`⚠️ Could not clean up temp file on error: ${cleanupError.message}`);
         }
+        
+        return {
+          filename: file.originalname,
+          status: 'ERROR',
+          error: error.message,
+          saved: false
+        };
       }
-    }
+    });
+    
+    // Wait for all files to be processed in parallel
+    const fileResults = await Promise.all(processPromises);
+    results.push(...fileResults);
     
     // Generate summary
     const savedCount = results.filter(r => r.saved).length;
