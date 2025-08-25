@@ -25,7 +25,7 @@ static-site/
 service-account-key.json
 
 # Google Cloud credentials
-*.json
+service-account-*.json
 .env
 .env.local
 .env.production
