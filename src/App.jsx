@@ -1042,12 +1042,7 @@ function App() {
                         Export CSV
                       </button>
                     </div>
-                    {/* KML Validation Portal Button */}
-                    <div>
-                      <button onClick={() => setShowValidationPortal(true)} style={{ padding: '8px 24px', borderRadius: 6, background: '#667eea', color: '#fff', border: 'none', fontWeight: 600, fontSize: 15, cursor: 'pointer' }}>
-                        🚁 Validate KML
-                      </button>
-                    </div>
+
 
                   </div>
                 )}
