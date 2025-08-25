@@ -33,3 +33,4 @@ service-account-key.json
 # Service account keys
 *-key.json
 service-account-*.json
+server/.env
