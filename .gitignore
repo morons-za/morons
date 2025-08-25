@@ -22,3 +22,14 @@ dist-ssr
 *.sln
 *.sw?
 static-site/
+service-account-key.json
+
+# Google Cloud credentials
+*.json
+.env
+.env.local
+.env.production
+
+# Service account keys
+*-key.json
+service-account-*.json
