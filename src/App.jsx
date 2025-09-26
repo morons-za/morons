@@ -22,8 +22,8 @@ const BACKEND_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:4000'
   : window.location.origin;
 
-// GitHub LFS URL for KML files
-const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/werneravr/heli-map/main';
+// GitHub LFS URL for KML files - use media endpoint for proper LFS downloads
+const GITHUB_LFS_URL = 'https://media.githubusercontent.com/media/werneravr/heli-map/main';
 
 function isInTableMountainArea(lat, lon) {
   // Rough bounding box for Table Mountain National Park
@@ -37,6 +37,64 @@ function utcToSaTime(date, time) {
   // South Africa is UTC+2
   const sa = new Date(utc.getTime() + 2 * 60 * 60 * 1000);
   return sa.toISOString().slice(11, 16); // 'HH:MM'
+}
+
+// KML download function
+async function downloadKML(filename, button) {
+  const url = `${GITHUB_LFS_URL}/server/uploads/${filename}`;
+  
+  try {
+    // Show loading indicator
+    const originalText = button.innerHTML;
+    button.innerHTML = '⏳';
+    button.disabled = true;
+    
+    // Fetch the file content
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    
+    const blob = await response.blob();
+    
+    // Create download link
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    link.style.display = 'none';
+    
+    // Trigger download
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    // Clean up
+    window.URL.revokeObjectURL(downloadUrl);
+    
+    // Restore button
+    button.innerHTML = originalText;
+    button.disabled = false;
+    
+    // Show success message
+    const successText = button.innerHTML;
+    button.innerHTML = '✅';
+    setTimeout(() => {
+      button.innerHTML = successText;
+    }, 2000);
+    
+  } catch (error) {
+    console.error('Download failed:', error);
+    
+    // Restore button
+    button.innerHTML = '⬇️';
+    button.disabled = false;
+    
+    // Fallback: open in new tab
+    window.open(url, '_blank');
+    
+    alert('Download failed. Opening file in new tab instead.');
+  }
 }
 
 // Selected Flight Row Component (replaces StickyFlightPanel)
@@ -124,9 +182,16 @@ function SelectedFlightSection({ flight, onClose, fileSize, onJumpToTable, onRep
               <td style={{ padding: '8px', border: '1px solid #ddd' }}>{flight.filename || '-'}</td>
               <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
                 {kml.url ? (
-                  <a href={`${GITHUB_RAW_URL}/server/uploads/${flight.filename}`} download={flight.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
+                  <button 
+                    onClick={async (e) => {
+                      e.stopPropagation();
+                      await downloadKML(flight.filename, e.target);
+                    }} 
+                    title="Download KML" 
+                    style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+                  >
                     ⬇️
-                  </a>
+                  </button>
                 ) : '-'}
               </td>
               <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
@@ -389,7 +454,7 @@ function ReportModal({ isOpen, onClose, flightData }) {
                 const mailtoUrl = `mailto:enforcement@caa.co.za?subject=Helicopter Airspace Violation Report - ${registration}&body=${encodeURIComponent(`Dear sir/madam,
 
 
-It appears that a helicopter, registration ${registration} (${owner}), entered restricted airspace (NEMPAA NP17) over Table Mountain on ${date}. Please find a flight map here: ${imagePath ? imagePath.replace(/^https?:\/\/[^\/]+/, 'https://morons.onrender.com') : 'Flight map not available'}.
+It appears that a helicopter, registration ${registration} (${owner}), entered restricted airspace (NEMPAA NP17) over Table Mountain on ${date}. Please find a flight map here: ${imagePath || 'Flight map not available'}.
 
 
 Could you please confirm receipt of my complaint and any relevant steps that might be taken? I greatly appreciate your assistance in the matter!
@@ -419,7 +484,7 @@ Regards,`)}`;
                 const mailtoUrl = `mailto:TableM@sanparks.org?subject=Table Mountain Airspace Violation Report - ${registration}&body=${encodeURIComponent(`Dear sir/madam,
 
 
-It appears that a helicopter, registration ${registration} (${owner}), entered restricted airspace (NEMPAA NP17) over Table Mountain on ${date}. Please find a flight map here: ${imagePath ? imagePath.replace(/^https?:\/\/[^\/]+/, 'https://morons.onrender.com') : 'Flight map not available'}.
+It appears that a helicopter, registration ${registration} (${owner}), entered restricted airspace (NEMPAA NP17) over Table Mountain on ${date}. Please find a flight map here: ${imagePath || 'Flight map not available'}.
 
 
 Could you please confirm receipt of my complaint and any relevant steps that might be taken? I greatly appreciate your assistance in the matter!
@@ -732,6 +797,25 @@ function App() {
             fillOpacity: 0.25
           }));
           mapRef.current.fitBounds(this.getBounds(), { padding: [20, 20] });
+          
+          // Show initial instruction overlay
+          const instructionDiv = document.createElement('div')
+          instructionDiv.innerHTML = `
+            <div style="text-align: center; line-height: 1.4;">
+              <div style="font-size: 18px; margin-bottom: 8px;">🗺️ Flight Tracking Map</div>
+              <div style="font-size: 14px; margin-bottom: 12px;">Scroll down to view flights</div>
+              <div style="font-size: 12px; color: #ccc;">Click the 👀 button on any flight to see its path</div>
+            </div>
+          `
+          instructionDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 25px 35px; border-radius: 12px; z-index: 1000; font-size: 14px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.4); max-width: 300px;'
+          mapRef.current.getContainer().appendChild(instructionDiv)
+          
+          // Auto-hide instruction after 8 seconds
+          setTimeout(() => {
+            if (instructionDiv.parentNode) {
+              instructionDiv.parentNode.removeChild(instructionDiv)
+            }
+          }, 8000)
         })
         .addTo(mapRef.current)
     }
@@ -768,9 +852,8 @@ function App() {
       })
   }, [])
 
-  // Placeholder for future backend/static bucket integration
+  // Helicopter data integration (currently empty, ready for future integration)
   useEffect(() => {
-    // TODO: Replace this with fetch from backend or static bucket
     setHelicopters([]) // Currently empty, ready for integration
   }, [])
 
@@ -1094,9 +1177,16 @@ function App() {
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.filename || '-'}</td>
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
                           {kml.url ? (
-                            <a href={`${GITHUB_RAW_URL}/server/uploads/${meta.filename}`} download={meta.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
+                            <button 
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                await downloadKML(meta.filename, e.target);
+                              }} 
+                              title="Download KML" 
+                              style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer', background: 'none', border: 'none', padding: 0 }}
+                            >
                               ⬇️
-                            </a>
+                            </button>
                           ) : '-'}
                         </td>
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
@@ -1121,14 +1211,32 @@ function App() {
                               }
                               placemarkMarkersRef.current.forEach(m => mapRef.current.removeLayer(m))
                               placemarkMarkersRef.current = []
-                              // Add new KML layer
-                              kmlLayerRef.current = omnivore.kml(`${GITHUB_RAW_URL}/server/uploads/${meta.filename}`)
+                              // Add new KML layer with performance logging and optimization
+                              console.log('🚀 Starting KML load:', meta.filename, new Date().toISOString())
+                              const startTime = performance.now()
+                              
+                              // Show loading indicator in center of map
+                              const loadingDiv = document.createElement('div')
+                              loadingDiv.innerHTML = '🔄 Loading flight path...'
+                              loadingDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 30px; border-radius: 10px; z-index: 1000; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);'
+                              mapRef.current.getContainer().appendChild(loadingDiv)
+                              
+                              kmlLayerRef.current = omnivore.kml(`${GITHUB_LFS_URL}/server/uploads/${meta.filename}`)
                                 .on('ready', function() {
+                                  const loadTime = performance.now() - startTime
+                                  console.log('✅ KML loaded in:', Math.round(loadTime), 'ms')
+                                  
+                                  // Remove loading indicator
+                                  if (loadingDiv.parentNode) {
+                                    loadingDiv.parentNode.removeChild(loadingDiv)
+                                  }
+                                  
                                   this.setStyle(() => ({
                                     color: '#0000ff',
                                     weight: 4,
                                     opacity: 0.8
                                   }));
+                                  
                                   // Fit bounds to both TMNP and the new KML if both are present
                                   if (tmnpLayerRef.current) {
                                     const group = L.featureGroup([tmnpLayerRef.current, this]);
@@ -1137,42 +1245,15 @@ function App() {
                                     mapRef.current.fitBounds(this.getBounds(), { padding: [20, 20] });
                                   }
                                 })
-                                .addTo(mapRef.current)
-                              // Fetch and parse KML for placemarks (optional, for popups)
-                              try {
-                                const res = await fetch(`${GITHUB_RAW_URL}/server/uploads/${meta.filename}`)
-                                const text = await res.text()
-                                const parser = new window.DOMParser()
-                                const xml = parser.parseFromString(text, 'text/xml')
-                                const placemarks = Array.from(xml.querySelectorAll('Folder > Placemark'))
-                                placemarks.forEach(pm => {
-                                  const name = pm.querySelector('name')?.textContent || ''
-                                  const desc = pm.querySelector('description')?.textContent || ''
-                                  const when = pm.querySelector('TimeStamp > when')?.textContent || ''
-                                  const coords = pm.querySelector('Point > coordinates')?.textContent || ''
-                                  // Parse coordinates (lon,lat,alt)
-                                  const [lon, lat] = coords.split(',').map(Number)
-                                  // Extract Altitude, Speed, Heading from desc (HTML)
-                                  let altitude = '', speed = '', heading = ''
-                                  const altMatch = desc.match(/Altitude:\s*([\d,]+) ft/i)
-                                  if (altMatch) altitude = altMatch[1]
-                                  const spdMatch = desc.match(/Speed:\s*([\d,]+) kt/i)
-                                  if (spdMatch) speed = spdMatch[1]
-                                  const hdgMatch = desc.match(/Heading:\s*([\d,]+)[^\d]?/i)
-                                  if (hdgMatch) heading = hdgMatch[1]
-                                  // Compose popup HTML
-                                  const popup = `<div style='font-size:14px;'><b>${name}</b><br/>`
-                                    + (altitude ? `<b>Altitude:</b> ${altitude} ft<br/>` : '')
-                                    + (speed ? `<b>Speed:</b> ${speed} kt<br/>` : '')
-                                    + (heading ? `<b>Heading:</b> ${heading}&deg;<br/>` : '')
-                                    + `</div>`
-                                  if (!isNaN(lat) && !isNaN(lon)) {
-                                    const marker = L.marker([lat, lon]).addTo(mapRef.current)
-                                    marker.bindPopup(popup)
-                                    placemarkMarkersRef.current.push(marker)
+                                .on('error', function(error) {
+                                  console.error('❌ KML load error:', error)
+                                  if (loadingDiv.parentNode) {
+                                    loadingDiv.parentNode.removeChild(loadingDiv)
                                   }
                                 })
-                              } catch {}
+                                .addTo(mapRef.current)
+                              // Note: Popup processing removed to improve performance
+                              // KML layer will still show flight path without individual placemark popups
                             }} style={{ padding: '4px 12px', borderRadius: 4, background: '#007bff', color: '#fff', border: 'none', cursor: 'pointer', fontSize: '1.2em' }} title="View on map">
                               👀
                             </button>

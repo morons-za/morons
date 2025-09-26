@@ -29,7 +29,7 @@ async function checkHealth(url, maxRetries = 30, delay = 10000) {
   return false;
 }
 
-const url = process.argv[2] || 'https://morons.onrender.com';
+const url = process.argv[2] || 'https://your-production-domain.com'; // Update with your actual production URL
 checkHealth(url).then(success => {
   process.exit(success ? 0 : 1);
 }); 

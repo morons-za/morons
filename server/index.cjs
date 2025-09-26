@@ -78,7 +78,7 @@ app.use(cors({
 // Redirect uploads to GitHub LFS
 app.get('/uploads/:filename', (req, res) => {
   const filename = req.params.filename;
-  const githubUrl = `https://raw.githubusercontent.com/werneravr/heli-map/main/server/uploads/${filename}`;
+  const githubUrl = `https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/${filename}`;
   
   res.redirect(301, githubUrl);
 });
@@ -968,7 +968,7 @@ app.post('/refresh-metadata', requireAdmin, (req, res) => {
   res.json({ success: true, count: kmlMetadata.length });
 });
 
-// Health check endpoint for Render
+// Health check endpoint for production monitoring
 app.get('/health', (req, res) => {
   const isReady = kmlMetadata.length > 0 && Object.keys(helicopterMetadata).length > 0;
   
@@ -1058,7 +1058,7 @@ app.get('*', (req, res) => {
 // Add specific route for KML files to redirect to GitHub LFS
 app.get('/kml/:filename', (req, res) => {
   const filename = req.params.filename;
-  const githubUrl = `https://raw.githubusercontent.com/werneravr/heli-map/main/server/uploads/${filename}`;
+  const githubUrl = `https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/${filename}`;
   
   res.redirect(301, githubUrl);
 });

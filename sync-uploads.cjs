@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const https = require('https');
 
-const PRODUCTION_URL = 'https://morons.onrender.com';
+const PRODUCTION_URL = 'https://your-production-domain.com'; // Update with your actual production URL
 const LOCAL_UPLOADS_DIR = path.join(__dirname, 'server', 'uploads');
 
 async function fetchProductionUploads() {
