@@ -75,7 +75,13 @@ app.use(cors({
   origin: true,
   credentials: true
 }));
-app.use('/uploads', express.static(uploadsDir));
+// Redirect uploads to GitHub LFS
+app.get('/uploads/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const githubUrl = `https://raw.githubusercontent.com/werneravr/heli-map/main/server/uploads/${filename}`;
+  
+  res.redirect(301, githubUrl);
+});
 app.use('/images', express.static(imagesDir));
 app.use('/flight-maps', express.static(flightMapsDir));
 app.use(express.urlencoded({ extended: true }));
@@ -1049,17 +1055,12 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../dist/index.html'));
 });
 
-// Add specific route for KML files to ensure correct content type
+// Add specific route for KML files to redirect to GitHub LFS
 app.get('/kml/:filename', (req, res) => {
   const filename = req.params.filename;
-  const filePath = path.join(uploadsDir, filename);
+  const githubUrl = `https://raw.githubusercontent.com/werneravr/heli-map/main/server/uploads/${filename}`;
   
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).send('KML file not found');
-  }
-  
-  res.setHeader('Content-Type', 'application/vnd.google-earth.kml+xml');
-  res.sendFile(filePath);
+  res.redirect(301, githubUrl);
 });
 
 // KML Validation Portal endpoint

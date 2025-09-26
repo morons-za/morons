@@ -22,6 +22,9 @@ const BACKEND_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:4000'
   : window.location.origin;
 
+// GitHub LFS URL for KML files
+const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/werneravr/heli-map/main';
+
 function isInTableMountainArea(lat, lon) {
   // Rough bounding box for Table Mountain National Park
   return lat >= -34.1 && lat <= -33.9 && lon >= 18.3 && lon <= 18.5
@@ -121,7 +124,7 @@ function SelectedFlightSection({ flight, onClose, fileSize, onJumpToTable, onRep
               <td style={{ padding: '8px', border: '1px solid #ddd' }}>{flight.filename || '-'}</td>
               <td style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>
                 {kml.url ? (
-                  <a href={`${BACKEND_URL}${kml.url}`} download={flight.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
+                  <a href={`${GITHUB_RAW_URL}/server/uploads/${flight.filename}`} download={flight.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
                     ⬇️
                   </a>
                 ) : '-'}
@@ -1091,7 +1094,7 @@ function App() {
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>{meta.filename || '-'}</td>
                         <td style={{ padding: 8, border: '1px solid #ddd', textAlign: 'center' }}>
                           {kml.url ? (
-                            <a href={`${BACKEND_URL}${kml.url}`} download={meta.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
+                            <a href={`${GITHUB_RAW_URL}/server/uploads/${meta.filename}`} download={meta.filename} title="Download KML" style={{ fontSize: '1.3em', color: '#007bff', textDecoration: 'none', cursor: 'pointer' }}>
                               ⬇️
                             </a>
                           ) : '-'}
@@ -1119,7 +1122,7 @@ function App() {
                               placemarkMarkersRef.current.forEach(m => mapRef.current.removeLayer(m))
                               placemarkMarkersRef.current = []
                               // Add new KML layer
-                              kmlLayerRef.current = omnivore.kml(`${BACKEND_URL}${kml.url}`)
+                              kmlLayerRef.current = omnivore.kml(`${GITHUB_RAW_URL}/server/uploads/${meta.filename}`)
                                 .on('ready', function() {
                                   this.setStyle(() => ({
                                     color: '#0000ff',
@@ -1137,7 +1140,7 @@ function App() {
                                 .addTo(mapRef.current)
                               // Fetch and parse KML for placemarks (optional, for popups)
                               try {
-                                const res = await fetch(`${BACKEND_URL}${kml.url}`)
+                                const res = await fetch(`${GITHUB_RAW_URL}/server/uploads/${meta.filename}`)
                                 const text = await res.text()
                                 const parser = new window.DOMParser()
                                 const xml = parser.parseFromString(text, 'text/xml')
