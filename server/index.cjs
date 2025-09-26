@@ -12,9 +12,25 @@ const SmartKMLManager = require('./smart-kml-manager.cjs');
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Admin credentials from environment variables
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin@example.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'change_this_password';
+// Admin credentials from environment variables (required)
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
+// Validate required environment variables
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD) {
+  console.error('❌ Missing required environment variables:');
+  if (!ADMIN_EMAIL) console.error('  - ADMIN_EMAIL');
+  if (!ADMIN_PASSWORD) console.error('  - ADMIN_PASSWORD');
+  console.error('');
+  console.error('📋 Setup Instructions:');
+  console.error('1. Copy env.example to .env: cp env.example .env');
+  console.error('2. Edit .env with your actual values');
+  console.error('3. Generate a secure SESSION_SECRET (32+ characters)');
+  console.error('4. Use strong passwords for ADMIN_PASSWORD');
+  console.error('');
+  console.error('See env.example for all required variables.');
+  process.exit(1);
+}
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -64,8 +80,25 @@ app.use('/images', express.static(imagesDir));
 app.use('/flight-maps', express.static(flightMapsDir));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+// Session secret from environment variables (required)
+const SESSION_SECRET = process.env.SESSION_SECRET;
+
+// Validate session secret
+if (!SESSION_SECRET) {
+  console.error('❌ Missing required environment variable: SESSION_SECRET');
+  console.error('');
+  console.error('📋 Setup Instructions:');
+  console.error('1. Copy env.example to .env: cp env.example .env');
+  console.error('2. Edit .env with your actual values');
+  console.error('3. Generate a secure SESSION_SECRET (32+ characters)');
+  console.error('4. Use strong passwords for ADMIN_PASSWORD');
+  console.error('');
+  console.error('See env.example for all required variables.');
+  process.exit(1);
+}
+
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'change_this_secret',
+  secret: SESSION_SECRET,
   resave: false,
   saveUninitialized: false,
   cookie: { httpOnly: true, secure: false } // set secure: true if using HTTPS
