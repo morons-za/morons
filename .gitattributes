@@ -1,1 +1,2 @@
+server/uploads/*.kml filter=lfs diff=lfs merge=lfs -text
 backend/flight-maps.zip filter=lfs diff=lfs merge=lfs -text
