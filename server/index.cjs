@@ -82,8 +82,15 @@ app.get('/uploads/:filename', (req, res) => {
   
   res.redirect(301, githubUrl);
 });
+
+// Redirect flight-maps to GitHub LFS
+app.get('/flight-maps/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const githubUrl = `https://media.githubusercontent.com/media/werneravr/heli-map/main/server/flight-maps/${filename}`;
+  
+  res.redirect(301, githubUrl);
+});
 app.use('/images', express.static(imagesDir));
-app.use('/flight-maps', express.static(flightMapsDir));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 // Session secret from environment variables (required)

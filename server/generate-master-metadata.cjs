@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { XMLParser } = require('fast-xml-parser');
 
 // Paths
 const uploadsDir = path.join(__dirname, 'uploads');
@@ -17,13 +18,63 @@ try {
   console.error('❌ Error loading helicopter metadata:', err);
 }
 
-// Extract info from KML filename
+// Extract info from KML filename and content
 function extractKmlInfo(filename) {
   const match = filename.match(/^(\d{4}-\d{2}-\d{2})-([A-Z0-9-]+)-[a-f0-9]+\.kml$/);
   if (!match) return null;
   
   const [_, date, registration] = match;
-  const time = '00:00'; // We'll get this from the file content later
+  let time = '00:00'; // Default fallback
+  
+  // Try to extract time from KML content
+  try {
+    const filePath = path.join(uploadsDir, filename);
+    const xmlData = fs.readFileSync(filePath, 'utf8');
+    const parser = new XMLParser({ ignoreAttributes: false, processEntities: true });
+    const xml = parser.parse(xmlData);
+    
+    // Look for time in multiple places
+    const doc = xml.kml && xml.kml.Document ? xml.kml.Document : null;
+    
+    // First try: Look for TimeStamp in Placemark (check both Document and Folder)
+    let placemarks = [];
+    if (doc && doc.Placemark) {
+      placemarks = Array.isArray(doc.Placemark) ? doc.Placemark : [doc.Placemark];
+    } else if (doc && doc.Folder) {
+      const folders = Array.isArray(doc.Folder) ? doc.Folder : [doc.Folder];
+      for (const folder of folders) {
+        if (folder.Placemark) {
+          const folderPlacemarks = Array.isArray(folder.Placemark) ? folder.Placemark : [folder.Placemark];
+          placemarks.push(...folderPlacemarks);
+        }
+      }
+    }
+    
+    for (const placemark of placemarks) {
+      if (placemark.TimeStamp && placemark.TimeStamp.when) {
+        // Extract time from ISO format: "2025-08-24T11:08:52+00:00"
+        const timeMatch = placemark.TimeStamp.when.match(/T(\d{2}:\d{2}):\d{2}/);
+        if (timeMatch) {
+          time = timeMatch[1];
+          break;
+        }
+      }
+    }
+    
+    // Second try: Look for ATD (Actual Time of Departure) in description
+    if (time === '00:00' && doc && doc.description) {
+      let desc = doc.description;
+      desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+      
+      // Extract ATD time (e.g., "11:08" from "ATD 11:08 UTC")
+      const atdMatch = desc.match(/ATD[^>]*?(\d{1,2}:\d{2})/i);
+      if (atdMatch) {
+        time = atdMatch[1];
+      }
+    }
+  } catch (e) {
+    console.warn(`Warning: Could not extract time from ${filename}: ${e.message}`);
+  }
   
   return {
     filename,

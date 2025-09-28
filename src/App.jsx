@@ -235,7 +235,7 @@ function ReportModal({ isOpen, onClose, flightData }) {
   
   // Generate flight map image path
   const imageFilename = flightData.filename ? flightData.filename.replace('.kml', '.png') : null;
-  const imagePath = imageFilename ? `${BACKEND_URL}/flight-maps/${imageFilename}` : null;
+  const imagePath = imageFilename ? `${GITHUB_LFS_URL}/server/flight-maps/${imageFilename}` : null;
 
   const handleCopyText = async () => {
     try {
@@ -800,6 +800,7 @@ function App() {
           
           // Show initial instruction overlay
           const instructionDiv = document.createElement('div')
+          instructionDiv.id = 'instructionOverlay'
           instructionDiv.innerHTML = `
             <div style="text-align: center; line-height: 1.4;">
               <div style="font-size: 18px; margin-bottom: 8px;">🗺️ Flight Tracking Map</div>
@@ -812,7 +813,8 @@ function App() {
           
           // Auto-hide instruction after 8 seconds
           setTimeout(() => {
-            if (instructionDiv.parentNode) {
+            // Only remove if the element still exists and hasn't been removed manually
+            if (instructionDiv.parentNode && document.getElementById('instructionOverlay')) {
               instructionDiv.parentNode.removeChild(instructionDiv)
             }
           }, 8000)
@@ -1195,6 +1197,12 @@ function App() {
                         <td style={{ padding: 8, border: '1px solid #ddd' }}>
                           {kml.url ? (
                             <button onClick={async () => {
+                              // Remove instruction overlay immediately when flight is clicked
+                              const instructionOverlay = document.getElementById('instructionOverlay')
+                              if (instructionOverlay) {
+                                instructionOverlay.remove()
+                              }
+                              
                               // Set selected flight with KML data for SelectedFlightSection
                               setSelectedFlight({
                                 ...meta,
@@ -1217,7 +1225,7 @@ function App() {
                               
                               // Show loading indicator in center of map
                               const loadingDiv = document.createElement('div')
-                              loadingDiv.innerHTML = '🔄 Loading flight path...'
+                              loadingDiv.innerHTML = '<span class="helicopter-loader">🚁</span> Loading flight path...'
                               loadingDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 30px; border-radius: 10px; z-index: 1000; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);'
                               mapRef.current.getContainer().appendChild(loadingDiv)
                               

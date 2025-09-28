@@ -53,20 +53,8 @@ if (fs.existsSync(SOURCE_DIRS.uploads)) {
   console.log('⚠️  Uploads directory not found');
 }
 
-// Copy PNG flight maps
-if (fs.existsSync(SOURCE_DIRS.flightMaps)) {
-  const pngFiles = fs.readdirSync(SOURCE_DIRS.flightMaps).filter(f => f.endsWith('.png'));
-  console.log(`🖼️  Copying ${pngFiles.length} PNG flight maps...`);
-  
-  pngFiles.forEach(file => {
-    const sourcePath = path.join(SOURCE_DIRS.flightMaps, file);
-    const destPath = path.join(BUILD_DIR, 'flight-maps', file);
-    fs.copyFileSync(sourcePath, destPath);
-  });
-  console.log('✅ Copied all PNG flight maps');
-} else {
-  console.log('⚠️  Flight maps directory not found');
-}
+// PNG files are now served from GitHub LFS - no need to copy locally
+console.log('📸 PNG files will be served from GitHub LFS');
 
 // Load flight metadata
 console.log('\n📊 Loading flight metadata...');
@@ -122,6 +110,16 @@ try {
 } catch (error) {
   console.error('❌ Error loading metadata:', error.message);
   process.exit(1);
+}
+
+// UTC to South Africa time conversion
+function utcToSaTime(date, time) {
+  if (!date || !time) return '-';
+  // date: '2025-05-03', time: '07:31'
+  const utc = new Date(`${date}T${time}:00Z`);
+  // South Africa is UTC+2
+  const sa = new Date(utc.getTime() + 2 * 60 * 60 * 1000);
+  return sa.toISOString().slice(11, 16); // 'HH:MM'
 }
 
 // Generate the main HTML file
@@ -464,6 +462,16 @@ const htmlContent = `<!DOCTYPE html>
             margin: 1rem 0;
         }
         
+        @keyframes helicopter-hover {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+        }
+        
+        .helicopter-loader {
+            animation: helicopter-hover 1s ease-in-out infinite;
+            display: inline-block;
+        }
+        
         @media (max-width: 768px) {
             .main-title {
                 font-size: 1.5rem;
@@ -488,6 +496,49 @@ const htmlContent = `<!DOCTYPE html>
 
     <div class="main-content">
         <h1 class="main-title">Misbehaving Operators Roaming Over National Sanctuaries</h1>
+        
+        <!-- Viewing Flight Information Box -->
+        <div id="viewingFlightBox" style="display: none; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; margin: 16px 0; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="background: #e9ecef; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #dee2e6;">
+                <h3 id="viewingFlightTitle" style="margin: 0; color: #495057; font-size: 1.1rem;">Viewing Flight: </h3>
+                <div style="display: flex; gap: 8px;">
+                    <button onclick="jumpToTable()" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">📋 Jump to Table</button>
+                    <button onclick="closeViewingFlight()" style="background: #6c757d; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">✕ Close</button>
+                </div>
+            </div>
+            <div style="padding: 16px;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                    <thead>
+                        <tr style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Date</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">UTC Time</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">SA Time</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Registration</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Filename</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">KML</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Size</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Take action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #dee2e6;">
+                            <td id="viewingFlightDate" style="padding: 8px 12px;">-</td>
+                            <td id="viewingFlightUTC" style="padding: 8px 12px;">-</td>
+                            <td id="viewingFlightSA" style="padding: 8px 12px;">-</td>
+                            <td id="viewingFlightReg" style="padding: 8px 12px;">-</td>
+                            <td id="viewingFlightFilename" style="padding: 8px 12px;">-</td>
+                            <td style="padding: 8px 12px;">
+                                <button id="viewingFlightDownload" onclick="downloadKML('')" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer; background: none; border: none; padding: 0;" title="Download KML">⬇️</button>
+                            </td>
+                            <td id="viewingFlightSize" style="padding: 8px 12px;">-</td>
+                            <td style="padding: 8px 12px;">
+                                <button onclick="takeAction()" style="background: #dc3545; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 600;">👮</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
         
         <div id="map"></div>
         
@@ -528,7 +579,43 @@ const htmlContent = `<!DOCTYPE html>
         </div>
 
         <div id="tableContainer">
-            <div class="loading">Loading flight data...</div>
+            <h2>Airspace Violations</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>UTC Time</th>
+                        <th>SA Time</th>
+                        <th>Registration</th>
+                        <th>Filename</th>
+                        <th>KML</th>
+                        <th>Size</th>
+                        <th>View Flight</th>
+                        <th>Take action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${flightData.sort((a, b) => new Date(b.date) - new Date(a.date)).map(flight => `
+                        <tr class="flight-row" onclick="viewFlight('${flight.filename}')">
+                            <td>${flight.date || '-'}</td>
+                            <td>${flight.time || '-'}</td>
+                            <td>${utcToSaTime(flight.date, flight.time)}</td>
+                            <td>${flight.registration || '-'}</td>
+                            <td>${flight.filename || '-'}</td>
+                            <td style="text-align: center;">
+                                <a href="https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
+                            </td>
+                            <td style="text-align: center;">${flight.fileSizeMB ? flight.fileSizeMB + ' MB' : '-'}</td>
+                            <td>
+                                <button onclick="event.stopPropagation(); loadFlightOnMap('${flight.filename}')" style="padding: 4px 12px; border-radius: 4px; background: #007bff; color: #fff; border: none; cursor: pointer; font-size: 1.2em;" title="View on map">👀</button>
+                            </td>
+                            <td>
+                                <button onclick="event.stopPropagation(); reportFlight('${flight}')" style="padding: 6px 12px; border-radius: 4px; background: #dc3545; color: #fff; border: none; cursor: pointer; font-size: 18px; font-weight: 600; display: flex; align-items: center; gap: 4px;" title="Generate violation report">👮‍♂️</button>
+                            </td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -541,6 +628,7 @@ const htmlContent = `<!DOCTYPE html>
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-omnivore@0.3.4/leaflet-omnivore.min.js"></script>
     <script>
         // Flight data embedded from build process
         const flightData = ${JSON.stringify(flightData, null, 2)};
@@ -550,6 +638,7 @@ const htmlContent = `<!DOCTYPE html>
         let currentFlightLayer = null;
         let filteredData = [...flightData];
         let showFilters = false;
+        let lastViewedFilename = null;
         
         // UTC to South Africa time conversion
         function utcToSaTime(date, time) {
@@ -589,84 +678,59 @@ const htmlContent = `<!DOCTYPE html>
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             initializeMap();
-            renderTable();
             setupEventListeners();
+            updateSummary(); // Initial summary update
         });
         
         function initializeMap() {
+            console.log('Initializing map...');
+            console.log('Leaflet available:', typeof L);
+            console.log('Map container exists:', document.getElementById('map'));
+            
             // Initialize map centered on Cape Town
             map = L.map('map').setView([-33.9249, 18.4241], 10);
+            console.log('Map created:', map);
             
             // Add OpenStreetMap tiles
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© OpenStreetMap contributors'
             }).addTo(map);
+            console.log('Tile layer added to map');
             
-            // Add TMNP boundary with loading indicator and instruction overlay
-            fetch('tmnp.kml')
-                .then(response => response.text())
-                .then(kmlText => {
-                    // Simple KML parsing for boundary
-                    const parser = new DOMParser();
-                    const kmlDoc = parser.parseFromString(kmlText, 'text/xml');
-                    const coordinates = kmlDoc.querySelectorAll('coordinates');
-                    
-                    coordinates.forEach(coord => {
-                        const coordText = coord.textContent.trim();
-                        const points = coordText.split('\\n').map(line => {
-                            const [lon, lat] = line.trim().split(',').map(Number);
-                            return [lat, lon];
-                        }).filter(point => !isNaN(point[0]) && !isNaN(point[1]));
-                        
-                        if (points.length > 2) {
-                            L.polygon(points, {
-                                color: '#ff0000',
-                                weight: 3,
-                                opacity: 0.7,
-                                fillColor: '#ff0000',
-                                fillOpacity: 0.25
-                            }).addTo(map);
-                        }
-                    });
-                    
-                    // Fit bounds to TMNP
-                    if (coordinates.length > 0) {
-                        const allPoints = [];
-                        coordinates.forEach(coord => {
-                            const coordText = coord.textContent.trim();
-                            const points = coordText.split('\\n').map(line => {
-                                const [lon, lat] = line.trim().split(',').map(Number);
-                                return [lat, lon];
-                            }).filter(point => !isNaN(point[0]) && !isNaN(point[1]));
-                            allPoints.push(...points);
-                        });
-                        
-                        if (allPoints.length > 0) {
-                            const bounds = L.latLngBounds(allPoints);
-                            map.fitBounds(bounds, { padding: [20, 20] });
-                        }
-                    }
-                    
-                    // Show initial instruction overlay
-                    const instructionDiv = document.createElement('div');
-                    instructionDiv.innerHTML = \`
-                        <div style="text-align: center; line-height: 1.4;">
-                            <div style="font-size: 18px; margin-bottom: 8px;">🗺️ Flight Tracking Map</div>
-                            <div style="font-size: 14px; margin-bottom: 12px;">Scroll down to view flights</div>
-                            <div style="font-size: 12px; color: #ccc;">Click the 👀 button on any flight to see its path</div>
-                        </div>
-                    \`;
-                    instructionDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 25px 35px; border-radius: 12px; z-index: 1000; font-size: 14px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.4); max-width: 300px;';
-                    map.getContainer().appendChild(instructionDiv);
-                    
-                    // Auto-hide instruction after 8 seconds
-                    setTimeout(() => {
-                        if (instructionDiv.parentNode) {
-                            instructionDiv.parentNode.removeChild(instructionDiv);
-                        }
-                    }, 8000);
+            // Add TMNP boundary using omnivore (same as dynamic site)
+            console.log('Loading TMNP boundary...');
+            
+            // Use omnivore to load TMNP boundary (same approach as dynamic site)
+            const tmnpLayer = omnivore.kml('tmnp.kml')
+                .on('ready', function() {
+                    console.log('TMNP boundary loaded successfully');
+                    this.setStyle(() => ({
+                        color: '#ff0000',
+                        weight: 3,
+                        opacity: 0.7,
+                        fillColor: '#ff0000',
+                        fillOpacity: 0.25
+                    }));
+                    map.fitBounds(this.getBounds(), { padding: [20, 20] });
                 })
-                .catch(error => console.log('Could not load TMNP boundary:', error));
+                .on('error', function(error) {
+                    console.error('TMNP boundary load error:', error);
+                })
+                .addTo(map);
+            
+            // Show initial instruction overlay
+            const instructionDiv = document.createElement('div');
+            instructionDiv.id = 'instructionOverlay';
+            instructionDiv.innerHTML = '<div style="text-align: center; line-height: 1.4;"><div style="font-size: 18px; margin-bottom: 8px;">🗺️ Flight Tracking Map</div><div style="font-size: 14px; margin-bottom: 12px;">Scroll down to view flights</div><div style="font-size: 12px; color: #ccc;">Click the 👀 button on any flight to see its path</div></div>';
+            instructionDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 25px 35px; border-radius: 12px; z-index: 1000; font-size: 14px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.4); max-width: 300px;';
+            map.getContainer().appendChild(instructionDiv);
+            
+            // Auto-hide instruction after 8 seconds
+            setTimeout(() => {
+                if (instructionDiv.parentNode) {
+                    instructionDiv.parentNode.removeChild(instructionDiv);
+                }
+            }, 8000);
         }
         
         function setupEventListeners() {
@@ -730,14 +794,14 @@ const htmlContent = `<!DOCTYPE html>
             
             // Update main summary
             const summaryText = document.querySelector('.summary-text');
-            summaryText.innerHTML = \`Summary: <strong>\${filteredData.length} flight\${filteredData.length === 1 ? '' : 's'} shown</strong> with <i>likely</i> <strong>NP17</strong> airspace violations over Table Mountain National Park, from <strong>\${uniqueHelicopters} helicopter\${uniqueHelicopters === 1 ? '' : 's'}</strong>, with flight logs shown from <strong>\${startDate}</strong> <span style="font-weight: 500">to</span> <strong>\${endDate}</strong>\`;
+            summaryText.innerHTML = 'Summary: <strong>' + filteredData.length + ' flight' + (filteredData.length === 1 ? '' : 's') + ' shown</strong> with <i>likely</i> <strong>NP17</strong> airspace violations over Table Mountain National Park, from <strong>' + uniqueHelicopters + ' helicopter' + (uniqueHelicopters === 1 ? '' : 's') + '</strong>, with flight logs shown from <strong>' + startDate + '</strong> <span style="font-weight: 500">to</span> <strong>' + endDate + '</strong>';
             
             // Update filter summary
             const filterSummary = document.getElementById('filterSummary');
             if (filteredData.length === flightData.length) {
                 filterSummary.textContent = 'All flights';
             } else {
-                filterSummary.textContent = \`\${filteredData.length} of \${flightData.length} flights\`;
+                filterSummary.textContent = filteredData.length + ' of ' + flightData.length + ' flights';
             }
             
             // Show/hide clear button
@@ -776,7 +840,7 @@ const htmlContent = `<!DOCTYPE html>
                     </thead>
                     <tbody>
                         \${sortedData.map(flight => \`
-                            <tr class="flight-row" onclick="viewFlight('\${flight.filename}')">
+                            <tr id="flight-\${flight.filename}" class="flight-row" onclick="viewFlight('\${flight.filename}')" style="\${lastViewedFilename === flight.filename ? 'background: #e6f7ff;' : ''}">
                                 <td>\${flight.date || '-'}</td>
                                 <td>\${flight.time || '-'}</td>
                                 <td>\${utcToSaTime(flight.date, flight.time)}</td>
@@ -830,7 +894,7 @@ const htmlContent = `<!DOCTYPE html>
                 content.innerHTML += \`
                     <div style="margin-top: 1rem;">
                         <h3>Flight Path Map</h3>
-                        <img src="flight-maps/\${pngFilename}" alt="Flight path" class="flight-map" onerror="this.style.display='none'">
+                        <img src="https://media.githubusercontent.com/media/werneravr/heli-map/main/server/flight-maps/\${pngFilename}" alt="Flight path" class="flight-map" onerror="this.style.display='none'">
                     </div>
                 \`;
             }
@@ -846,78 +910,77 @@ const htmlContent = `<!DOCTYPE html>
             const flight = flightData.find(f => f.filename === filename);
             if (!flight) return;
             
+            // Set the last viewed filename for highlighting
+            lastViewedFilename = filename;
+            
+            // Show and populate the viewing flight information box
+            showViewingFlight(flight);
+            
+            // Scroll to top to show the map update
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Re-render table to show highlighting
+            renderTable();
+            
             // Remove previous flight layer
             if (currentFlightLayer) {
                 map.removeLayer(currentFlightLayer);
             }
             
-            // Show loading indicator in center of map
-            const loadingDiv = document.createElement('div');
-            loadingDiv.innerHTML = '🔄 Loading flight path...';
-            loadingDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 30px; border-radius: 10px; z-index: 1000; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
+            // Remove instruction overlay if it exists
+            const instructionOverlay = document.getElementById('instructionOverlay');
+            if (instructionOverlay) {
+                instructionOverlay.remove();
+            }
+            
+             // Show loading indicator in center of map
+             const loadingDiv = document.createElement('div');
+             loadingDiv.innerHTML = '<span class="helicopter-loader">🚁</span> Loading flight path...';
+             loadingDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 30px; border-radius: 10px; z-index: 1000; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
             map.getContainer().appendChild(loadingDiv);
             
-            // Load KML file from GitHub LFS
-            const githubUrl = \`https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/\${filename}\`;
-            fetch(githubUrl)
-                .then(response => response.text())
-                .then(kmlText => {
+            // Load KML file using omnivore (same as dynamic site)
+            const githubUrl = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/' + filename;
+            console.log('Loading flight KML from:', githubUrl);
+            
+            currentFlightLayer = omnivore.kml(githubUrl)
+                .on('ready', function() {
+                    console.log('Flight KML loaded successfully');
                     // Remove loading indicator
                     if (loadingDiv.parentNode) {
                         loadingDiv.parentNode.removeChild(loadingDiv);
                     }
                     
-                    // Simple KML parsing for flight path
-                    const parser = new DOMParser();
-                    const kmlDoc = parser.parseFromString(kmlText, 'text/xml');
-                    const coordinates = kmlDoc.querySelectorAll('coordinates');
+                    this.setStyle(() => ({
+                        color: '#0000ff',
+                        weight: 4,
+                        opacity: 0.8
+                    }));
                     
-                    coordinates.forEach(coord => {
-                        const coordText = coord.textContent.trim();
-                        const points = coordText.split('\\n').map(line => {
-                            const [lon, lat] = line.trim().split(',').map(Number);
-                            return [lat, lon];
-                        }).filter(point => !isNaN(point[0]) && !isNaN(point[1]));
-                        
-                        if (points.length > 1) {
-                            currentFlightLayer = L.polyline(points, {
-                                color: '#0000ff',
-                                weight: 4,
-                                opacity: 0.8
-                            }).addTo(map);
-                            
-                            map.fitBounds(currentFlightLayer.getBounds(), { padding: [20, 20] });
-                        }
-                    });
+                    // Fit bounds to both TMNP and the new KML if both are present
+                    if (tmnpLayer) {
+                        const group = L.featureGroup([tmnpLayer, this]);
+                        map.fitBounds(group.getBounds(), { padding: [20, 20] });
+                    } else {
+                        map.fitBounds(this.getBounds(), { padding: [20, 20] });
+                    }
                 })
-                .catch(error => {
-                    console.log('Could not load flight path:', error);
+                .on('error', function(error) {
+                    console.error('Flight KML load error:', error);
                     if (loadingDiv.parentNode) {
                         loadingDiv.parentNode.removeChild(loadingDiv);
                     }
-                });
+                })
+                .addTo(map);
             
             closeModal();
         }
         
         function reportFlight(flight) {
-            const subject = encodeURIComponent(\`Airspace Violation Report: \${flight.registration}\`);
-            const body = encodeURIComponent(\`
-Airspace Violation Report
-
-Aircraft Registration: \${flight.registration}
-Date: \${flight.date}
-Time: \${flight.time}
-Filename: \${flight.filename}
-
-This flight appears to have violated NP17 airspace restrictions over Table Mountain National Park.
-
-Please investigate this violation and take appropriate action.
-
-Report generated from TMNP Helicopter Tracking System.
-            \`);
+            const subject = encodeURIComponent('Airspace Violation Report: ' + flight.registration);
+            const body = encodeURIComponent('Airspace Violation Report\\n\\nAircraft Registration: ' + flight.registration + '\\nDate: ' + flight.date + '\\nTime: ' + flight.time + '\\nFilename: ' + flight.filename + '\\n\\nThis flight appears to have violated NP17 airspace restrictions over Table Mountain National Park.\\n\\nPlease investigate this violation and take appropriate action.\\n\\nReport generated from TMNP Helicopter Tracking System.');
             
-            window.open(\`mailto:?subject=\${subject}&body=\${body}\`);
+            window.open('mailto:?subject=' + subject + '&body=' + body);
         }
         
         function exportCSV() {
@@ -937,7 +1000,7 @@ Report generated from TMNP Helicopter Tracking System.
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = \`tmnp-flights-\${new Date().toISOString().split('T')[0]}.csv\`;
+            a.download = 'tmnp-flights-' + new Date().toISOString().split('T')[0] + '.csv';
             a.click();
             window.URL.revokeObjectURL(url);
         }
@@ -952,7 +1015,7 @@ Report generated from TMNP Helicopter Tracking System.
         
         // KML download function
         async function downloadKML(filename) {
-            const url = \`https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/\${filename}\`;
+            const url = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/' + filename;
             
             try {
                 // Show loading indicator
@@ -964,7 +1027,7 @@ Report generated from TMNP Helicopter Tracking System.
                 // Fetch the file content
                 const response = await fetch(url);
                 if (!response.ok) {
-                    throw new Error(\`HTTP error! status: \${response.status}\`);
+                    throw new Error('HTTP error! status: ' + response.status);
                 }
                 
                 const blob = await response.blob();
@@ -1018,6 +1081,74 @@ Report generated from TMNP Helicopter Tracking System.
         function showFAQ() {
             alert('FAQ: This is a static version of the TMNP Helicopter Tracking System. Use the filters to search flights and click the eye button to view flight paths on the map.');
         }
+        
+        // Viewing Flight Information Box Functions
+        function showViewingFlight(flight) {
+            const box = document.getElementById('viewingFlightBox');
+            const title = document.getElementById('viewingFlightTitle');
+            const date = document.getElementById('viewingFlightDate');
+            const utc = document.getElementById('viewingFlightUTC');
+            const sa = document.getElementById('viewingFlightSA');
+            const reg = document.getElementById('viewingFlightReg');
+            const filename = document.getElementById('viewingFlightFilename');
+            const size = document.getElementById('viewingFlightSize');
+            const download = document.getElementById('viewingFlightDownload');
+            
+            // Populate flight information
+            title.textContent = 'Viewing Flight: ' + (flight.registration || 'Unknown');
+            date.textContent = flight.date || '-';
+            utc.textContent = flight.time || '-';
+            sa.textContent = utcToSaTime(flight.date, flight.time);
+            reg.textContent = flight.registration || '-';
+            filename.textContent = flight.filename || '-';
+            size.textContent = flight.fileSizeMB ? flight.fileSizeMB + ' MB' : '-';
+            
+            // Update download button
+            download.onclick = () => downloadKML(flight.filename);
+            
+            // Show the box
+            box.style.display = 'block';
+        }
+        
+        function closeViewingFlight() {
+            document.getElementById('viewingFlightBox').style.display = 'none';
+            
+            // Clear the last viewed filename to remove highlighting
+            lastViewedFilename = null;
+            
+            // Re-render table to remove highlighting
+            renderTable();
+            
+            // Remove flight layer from map
+            if (currentFlightLayer) {
+                map.removeLayer(currentFlightLayer);
+                currentFlightLayer = null;
+            }
+        }
+        
+            function jumpToTable() {
+                // Scroll to the specific flight row using lastViewedFilename
+                if (lastViewedFilename) {
+                    const rowElement = document.getElementById('flight-' + lastViewedFilename);
+                    if (rowElement) {
+                        rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        // Flash effect to highlight the row
+                        rowElement.style.transition = 'background-color 0.5s';
+                        rowElement.style.backgroundColor = '#fff7e6';
+                        setTimeout(() => {
+                            rowElement.style.backgroundColor = '#e6f7ff';
+                        }, 1000);
+                    }
+                } else {
+                    // Fallback: scroll to table container if no specific flight
+                    const tableContainer = document.getElementById('tableContainer');
+                    tableContainer.scrollIntoView({ behavior: 'smooth' });
+                }
+            }
+            
+            function takeAction() {
+                alert('Take action functionality - this would typically open a form or contact page for reporting violations.');
+            }
     </script>
 </body>
 </html>`;
@@ -1085,7 +1216,7 @@ console.log('📄 Files generated:');
 console.log('   • index.html (main website)');
 console.log('   • README.md (deployment guide)');
 console.log(`   • kml/ (${fs.readdirSync(path.join(BUILD_DIR, 'kml')).length} KML files)`);
-console.log(`   • flight-maps/ (${fs.readdirSync(path.join(BUILD_DIR, 'flight-maps')).length} PNG files)`);
+console.log(`   • flight-maps/ (served from GitHub LFS)`);
 console.log('   • tmnp.kml (boundary file)');
 
 console.log('\n🚀 Next Steps:');
