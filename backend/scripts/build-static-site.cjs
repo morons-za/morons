@@ -727,7 +727,7 @@ const htmlContent = `<!DOCTYPE html>
                             <td>${flight.owner || '-'}</td>
                             <td>${flight.filename || '-'}</td>
                             <td style="text-align: center;">
-                                <a href="https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
+                                <a href="https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
                             </td>
                             <td style="text-align: center;">${flight.fileSizeMB ? flight.fileSizeMB + ' MB' : '-'}</td>
                             <td>
@@ -1096,7 +1096,7 @@ const htmlContent = `<!DOCTYPE html>
                                 <td>\${flight.owner || '-'}</td>
                                 <td>\${flight.filename || '-'}</td>
                                 <td style="text-align: center;">
-                                    <a href="https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/\${flight.filename}" download="\${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('\${flight.filename}'); return false;">⬇️</a>
+                                    <a href="https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/\${flight.filename}" download="\${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('\${flight.filename}'); return false;">⬇️</a>
                                 </td>
                                 <td style="text-align: center;">\${flight.fileSizeMB ? flight.fileSizeMB + ' MB' : '-'}</td>
                                 <td>
@@ -1155,7 +1155,7 @@ const htmlContent = `<!DOCTYPE html>
             
             // Try local KML first, fallback to GitHub
             const localUrl = './kml/' + filename;
-            const githubUrl = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/' + filename;
+            const githubUrl = 'https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/' + filename;
             
             console.log('📍 Checking local KML first:', localUrl);
             
@@ -1472,7 +1472,7 @@ const htmlContent = `<!DOCTYPE html>
         
         // KML download function
         async function downloadKML(filename) {
-            const url = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/' + filename;
+            const url = 'https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/' + filename;
             
             try {
                 // Show loading indicator
