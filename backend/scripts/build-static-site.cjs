@@ -9,8 +9,8 @@ console.log('🚀 Building Static Site for TMNP Helicopter Tracking...\n');
 // Configuration
 const BUILD_DIR = 'static-site';
 const SOURCE_DIRS = {
-  uploads: 'uploads',
-  flightMaps: 'flight-maps',
+  uploads: 'backend/uploads',
+  flightMaps: 'backend/flight-maps',
   tmnpBoundaryPrimary: '../static-site/tmnp.kml',
   tmnpBoundaryFallback: 'static-site/tmnp.kml'
 };
@@ -130,8 +130,8 @@ let flightData = [];
 
 try {
   // Try to load from master metadata first
-  if (fs.existsSync('server/master-metadata.json')) {
-    const masterMetadata = JSON.parse(fs.readFileSync('server/master-metadata.json', 'utf8'));
+  if (fs.existsSync('backend/server/master-metadata.json')) {
+    const masterMetadata = JSON.parse(fs.readFileSync('backend/server/master-metadata.json', 'utf8'));
     console.log('✅ Loaded master metadata');
     
     // Handle both array and object formats
@@ -145,8 +145,8 @@ try {
         flight && flight.filename && flight.registration
       );
     }
-  } else if (fs.existsSync('server/kml-metadata-cache.json')) {
-    const cacheMetadata = JSON.parse(fs.readFileSync('server/kml-metadata-cache.json', 'utf8'));
+  } else if (fs.existsSync('backend/server/kml-metadata-cache.json')) {
+    const cacheMetadata = JSON.parse(fs.readFileSync('backend/server/kml-metadata-cache.json', 'utf8'));
     console.log('✅ Loaded cache metadata');
     
     // Convert to flat array format
@@ -727,7 +727,7 @@ const htmlContent = `<!DOCTYPE html>
                             <td>${flight.owner || '-'}</td>
                             <td>${flight.filename || '-'}</td>
                             <td style="text-align: center;">
-                                <a href="https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
+                                <a href="https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
                             </td>
                             <td style="text-align: center;">${flight.fileSizeMB ? flight.fileSizeMB + ' MB' : '-'}</td>
                             <td>
@@ -1096,7 +1096,7 @@ const htmlContent = `<!DOCTYPE html>
                                 <td>\${flight.owner || '-'}</td>
                                 <td>\${flight.filename || '-'}</td>
                                 <td style="text-align: center;">
-                                    <a href="https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/\${flight.filename}" download="\${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('\${flight.filename}'); return false;">⬇️</a>
+                                    <a href="https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/\${flight.filename}" download="\${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('\${flight.filename}'); return false;">⬇️</a>
                                 </td>
                                 <td style="text-align: center;">\${flight.fileSizeMB ? flight.fileSizeMB + ' MB' : '-'}</td>
                                 <td>
@@ -1155,7 +1155,7 @@ const htmlContent = `<!DOCTYPE html>
             
             // Try local KML first, fallback to GitHub
             const localUrl = './kml/' + filename;
-            const githubUrl = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/' + filename;
+            const githubUrl = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/' + filename;
             
             console.log('📍 Checking local KML first:', localUrl);
             
@@ -1280,7 +1280,7 @@ const htmlContent = `<!DOCTYPE html>
             const owner = flight.owner || 'Private owner';
             const date = flight.date || 'UNKNOWN DATE';
             const imageFilename = flight.filename ? flight.filename.replace('.kml', '.png') : null;
-            const imagePath = imageFilename ? 'https://media.githubusercontent.com/media/werneravr/heli-map/main/server/flight-maps/' + imageFilename : null;
+            const imagePath = imageFilename ? 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/' + imageFilename : null;
             
             const reportText = 'It appears that a helicopter, registration ' + registration + ' (' + owner + '), entered restricted NP17 airspace over Table Mountain on ' + date + '.\\n\\nThe National Environmental Management Protected Areas Act (NEMPAA NP17) clearly states that aircraft are prohibited from flying over TMNP at any height below 6070FT (~1850m). Doing so without authorisation is an offense with fines up to R5 million or imprisonment for up to 10 years, and can result in the suspension of licenses by the Civil Aviation Authority.\\n\\nNEMPAA (NP17) and these penalties are in place to protect the park\\'s natural environment and ensure compliance with airspace regulations.';
             
@@ -1398,7 +1398,7 @@ const htmlContent = `<!DOCTYPE html>
         }
         
         function downloadPNG(filename) {
-            const url = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/server/flight-maps/' + filename;
+            const url = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/' + filename;
             
             try {
                 const button = event.target;
@@ -1472,7 +1472,7 @@ const htmlContent = `<!DOCTYPE html>
         
         // KML download function
         async function downloadKML(filename) {
-            const url = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/' + filename;
+            const url = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/uploads/' + filename;
             
             try {
                 // Show loading indicator
