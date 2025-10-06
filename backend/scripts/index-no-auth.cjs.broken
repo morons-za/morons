@@ -1,0 +1,1590 @@
+require('dotenv').config();
+const express = require('express');
+const multer = require('multer');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
+const { XMLParser } = require('fast-xml-parser');
+const axios = require('axios'); // For downloading images
+const SmartKMLManager = require('./smart-kml-manager.cjs');
+const { spawn } = require('child_process');
+
+const app = express();
+const PORT = process.env.PORT || 4000;
+
+console.log('🔓 Running in NO-AUTH mode - suitable for local development only!');
+
+// Development mode flag - skip heavy scanning for faster startup
+const DEV_MODE = process.env.DEV_MODE === 'true' || process.argv.includes('--dev');
+if (DEV_MODE) {
+  console.log('🚀 Development mode enabled - skipping KML scanning for faster startup');
+}
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '..', 'uploads');
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Ensure images directory exists
+const imagesDir = path.join(__dirname, 'images');
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir);
+}
+
+// Ensure flight-maps directory exists
+const flightMapsDir = path.join(__dirname, 'flight-maps');
+if (!fs.existsSync(flightMapsDir)) {
+  fs.mkdirSync(flightMapsDir);
+}
+
+// Multer setup
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+});
+const upload = multer({
+  storage: storage,
+  fileFilter: function (req, file, cb) {
+    const overwrite = req.body.overwrite === 'true';
+    const filePath = path.join(uploadsDir, file.originalname);
+    if (fs.existsSync(filePath) && !overwrite) {
+      return cb(new Error('File already exists'), false);
+    }
+    cb(null, true);
+  }
+});
+
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+
+// Redirect uploads to GitHub LFS
+app.get('/uploads/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const githubUrl = `https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/${filename}`;
+  
+  res.redirect(301, githubUrl);
+});
+
+// Redirect flight-maps to GitHub LFS
+app.get('/flight-maps/:filename', (req, res) => {
+  const filename = req.params.filename;
+  const githubUrl = `https://media.githubusercontent.com/media/werneravr/heli-map/main/server/flight-maps/${filename}`;
+  
+  res.redirect(301, githubUrl);
+});
+
+app.use('/images', express.static(imagesDir));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+
+// Server status endpoint for the HTML interface
+app.get('/api/status', (req, res) => {
+  res.json({
+    status: 'online',
+    flights: kmlMetadata.length,
+    helicopters: Object.keys(helicopterMetadata).length,
+    timestamp: new Date().toISOString()
+  });
+});
+
+// In-memory KML metadata
+let kmlMetadata = [];
+
+// Load helicopter metadata from JSON file
+let helicopterMetadata = {};
+function loadHelicopterMetadata() {
+  try {
+    const helicopterDataPath = path.join(__dirname, 'helicopters.json');
+    if (fs.existsSync(helicopterDataPath)) {
+      helicopterMetadata = JSON.parse(fs.readFileSync(helicopterDataPath, 'utf8'));
+      console.log(`✅ Loaded metadata for ${Object.keys(helicopterMetadata).length} helicopters`);
+    } else {
+      console.log('⚠️ helicopters.json not found');
+    }
+  } catch (e) {
+    console.log('❌ Error loading helicopter metadata:', e.message);
+  }
+}
+
+function extractKmlInfoFromFile(filePath, filename) {
+  try {
+    const xmlData = fs.readFileSync(filePath, 'utf8');
+    const parser = new XMLParser({ ignoreAttributes: false, processEntities: true });
+    const xml = parser.parse(xmlData);
+    let registration = '';
+    let date = '';
+    let time = '';
+    let imageUrl = '';
+    let owner = '';
+    
+    // Helper: recursively find first Placemark
+    function findFirstPlacemark(obj) {
+      if (!obj || typeof obj !== 'object') return null;
+      if (obj.Placemark) {
+        if (Array.isArray(obj.Placemark)) return obj.Placemark[0];
+        return obj.Placemark;
+      }
+      for (const key of Object.keys(obj)) {
+        const found = findFirstPlacemark(obj[key]);
+        if (found) return found;
+      }
+      return null;
+    }
+    
+    const doc = xml.kml && xml.kml.Document ? xml.kml.Document : null;
+    
+    // Handle case where KML doesn't have Document wrapper (ADS-B Exchange)
+    const kmlRoot = doc || xml.kml;
+    
+    // Determine KML source and extract accordingly
+    const isFlightRadar24 = doc && doc.name && doc.name.includes('/Z');
+    const isAdsb = filename.includes('track') || (!doc && xml.kml.Folder);
+    
+    console.log(`[KML SOURCE] ${filename}: ${isFlightRadar24 ? 'FlightRadar24' : isAdsb ? 'ADS-B Exchange' : 'Unknown'}`);
+    
+    if (isFlightRadar24) {
+      // FlightRadar24 format parsing
+      if (doc.name) {
+        // Handle formats like "-/ZSHMB" or "FlightRadar24/ZSHMB"
+        const regMatch = doc.name.match(/[A-Z]{2}[A-Z0-9]{3}$/);
+        if (regMatch) {
+          const rawReg = regMatch[0]; // e.g., "ZSHMB"
+          // Convert to proper format: ZSHMB -> ZS-HMB
+          registration = rawReg.slice(0, 2) + '-' + rawReg.slice(2);
+          console.log(`[KML REGEX] Matched registration in name: ${registration}`);
+        }
+      }
+      
+      // Fallback: try to extract from description (as a link)
+      if (!registration && doc && doc.description) {
+        let desc = doc.description;
+        desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+        let regMatch = desc.match(/Registration<[^>]*>.*?<a [^>]*>([A-Z0-9-]+)<\/a>/i);
+        if (regMatch) {
+          registration = regMatch[1];
+          console.log(`[KML REGEX] Matched registration in description: ${registration}`);
+        }
+      }
+      
+      // Extract image URL and owner from description (HTML)
+      if (doc && doc.description) {
+        let desc = doc.description;
+        desc = desc.replace(/^<!\[CDATA\[|\]\]>$/g, '');
+        
+        // Extract image URL (photo)
+        const imageMatch = desc.match(/<img[^>]+src=["']([^"']+)["'][^>]*>/i);
+        if (imageMatch) {
+          imageUrl = imageMatch[1];
+          console.log(`[KML REGEX] Found image URL: ${imageUrl}`);
+        }
+        
+        // Extract owner info
+        const ownerMatch = desc.match(/Owner<[^>]*>.*?<td[^>]*>([^<]+)</i);
+        if (ownerMatch) {
+          owner = ownerMatch[1].trim();
+          console.log(`[KML REGEX] Found owner: ${owner}`);
+        }
+      }
+      
+      // Extract date/time from first placemark
+      const firstPlacemark = findFirstPlacemark(kmlRoot);
+      if (firstPlacemark && firstPlacemark.TimeStamp && firstPlacemark.TimeStamp.when) {
+        const timestamp = firstPlacemark.TimeStamp.when;
+        const dateMatch = timestamp.match(/(\d{4}-\d{2}-\d{2})/);
+        const timeMatch = timestamp.match(/T(\d{2}:\d{2})/);
+        if (dateMatch) date = dateMatch[1];
+        if (timeMatch) time = timeMatch[1];
+        console.log(`[KML TIME] Extracted from TimeStamp: ${date} ${time}`);
+      }
+    } else {
+      // ADS-B Exchange or other formats
+      // Try filename parsing first: "2025-02-13_ZS-HMB_09-18-UTC.kml"
+      const fileMatch = filename.match(/(\d{4}-\d{2}-\d{2}).*?([A-Z]{2}-[A-Z0-9]{3}).*?(\d{2}-\d{2})/);
+      if (fileMatch) {
+        date = fileMatch[1];
+        registration = fileMatch[2];
+        time = fileMatch[3].replace('-', ':');
+        console.log(`[FILENAME] Parsed from filename: ${registration} on ${date} at ${time}`);
+      }
+      
+      // Fallback: try to extract from KML content
+      if (!registration) {
+        const firstPlacemark = findFirstPlacemark(kmlRoot);
+        if (firstPlacemark) {
+          // Try name field
+          if (firstPlacemark.name) {
+            const regMatch = firstPlacemark.name.match(/([A-Z]{2}-[A-Z0-9]{3})/);
+            if (regMatch) {
+              registration = regMatch[1];
+              console.log(`[KML NAME] Found registration in placemark name: ${registration}`);
+            }
+          }
+          
+          // Try description field
+          if (!registration && firstPlacemark.description) {
+            const regMatch = firstPlacemark.description.match(/([A-Z]{2}-[A-Z0-9]{3})/);
+            if (regMatch) {
+              registration = regMatch[1];
+              console.log(`[KML DESC] Found registration in placemark description: ${registration}`);
+            }
+          }
+        }
+      }
+    }
+    
+    // Fallback: extract from filename if still missing
+    if (!registration) {
+      const fileRegMatch = filename.match(/([A-Z]{2}-[A-Z0-9]{3})/);
+      if (fileRegMatch) {
+        registration = fileRegMatch[1];
+        console.log(`[FALLBACK] Extracted registration from filename: ${registration}`);
+      }
+    }
+    
+    if (!date) {
+      const fileDateMatch = filename.match(/(\d{4}-\d{2}-\d{2})/);
+      if (fileDateMatch) {
+        date = fileDateMatch[1];
+        console.log(`[FALLBACK] Extracted date from filename: ${date}`);
+      }
+    }
+    
+    return {
+      filename,
+      registration: registration || 'UNKNOWN',
+      date: date || 'UNKNOWN',
+      time: time || 'UNKNOWN',
+      imageUrl: imageUrl || '',
+      owner: owner || ''
+    };
+  } catch (error) {
+    console.error(`❌ Error parsing ${filename}:`, error.message);
+    return {
+      filename,
+      registration: 'ERROR',
+      date: 'ERROR',
+      time: 'ERROR',
+      imageUrl: '',
+      owner: ''
+    };
+  }
+}
+
+// Cache image function
+async function cacheImage(imageUrl, registration) {
+  try {
+    if (!imageUrl) return '';
+    
+    // Skip if already cached
+    const filename = `${registration}.jpg`;
+    const localPath = path.join(imagesDir, filename);
+    if (fs.existsSync(localPath)) {
+      console.log(`🖼️ Image already cached: ${filename}`);
+      return `/images/${filename}`;
+    }
+    
+    console.log(`📥 Downloading image for ${registration}...`);
+    const response = await axios.get(imageUrl, { responseType: 'stream' });
+    const writer = fs.createWriteStream(localPath);
+    
+    response.data.pipe(writer);
+    
+    await new Promise((resolve, reject) => {
+      writer.on('finish', resolve);
+      writer.on('error', reject);
+    });
+    
+    console.log(`✅ Cached image: ${filename}`);
+    return `/images/${filename}`;
+  } catch (error) {
+    console.log(`❌ Error caching image for ${registration}: ${error.message}`);
+    return imageUrl; // Return original URL if caching fails
+  }
+}
+
+// Load metadata from master file (FAST startup)
+async function loadMetadataFromMasterFile() {
+  try {
+    const masterFile = path.join(__dirname, '..', 'server', 'master-metadata.json');
+    if (!fs.existsSync(masterFile)) {
+      console.log('🔍 Master metadata file not found, falling back to legacy scanning...');
+      return false;
+    }
+
+    console.log('⚡ Loading metadata from master file (super fast!)...');
+    const masterData = JSON.parse(fs.readFileSync(masterFile, 'utf8'));
+    
+    if (masterData && masterData.flights && masterData.flights.length > 0) {
+      kmlMetadata = masterData.flights;
+      console.log(`🚀 Loaded ${kmlMetadata.length} flights from master metadata file!`);
+      return true;
+    }
+  } catch (error) {
+    console.log(`❌ Error loading master metadata: ${error.message}`);
+  }
+  return false;
+}
+
+async function scanKmlMetadata() {
+  // Try to load from master file first (FAST!)
+  const masterLoaded = await loadMetadataFromMasterFile();
+  if (masterLoaded) {
+    return; // We're done! Super fast startup 🚀
+  }
+  
+  // Try to load from cache file
+  const cacheFile = path.join(__dirname, '..', 'server', 'kml-metadata-cache.json');
+  if (fs.existsSync(cacheFile)) {
+    try {
+      const cached = JSON.parse(fs.readFileSync(cacheFile, 'utf8'));
+      kmlMetadata = cached.map(flight => ({
+        filename: flight.filename,
+        registration: flight.registration,
+        date: flight.date,
+        time: flight.time
+      }));
+      console.log(`📋 Loaded ${cached.length} flights from cache`);
+      return;
+    } catch (e) {
+      console.log(`❌ Error reading cache: ${e.message}`);
+    }
+  }
+  
+  // No metadata files found - server will start with empty data
+  console.log('⚠️ No metadata files found (master-metadata.json or kml-metadata-cache.json)');
+  console.log('💡 Server starting with empty flight data - use backend interface to generate metadata');
+  console.log('🔧 Available actions:');
+  console.log('   • Process KMLs - runs Smart KML Manager to organize files');
+  console.log('   • Refresh Metadata - generates fresh metadata from all KML files');
+  console.log('   • Validate Files - checks status of KML files and generated assets');
+  kmlMetadata = [];
+}
+
+// Initial scan on startup (make it async)
+(async () => {
+  await scanKmlMetadata();
+  loadHelicopterMetadata();
+})();
+
+// Generate PNG flight map for a KML file
+async function generateFlightMap(filename) {
+  try {
+    console.log(`🖼️ Starting PNG generation for: ${filename}`);
+    
+    // Execute the PNG generator as a child process
+    return new Promise((resolve, reject) => {
+      const child = spawn('node', ['generate-flight-image.cjs', filename], {
+        cwd: __dirname,
+        stdio: ['inherit', 'pipe', 'pipe']
+      });
+      
+      child.stdout.on('data', (data) => {
+        console.log(`[PNG] ${data.toString().trim()}`);
+      });
+      
+      child.stderr.on('data', (data) => {
+        console.error(`[PNG ERROR] ${data.toString().trim()}`);
+      });
+      
+      child.on('close', (code) => {
+        if (code === 0) {
+          console.log(`✅ PNG generated successfully for ${filename}`);
+          resolve(true);
+        } else {
+          console.log(`❌ PNG generation failed for ${filename} (exit code: ${code})`);
+          resolve(false);
+        }
+      });
+      
+      child.on('error', (error) => {
+        console.error(`❌ PNG generation error for ${filename}:`, error.message);
+        resolve(false);
+      });
+    });
+    
+  } catch (error) {
+    console.error(`❌ PNG generation error for ${filename}:`, error.message);
+    return false;
+  }
+}
+
+// Upload endpoint (NO AUTH required) - supports multiple files
+app.post('/upload', upload.array('kml', 50), async (req, res) => {
+  if (!req.files || req.files.length === 0) {
+    return res.status(400).json({ error: 'No files uploaded' });
+  }
+  
+  console.log(`📁 Processing ${req.files.length} uploaded files...`);
+  const results = [];
+  const errors = [];
+  
+  // Process each uploaded file
+  for (const file of req.files) {
+    try {
+      console.log(`📄 Processing: ${file.originalname}`);
+      
+      // Extract metadata and cache image
+      const meta = extractKmlInfoFromFile(file.path, file.originalname);
+      if (meta.imageUrl && meta.registration) {
+        meta.imageUrl = await cacheImage(meta.imageUrl, meta.registration);
+      }
+      
+      // Add to current metadata immediately if valid
+      if (meta.registration) {
+        kmlMetadata.push({
+          filename: meta.filename,
+          registration: meta.registration,
+          date: meta.date,
+          time: meta.time
+        });
+        console.log(`✅ Added ${meta.registration} to metadata`);
+      }
+      
+      // Add to results
+      results.push({
+        filename: file.originalname,
+        originalname: file.originalname,
+        url: `/uploads/${file.originalname}`,
+        imageUrl: meta.imageUrl || '',
+        owner: meta.owner || '',
+        registration: meta.registration || '',
+        date: meta.date || '',
+        time: meta.time || '',
+        status: 'success'
+      });
+      
+    } catch (error) {
+      console.log(`❌ Error processing ${file.originalname}: ${error.message}`);
+      errors.push({
+        filename: file.originalname,
+        error: error.message,
+        status: 'error'
+      });
+    }
+  }
+  
+  // Invalidate cache after all files processed
+  const cacheFile = path.join(__dirname, 'kml-metadata-cache.json');
+  if (fs.existsSync(cacheFile)) {
+    try {
+      fs.unlinkSync(cacheFile);
+      console.log(`🗑️ Invalidated cache after ${req.files.length} uploads`);
+    } catch (e) {
+      console.log(`❌ Error deleting cache: ${e.message}`);
+    }
+  }
+  
+  // Auto-trigger Smart KML Manager for new uploads
+  try {
+    console.log('🧠 Auto-processing uploads with Smart KML Manager...');
+    const manager = new SmartKMLManager();
+    const managerResults = await manager.processNewFiles();
+    if (managerResults.processed > 0) {
+      console.log(`✨ Smart Manager processed ${managerResults.processed} new files, renamed ${managerResults.renamed}`);
+    }
+  } catch (error) {
+    console.log(`⚠️ Smart Manager auto-processing error: ${error.message}`);
+  }
+  
+  // Generate PNG flight maps for all uploaded files
+  console.log('🖼️ Starting PNG generation for uploaded files...');
+  const pngPromises = results.map(async (result) => {
+    if (result.status === 'success' && result.filename) {
+      try {
+        const pngSuccess = await generateFlightMap(result.filename);
+        result.pngGenerated = pngSuccess;
+        if (pngSuccess) {
+          console.log(`✅ PNG generated for: ${result.filename}`);
+        } else {
+          console.log(`⚠️ PNG generation failed for: ${result.filename}`);
+        }
+      } catch (error) {
+        console.log(`❌ PNG generation error for ${result.filename}: ${error.message}`);
+        result.pngGenerated = false;
+      }
+    }
+    return result;
+  });
+  
+  // Wait for all PNG generation to complete
+  try {
+    await Promise.all(pngPromises);
+    console.log('✅ PNG generation completed for all files');
+  } catch (error) {
+    console.log(`⚠️ Some PNG generations may have failed: ${error.message}`);
+  }
+  
+  // Return comprehensive results
+  res.json({
+    success: true,
+    totalFiles: req.files.length,
+    processed: results.length,
+    errors: errors.length,
+    results: results,
+    errors: errors
+  });
+});
+
+app.get('/uploads', (req, res) => {
+  fs.readdir(uploadsDir, (err, files) => {
+    if (err) {
+      return res.status(500).send('<h1>Error</h1><p>Unable to list uploads</p>');
+    }
+    // Only return .kml files
+    const kmlFiles = files.filter(f => f.toLowerCase().endsWith('.kml'));
+    const sortedFiles = kmlFiles.sort().reverse(); // Most recent f// Serve the static backend.html file
+app.get('/', (req, res) => {
+  const htmlPath = path.join(__dirname, '../backend.html');
+  res.sendFile(htmlPath);
+});
+});
+
+// HTML endpoint for metadata view
+app.get('/metadata', (req, res) => {
+  // Check if data is already enriched (from master file)
+  const firstFlight = kmlMetadata[0];
+  const isEnriched = firstFlight && (firstFlight.hasOwnProperty('owner') || firstFlight.hasOwnProperty('imageUrl'));
+  
+  let enrichedMetadata;
+  if (isEnriched) {
+    enrichedMetadata = kmlMetadata;
+  } else {
+    enrichedMetadata = kmlMetadata.map(flight => {
+      const heliData = helicopterMetadata[flight.registration] || {};
+      return {
+        ...flight,
+        owner: heliData.owner || '',
+        contact: heliData.contact || '',
+        imageUrl: heliData.imageUrl || ''
+      };
+    });
+  }
+  
+  // Group by registration
+  const flightsByReg = {};
+  enrichedMetadata.forEach(flight => {
+    if (!flightsByReg[flight.registration]) {
+      flightsByReg[flight.registration] = [];
+    }
+    flightsByReg[flight.registration].push(flight);
+  });
+  
+  const sortedRegs = Object.keys(flightsByReg).sort();
+  
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Flight Metadata</title>
+        <style>
+            body { font-family: Arial, sans-serif; max-width: 1400px; margin: 0 auto; padding: 20px; }
+            .header { background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
+            .stats { display: flex; gap: 30px; margin-bottom: 20px; }
+            .stat-box { background: #f9f9f9; padding: 15px; border-radius: 8px; text-align: center; }
+            .stat-number { font-size: 24px; font-weight: bold; color: #007bff; }
+            .stat-label { font-size: 14px; color: #666; }
+            .aircraft-section { background: white; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; padding: 20px; }
+            .aircraft-header { display: flex; align-items: center; margin-bottom: 15px; }
+            .aircraft-reg { font-size: 20px; font-weight: bold; margin-right: 20px; }
+            .aircraft-owner { color: #666; }
+            .flights-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 10px; }
+            .flight-item { background: #f8f9fa; padding: 10px; border-radius: 4px; border-left: 4px solid #007bff; }
+            .flight-date { font-weight: bold; }
+            .flight-time { color: #666; font-size: 14px; }
+            .flight-filename { font-size: 12px; color: #999; margin-top: 5px; }
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>✈️ Flight Metadata</h1>
+            <p>Flight tracking data by aircraft registration</p>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <div class="stat-number">${enrichedMetadata.length}</div>
+                <div class="stat-label">Total Flights</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">${sortedRegs.length}</div>
+                <div class="stat-label">Aircraft</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-number">${new Set(enrichedMetadata.map(f => f.date)).size}</div>
+                <div class="stat-label">Flight Days</div>
+            </div>
+        </div>
+        
+        ${sortedRegs.map(reg => {
+          const flights = flightsByReg[reg].sort((a, b) => 
+            new Date(b.date + ' ' + (b.time || '00:00')) - new Date(a.date + ' ' + (a.time || '00:00'))
+          );
+          const owner = flights[0].owner || 'Unknown';
+          
+          return `
+            <div class="aircraft-section">
+                <div class="aircraft-header">
+                    <div class="aircraft-reg">${reg}</div>
+                    <div class="aircraft-owner">${owner}</div>
+                    <div style="margin-left: auto; color: #666;">${flights.length} flights</div>
+                </div>
+                <div class="flights-grid">
+                    ${flights.slice(0, 20).map(flight => `
+                      <div class="flight-item">
+                          <div class="flight-date">${flight.date}</div>
+                          <div class="flight-time">${flight.time || 'No time'}</div>
+                          <div class="flight-filename">${flight.filename}</div>
+                      </div>
+                    `).join('')}
+                    ${flights.length > 20 ? `<div class="flight-item" style="opacity: 0.7;">... and ${flights.length - 20} more flights</div>` : ''}
+                </div>
+            </div>
+          `;
+        }).join('')}
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="/" style="color: #007bff; text-decoration: none;">← Back to Upload Interface</a>
+        </div>
+    </body>
+    </html>
+  `;
+  
+  res.send(html);
+});
+
+// Endpoint to get KML metadata
+app.get('/kml-metadata', (req, res) => {
+  // Check if data is already enriched (from master file)
+  const firstFlight = kmlMetadata[0];
+  const isEnriched = firstFlight && (firstFlight.hasOwnProperty('owner') || firstFlight.hasOwnProperty('imageUrl'));
+  
+  if (isEnriched) {
+    // Data is already enriched from master file - serve as-is
+    res.json(kmlMetadata);
+  } else {
+    // Legacy format - need to merge with helicopter metadata
+    const enrichedMetadata = kmlMetadata.map(flight => {
+      const heliData = helicopterMetadata[flight.registration] || {};
+      return {
+        ...flight,
+        owner: heliData.owner || '',
+        contact: heliData.contact || '',
+        imageUrl: heliData.imageUrl || ''
+      };
+    });
+    res.json(enrichedMetadata);
+  }
+});
+
+// Endpoint to refresh KML metadata (NO AUTH required)
+app.post('/refresh-metadata', (req, res) => {
+  // Force full rescan by deleting cache
+  const cacheFile = path.join(__dirname, '..', 'server', 'kml-metadata-cache.json');
+  if (fs.existsSync(cacheFile)) {
+    try {
+      fs.unlinkSync(cacheFile);
+      console.log(`🗑️ Deleted cache for full rescan`);
+    } catch (e) {
+      console.log(`❌ Error deleting cache: ${e.message}`);
+    }
+  }
+  
+  scanKmlMetadata();
+  res.json({ success: true, message: 'Metadata refresh started' });
+});
+
+// Helper function to run KML optimization script
+function optimizeKMLFiles(specificFile = null) {
+  return new Promise((resolve, reject) => {
+    console.log('🔧 Starting KML optimization process...');
+    
+    const pythonScript = path.join(__dirname, 'optimise_kml.py');
+    const inputDir = path.join(__dirname, 'uploads');
+    const outputDir = path.join(__dirname, '../static-site/kml-optimised');
+    
+    // Check if Python script exists
+    if (!fs.existsSync(pythonScript)) {
+      const error = 'Python optimization script not found';
+      console.log(`❌ ${error}`);
+      return reject(new Error(error));
+    }
+    
+    // Modify the Python script temporarily if we need to process a specific file
+    const python = spawn('python3', [pythonScript], {
+      cwd: path.dirname(pythonScript),
+      env: { ...process.env, UPLOADS_DIR: inputDir, OUTPUT_DIR: outputDir }
+    });
+    
+    let stdout = '';
+    let stderr = '';
+    
+    python.stdout.on('data', (data) => {
+      stdout += data.toString();
+      console.log('🐍 Python:', data.toString().trim());
+    });
+    
+    python.stderr.on('data', (data) => {
+      stderr += data.toString();
+      console.log('🐍 Python Error:', data.toString().trim());
+    });
+    
+    python.on('close', (code) => {
+      if (code === 0) {
+        console.log('✅ KML optimization completed successfully');
+        resolve({ stdout, stderr, code });
+      } else {
+        console.log(`❌ Python script exited with code ${code}`);
+        reject(new Error(`Python script failed with code ${code}: ${stderr}`));
+      }
+    });
+    
+    python.on('error', (error) => {
+      console.log(`❌ Failed to start Python script: ${error.message}`);
+      reject(error);
+    });
+  });
+}
+
+// Endpoint to run Smart KML Manager processing
+app.post('/process-kmls', async (req, res) => {
+  try {
+    console.log('🧠 Running Smart KML Manager processing...');
+    const manager = new SmartKMLManager();
+    const results = await manager.processNewFiles();
+    
+    res.json({
+      success: true,
+      message: 'KML processing completed',
+      results: results
+    });
+  } catch (error) {
+    console.log(`❌ Smart KML Manager error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Endpoint to optimize KML files (create optimized versions)
+app.post('/optimize-kmls', async (req, res) => {
+  try {
+    const result = await optimizeKMLFiles();
+    
+    res.json({
+      success: true,
+      message: 'KML optimization completed successfully',
+      output: result.stdout
+    });
+  } catch (error) {
+    console.log(`❌ KML optimization error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Validation endpoint to check KML files, optimized files, and PNG images
+app.get('/validate-files', async (req, res) => {
+  try {
+    const validateUploadsDir = path.join(__dirname, '..', 'uploads');
+    const optimizedDir = path.join(__dirname, '../../static-site/kml-optimised');
+    const pngDir = path.join(__dirname, '..', 'flight-maps');
+    
+    // Get all KML files in uploads directory
+    const uploadFiles = fs.readdirSync(validateUploadsDir)
+      .filter(f => f.toLowerCase().endsWith('.kml'));
+    
+    // Get all optimized KML files
+    const optimizedFiles = fs.existsSync(optimizedDir) ? 
+      fs.readdirSync(optimizedDir).filter(f => f.toLowerCase().endsWith('-opt.kml')) : [];
+    
+    // Get all PNG files in flight-maps directory
+    const pngFiles = fs.existsSync(pngDir) ? 
+      fs.readdirSync(pngDir).filter(f => f.toLowerCase().endsWith('.png')) : [];
+    
+    // Check which original files have optimized versions
+    const missingOptimized = [];
+    const missingPNG = [];
+    
+    uploadFiles.forEach(file => {
+      // Check for optimized version (original.kml → original-opt.kml)
+      const baseName = file.replace('.kml', '');
+      const expectedOptFile = `${baseName}-opt.kml`;
+      if (!optimizedFiles.includes(expectedOptFile)) {
+        missingOptimized.push(file);
+      }
+      
+      // Check for PNG version (original.kml → original.png)
+      const expectedPngFile = `${baseName}.png`;
+      if (!pngFiles.includes(expectedPngFile)) {
+        missingPNG.push(file);
+      }
+    });
+    
+    res.json({
+      success: true,
+      counts: {
+        uploads: uploadFiles.length,
+        optimized: optimizedFiles.length,
+        pngImages: pngFiles.length
+      },
+      missing: {
+        optimized: missingOptimized,
+        png: missingPNG
+      },
+      paths: {
+        uploadsDir: validateUploadsDir,
+        optimizedDir,
+        pngDir
+      }
+    });
+  } catch (error) {
+    console.log(`❌ Validation error: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    flights: kmlMetadata.length,
+    helicopters: Object.keys(helicopterMetadata).length,
+    timestamp: new Date().toISOString(),
+    auth: 'disabled'
+  });
+});
+
+// Ready check (for deployment health checks)
+app.get('/ready', (req, res) => {
+  if (kmlMetadata.length > 0) {
+    res.json({
+      status: 'ready',
+      flights: kmlMetadata.length,
+      helicopters: Object.keys(helicopterMetadata).length
+    });
+  } else {
+    res.status(503).json({
+      status: 'loading',
+      message: 'Still scanning KML files'
+    });
+  }
+});
+
+// Test API endpoint
+app.get('/test', (req, res) => {
+  const testHtml = fs.readFileSync(path.join(__dirname, '../test-api.html'), 'utf8');
+  res.send(testHtml);
+});
+
+// Serve the static backend.html file
+app.get('/', (req, res) => {
+  const htmlPath = path.join(__dirname, '../backend.html');
+  res.sendFile(htmlPath);
+});
+
+/*
+// Legacy dynamic HTML generation (commented out, replaced with static file serving)
+app.get('/legacy', (req, res) => {
+  // Original dynamic HTML generation removed for clarity
+  // Would contain the old HTML template here...
+  res.send('Legacy endpoint - use main interface');
+});
+*/
+
+// Initialize the Express app server
+                text-align: center;
+                background: #fafafa;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                margin-bottom: 20px;
+            }
+            .drop-zone:hover, .drop-zone.drag-over {
+                border-color: #007bff;
+                background: #f0f8ff;
+            }
+            .drop-zone-content {
+                pointer-events: none;
+            }
+            .drop-icon {
+                font-size: 48px;
+                margin-bottom: 15px;
+            }
+            .drop-text {
+                font-size: 18px;
+                font-weight: bold;
+                margin: 0 0 5px 0;
+                color: #333;
+            }
+            .drop-subtext {
+                font-size: 14px;
+                color: #666;
+                margin: 0 0 15px 0;
+            }
+            .browse-btn {
+                background: #28a745;
+                padding: 8px 16px;
+                font-size: 14px;
+                pointer-events: all;
+            }
+            .browse-btn:hover {
+                background: #218838;
+            }
+            
+            /* Selected Files Styles */
+            .selected-files {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+            }
+            .file-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px 0;
+                border-bottom: 1px solid #eee;
+            }
+            .file-item:last-child {
+                border-bottom: none;
+            }
+            .file-name {
+                font-weight: bold;
+                flex-grow: 1;
+            }
+            .file-size {
+                color: #666;
+                font-size: 12px;
+                margin: 0 10px;
+            }
+            .remove-file {
+                background: #dc3545;
+                color: white;
+                border: none;
+                border-radius: 3px;
+                padding: 4px 8px;
+                font-size: 12px;
+                cursor: pointer;
+            }
+            .remove-file:hover {
+                background: #c82333;
+            }
+            
+            /* Upload Controls */
+            .upload-controls {
+                margin-top: 15px;
+                text-align: center;
+            }
+            .upload-btn {
+                background: #007bff;
+                margin-right: 10px;
+            }
+            .clear-btn {
+                background: #6c757d;
+            }
+            .clear-btn:hover {
+                background: #5a6268;
+            }
+            
+            /* Progress Bar */
+            .upload-progress {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+            }
+            .progress-bar {
+                background: #e9ecef;
+                border-radius: 4px;
+                height: 25px;
+                position: relative;
+                overflow: hidden;
+                margin-bottom: 10px;
+            }
+            .progress-fill {
+                background: #007bff;
+                height: 100%;
+                width: 0%;
+                transition: width 0.3s ease;
+            }
+            .progress-text {
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-weight: bold;
+                color: #333;
+                z-index: 1;
+            }
+            .upload-status {
+                font-size: 14px;
+                color: #666;
+            }
+            
+            /* Upload Results */
+            .upload-results {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 15px;
+                margin: 15px 0;
+            }
+            .result-item {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 8px;
+                margin: 5px 0;
+                border-radius: 4px;
+            }
+            .result-item.success {
+                background: #d4edda;
+                color: #155724;
+            }
+            .result-item.error {
+                background: #f8d7da;
+                color: #721c24;
+            }
+            .result-filename {
+                font-weight: bold;
+            }
+            .result-details {
+                font-size: 12px;
+                color: #666;
+            }
+            
+            /* Validation Results Styles */
+            .validation-results {
+                background: #fff;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 15px;
+            }
+            .validation-summary {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .validation-card {
+                background: #f8f9fa;
+                border: 1px solid #dee2e6;
+                border-radius: 6px;
+                padding: 15px;
+                text-align: center;
+            }
+            .validation-card h5 {
+                margin: 0 0 10px 0;
+                color: #495057;
+                font-size: 14px;
+            }
+            .validation-number {
+                font-size: 28px;
+                font-weight: bold;
+                color: #007bff;
+                margin: 5px 0;
+            }
+            .validation-missing {
+                margin-top: 15px;
+            }
+            .missing-section {
+                margin-bottom: 15px;
+                padding: 10px;
+                background: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 4px;
+            }
+            .missing-section h5 {
+                margin: 0 0 10px 0;
+                color: #856404;
+            }
+            .missing-files {
+                font-size: 12px;
+                color: #6c757d;
+                max-height: 100px;
+                overflow-y: auto;
+            }
+            .no-missing {
+                color: #28a745;
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>🚁 Helicopter KML Upload</h1>
+        
+        <div class="info">
+            <h3>🔓 No Authentication Mode</h3>
+            <p>This server is running without authentication - suitable for local development only.</p>
+            <p><strong>Current Status:</strong> FLIGHT_COUNT flights loaded, HELICOPTER_COUNT helicopters in database</p>
+        </div>
+
+        <div class="upload-form">
+            <h3>Upload KML Files</h3>
+            
+            <!-- Drag and Drop Area -->
+            <div id="dropZone" class="drop-zone">
+                <div class="drop-zone-content">
+                    <div class="drop-icon">📁</div>
+                    <p class="drop-text">Drag and drop KML files here</p>
+                    <p class="drop-subtext">or click to browse</p>
+                    <button type="button" id="browseBtn" class="browse-btn">Browse Files</button>
+                </div>
+            </div>
+            
+            <!-- Hidden File Input -->
+            <form id="uploadForm" enctype="multipart/form-data" style="display: none;">
+                <input type="file" id="fileInput" name="kml" accept=".kml" multiple>
+                <label>
+                    <input type="checkbox" name="overwrite"> Overwrite existing files
+                </label>
+            </form>
+            
+            <!-- Selected Files List -->
+            <div id="selectedFiles" class="selected-files" style="display: none;">
+                <h4>Selected Files:</h4>
+                <div id="filesList"></div>
+                <div class="upload-controls">
+                    <button id="uploadBtn" class="upload-btn">Upload All Files</button>
+                    <button id="clearBtn" class="clear-btn">Clear All</button>
+                </div>
+            </div>
+            
+            <!-- Upload Progress -->
+            <div id="uploadProgress" class="upload-progress" style="display: none;">
+                <h4>Upload Progress:</h4>
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                    <span id="progressText" class="progress-text">0%</span>
+                </div>
+                <div id="uploadStatus" class="upload-status"></div>
+            </div>
+            
+            <!-- Upload Results -->
+            <div id="uploadResults" class="upload-results" style="display: none;">
+                <h4>Upload Results:</h4>
+                <div id="resultsList"></div>
+            </div>
+        </div>
+
+        <!-- Validation Section -->
+        <div class="upload-form">
+            <h3>🔍 File Validation</h3>
+            <p>Check the status of KML files, optimized versions, and PNG flight maps.</p>
+            <button onclick="validateFiles()" style="background: #17a2b8;">Validate Files</button>
+            
+            <div id="validationResults" class="validation-results" style="display: none; margin-top: 15px;">
+                <h4>Validation Results:</h4>
+                <div id="validationContent"></div>
+            </div>
+        </div>
+        
+        <div>
+            <h3>Actions</h3>
+            <button onclick="refreshMetadata()">Refresh Metadata</button>
+            <button onclick="processKMLs()">Process KMLs</button>
+            <button onclick="optimizeKMLs()">Optimize KMLs</button>
+            <button onclick="viewUploads()">View Uploads</button>
+            <button onclick="viewMetadata()">View Metadata</button>
+        </div>
+        
+        <div id="processingStatus"></div>
+
+        <script>
+            let selectedFiles = [];
+            
+            // DOM elements
+            const dropZone = document.getElementById('dropZone');
+            const fileInput = document.getElementById('fileInput');
+            const browseBtn = document.getElementById('browseBtn');
+            const selectedFilesDiv = document.getElementById('selectedFiles');
+            const filesList = document.getElementById('filesList');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const uploadProgress = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const uploadStatus = document.getElementById('uploadStatus');
+            const uploadResults = document.getElementById('uploadResults');
+            const resultsList = document.getElementById('resultsList');
+            
+            // File size formatting
+            function formatFileSize(bytes) {
+                if (bytes < 1024) return bytes + ' B';
+                if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+                return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+            }
+            
+            // Add files to selection
+            function addFiles(files) {
+                const newFiles = Array.from(files).filter(file => {
+                    if (!file.name.toLowerCase().endsWith('.kml')) {
+                        alert('Skipping ' + file.name + ': Only KML files are allowed');
+                        return false;
+                    }
+                    // Check if file already selected
+                    const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+                    if (exists) {
+                        console.log('File ' + file.name + ' already selected');
+                        return false;
+                    }
+                    return true;
+                });
+                
+                selectedFiles = selectedFiles.concat(newFiles);
+                updateFilesList();
+            }
+            
+            // Update files list display
+            function updateFilesList() {
+                if (selectedFiles.length === 0) {
+                    selectedFilesDiv.style.display = 'none';
+                    return;
+                }
+                
+                selectedFilesDiv.style.display = 'block';
+                filesList.innerHTML = selectedFiles.map((file, index) =>
+                    '<div class="file-item">' +
+                        '<span class="file-name">' + file.name + '</span>' +
+                        '<span class="file-size">' + formatFileSize(file.size) + '</span>' +
+                        '<button class="remove-file" onclick="removeFile(' + index + ')">Remove</button>' +
+                    '</div>'
+                ).join('');
+            }
+            
+            // Remove file from selection
+            function removeFile(index) {
+                selectedFiles.splice(index, 1);
+                updateFilesList();
+            }
+            
+            // Clear all selected files
+            function clearAllFiles() {
+                selectedFiles = [];
+                updateFilesList();
+                hideResults();
+            }
+            
+            // Hide upload results
+            function hideResults() {
+                uploadProgress.style.display = 'none';
+                uploadResults.style.display = 'none';
+            }
+            
+            // Update progress
+            function updateProgress(percent, status) {
+                progressFill.style.width = percent + '%';
+                progressText.textContent = percent + '%';
+                uploadStatus.textContent = status;
+            }
+            
+            // Upload files
+            async function uploadFiles() {
+                if (selectedFiles.length === 0) {
+                    alert('No files selected');
+                    return;
+                }
+                
+                // Show progress
+                uploadProgress.style.display = 'block';
+                uploadResults.style.display = 'none';
+                updateProgress(0, 'Preparing upload...');
+                
+                try {
+                    // Create FormData with all files
+                    const formData = new FormData();
+                    selectedFiles.forEach(file => {
+                        formData.append('kml', file);
+                    });
+                    
+                    // Add overwrite checkbox value
+                    const overwrite = document.querySelector('input[name="overwrite"]').checked;
+                    formData.append('overwrite', overwrite);
+                    
+                    updateProgress(10, 'Uploading ' + selectedFiles.length + ' files...');
+                    
+                    // Upload with progress
+                    const response = await fetch('/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    updateProgress(80, 'Processing files...');
+                    
+                    const result = await response.json();
+                    
+                    updateProgress(100, 'Upload completed!');
+                    
+                    // Show results
+                    setTimeout(() => {
+                        displayResults(result);
+                    }, 500);
+                    
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    uploadStatus.textContent = 'Upload failed: ' + error.message;
+                    uploadStatus.className = 'upload-status error';
+                }
+            }
+            
+            // Display upload results
+            function displayResults(result) {
+                uploadResults.style.display = 'block';
+                
+                let html = '';
+                
+                if (result.success) {
+                    html += '<div class="result-item success">' +
+                        '<span>✅ Successfully uploaded ' + result.processed + ' of ' + result.totalFiles + ' files</span>' +
+                    '</div>';
+                    
+                    // Show successful uploads
+                    if (result.results && result.results.length > 0) {
+                        result.results.forEach(file => {
+                            html += '<div class="result-item success">' +
+                                '<div>' +
+                                    '<span class="result-filename">' + file.filename + '</span>' +
+                                    '<div class="result-details">' +
+                                        (file.registration ? 'Registration: ' + file.registration : '') +
+                                        (file.date ? ' | Date: ' + file.date : '') +
+                                        (file.time ? ' | Time: ' + file.time : '') +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                    }
+                    
+                    // Show errors if any
+                    if (result.errors && result.errors.length > 0) {
+                        result.errors.forEach(error => {
+                            html += '<div class="result-item error">' +
+                                '<div>' +
+                                    '<span class="result-filename">' + error.filename + '</span>' +
+                                    '<div class="result-details">Error: ' + error.error + '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                    }
+                    
+                    // Clear selected files after successful upload
+                    if (result.processed > 0) {
+                        setTimeout(() => {
+                            clearAllFiles();
+                        }, 2000);
+                    }
+                } else {
+                    html = '<div class="result-item error">' +
+                        '<span>❌ Upload failed: ' + result.error + '</span>' +
+                    '</div>';
+                }
+                
+                resultsList.innerHTML = html;
+            }
+            
+            // Event listeners
+            dropZone.addEventListener('click', () => fileInput.click());
+            browseBtn.addEventListener('click', () => fileInput.click());
+            
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    addFiles(e.target.files);
+                }
+            });
+            
+            uploadBtn.addEventListener('click', uploadFiles);
+            clearBtn.addEventListener('click', clearAllFiles);
+            
+            // Drag and drop events
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+            
+            dropZone.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                if (!dropZone.contains(e.relatedTarget)) {
+                    dropZone.classList.remove('drag-over');
+                }
+            });
+            
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    addFiles(files);
+                }
+            });
+            
+            // Prevent default drag behaviors on document
+            document.addEventListener('dragover', (e) => e.preventDefault());
+            document.addEventListener('drop', (e) => e.preventDefault());
+            
+            async function refreshMetadata() {
+                try {
+                    const response = await fetch('/refresh-metadata', { method: 'POST' });
+                    const result = await response.json();
+                    alert('✅ Metadata refresh started');
+                } catch (error) {
+                    alert('❌ Error: ' + error.message);
+                }
+            }
+            
+            function viewUploads() {
+                window.open('/uploads', '_blank');
+            }
+            
+            function viewMetadata() {
+                window.open('/metadata', '_blank');
+            }
+            
+            async function processKMLs() {
+                const statusDiv = document.getElementById('processingStatus');
+                try {
+                    statusDiv.innerHTML = '<div class="status">🧠 Running Smart KML Manager...</div>';
+                    const response = await fetch('/process-kmls', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        const { processed, renamed, duplicates } = result.results;
+                        statusDiv.innerHTML = '<div class="status success">✅ Processing complete: ' + processed + ' processed, ' + renamed + ' renamed, ' + duplicates + ' duplicates found</div>';
+                    } else {
+                        statusDiv.innerHTML = '<div class="status error">❌ Error: ' + result.error + '</div>';
+                    }
+                } catch (error) {
+                    statusDiv.innerHTML = '<div class="status error">❌ Network error: ' + error.message + '</div>';
+                }
+            }
+            
+            async function optimizeKMLs() {
+                const statusDiv = document.getElementById('processingStatus');
+                try {
+                    statusDiv.innerHTML = '<div class="status">🔧 Creating optimized KML files...</div>';
+                    const response = await fetch('/optimize-kmls', { method: 'POST' });
+                    const result = await response.json();
+                    
+                    if (response.ok) {
+                        statusDiv.innerHTML = '<div class="status success">✅ KML optimization completed successfully</div>';
+                    } else {
+                        statusDiv.innerHTML = '<div class="status error">❌ Error: ' + result.error + '</div>';
+                    }
+                } catch (error) {
+                    statusDiv.innerHTML = '<div class="status error">❌ Network error: ' + error.message + '</div>';
+                }
+            }
+            
+            async function validateFiles() {
+                const validationResults = document.getElementById('validationResults');
+                const validationContent = document.getElementById('validationContent');
+                
+                try {
+                    validationResults.style.display = 'block';
+                    validationContent.innerHTML = '<div class="status">🔍 Validating files...</div>';
+                    
+                    const response = await fetch('/validate-files');
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        const { counts, missing } = result;
+                        
+                        let html = '<div class="validation-summary">';
+                        html += '<div class="validation-card">';
+                        html += '<h5>📁 KML Files</h5>';
+                        html += '<div class="validation-number">' + counts.uploads + '</div>';
+                        html += '<div>in uploads folder</div>';
+                        html += '</div>';
+                        
+                        html += '<div class="validation-card">';
+                        html += '<h5>⚡ Optimized Files</h5>';
+                        html += '<div class="validation-number">' + counts.optimized + '</div>';
+                        html += '<div>optimized versions</div>';
+                        html += '</div>';
+                        
+                        html += '<div class="validation-card">';
+                        html += '<h5>🖼️ PNG Images</h5>';
+                        html += '<div class="validation-number">' + counts.pngImages + '</div>';
+                        html += '<div>flight map images</div>';
+                        html += '</div>';
+                        html += '</div>';
+                        
+                        // Show missing files sections
+                        html += '<div class="validation-missing">';
+                        
+                        if (missing.optimized.length > 0) {
+                            html += '<div class="missing-section">';
+                            html += '<h5>⚠️ Missing Optimized Files (' + missing.optimized.length + ')</h5>';
+                            html += '<div class="missing-files">';
+                            missing.optimized.forEach(file => {
+                                html += '<div>• ' + file + '</div>';
+                            });
+                            html += '</div></div>';
+                        } else {
+                            html += '<div class="missing-section">';
+                            html += '<h5>✅ Optimized Files</h5>';
+                            html += '<div class="no-missing">All KML files have optimized versions</div>';
+                            html += '</div>';
+                        }
+                        
+                        if (missing.png.length > 0) {
+                            html += '<div class="missing-section">';
+                            html += '<h5>⚠️ Missing PNG Images (' + missing.png.length + ')</h5>';
+                            html += '<div class="missing-files">';
+                            missing.png.forEach(file => {
+                                html += '<div>• ' + file + '</div>';
+                            });
+                            html += '</div></div>';
+                        } else {
+                            html += '<div class="missing-section">';
+                            html += '<h5>✅ PNG Images</h5>';
+                            html += '<div class="no-missing">All KML files have PNG flight maps</div>';
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                        
+                        validationContent.innerHTML = html;
+                    } else {
+                        validationContent.innerHTML = '<div class="status error">❌ Validation failed: ' + (result.error || 'Unknown error') + '</div>';
+                    }
+                } catch (error) {
+                    validationContent.innerHTML = '<div class="status error">❌ Network error: ' + error.message + '</div>';
+                }
+            }
+        </script>
+    </body>
+    </html>
+  `;
+  
+  // Replace the placeholders with actual values
+  const finalHtml = html
+    .replace('FLIGHT_COUNT', kmlMetadata.length)
+    .replace('HELICOPTER_COUNT', Object.keys(helicopterMetadata).length);
+  
+  res.send(finalHtml);
+});
+*/
+
+app.listen(PORT, () => {
+  console.log(`🚀 KML Upload server running at http://localhost:${PORT}`);
+  console.log(`🔓 Authentication: DISABLED (local development mode)`);
+  console.log(`📁 Upload directory: ${uploadsDir}`);
+  console.log(`✈️  Flights loaded: ${kmlMetadata.length}`);
+  console.log(`🚁 Helicopters in database: ${Object.keys(helicopterMetadata).length}`);
+  console.log(`\n💡 Upload interface: http://localhost:${PORT}`);
+  console.log(`🛑 Press Ctrl+C to stop the server`);
+});

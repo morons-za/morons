@@ -1,0 +1,20 @@
+{
+  "git": {
+    "remote": "origin",
+    "branch": "main",
+    "commitMessageTemplate": "Add new helicopter violations: {registrations}",
+    "maxFilesPerCommit": 50,
+    "timeout": 300000
+  },
+  "paths": {
+    "uploads": "backend/uploads/",
+    "flightMaps": "backend/flight-maps/",
+    "optimizedKml": "static-site/kml-optimised/"
+  },
+  "notifications": {
+    "enableLogging": true,
+    "logFile": "backend/deployment.log",
+    "enableStatusFile": true,
+    "statusFile": "backend/deployment-status.json"
+  }
+}

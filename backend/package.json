@@ -1,0 +1,28 @@
+{
+  "name": "heli-map",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "node scripts/index.cjs",
+    "start:no-auth": "node scripts/index-no-auth.cjs",
+    "serve-static": "node scripts/serve-static-site.cjs",
+    "process-kmls": "node scripts/process-new-kmls.cjs",
+    "optimize-kmls": "python3 scripts/optimise_kml.py",
+    "build-static": "node scripts/build-static-site.cjs",
+    "generate-metadata": "node scripts/generate-master-metadata-main.cjs"
+  },
+  "dependencies": {
+    "axios": "^1.9.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^4.18.2",
+    "express-session": "^1.18.1",
+    "fast-xml-parser": "^5.2.3",
+    "leaflet": "^1.9.4",
+    "leaflet-omnivore": "^0.3.4",
+    "multer": "^2.0.0",
+    "sharp": "^0.34.2",
+    "sync-request": "^6.1.0"
+  }
+}

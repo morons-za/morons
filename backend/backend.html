@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KML Upload - No Auth</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
+        .upload-form { background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .info { background: #e8f4f8; padding: 15px; border-radius: 8px; margin: 20px 0; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        
+        /* Drag and Drop Styles */
+        .drop-zone {
+            border: 3px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            background: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        .drop-zone:hover, .drop-zone.drag-over {
+            border-color: #007bff;
+            background: #f0f8ff;
+        }
+        .drop-zone-content {
+            pointer-events: none;
+        }
+        .drop-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        .drop-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0 0 5px 0;
+            color: #333;
+        }
+        .drop-subtext {
+            font-size: 14px;
+            color: #666;
+            margin: 0 0 15px 0;
+        }
+        .browse-btn {
+            background: #28a745;
+            padding: 8px 16px;
+            font-size: 14px;
+            pointer-events: all;
+        }
+        .browse-btn:hover {
+            background: #218838;
+        }
+        
+        /* Selected Files Styles */
+        .selected-files {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .file-item:last-child {
+            border-bottom: none;
+        }
+        .file-name {
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        .file-size {
+            color: #666;
+            font-size: 12px;
+            margin: 0 10px;
+        }
+        .remove-file {
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .remove-file:hover {
+            background: #c82333;
+        }
+        
+        /* Upload Controls */
+        .upload-controls {
+            margin-top: 15px;
+            text-align: center;
+        }
+        .upload-btn {
+            background: #007bff;
+            margin-right: 10px;
+        }
+        .clear-btn {
+            background: #6c757d;
+        }
+        .clear-btn:hover {
+            background: #5a6268;
+        }
+        
+        /* Progress Bar */
+        .upload-progress {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .progress-bar {
+            background: #e9ecef;
+            border-radius: 4px;
+            height: 25px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        .progress-fill {
+            background: #007bff;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            color: #333;
+            z-index: 1;
+        }
+        .upload-status {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        /* Upload Results */
+        .upload-results {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+        .result-item.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        .result-item.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .result-item.info {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+        .result-item.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .result-filename {
+            font-weight: bold;
+        }
+        .result-details {
+            font-size: 12px;
+            color: #666;
+        }
+        
+        /* Health Check Styles */
+        .health-check-section {
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .health-check-section h4 {
+            margin: 0 0 15px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        
+        .health-summary {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        
+        .health-summary.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .health-summary.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .health-summary.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .health-details {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .health-count {
+            padding: 8px 12px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .health-mismatch {
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-weight: 600;
+            flex-basis: 100%;
+        }
+        
+        .health-actions {
+            border-top: 1px solid #dee2e6;
+            padding-top: 15px;
+        }
+        
+        .health-actions h5 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #495057;
+        }
+        
+        .health-action-btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            margin-right: 10px;
+            margin-bottom: 5px;
+            transition: background 0.2s;
+        }
+        
+        .health-action-btn:hover {
+            background: #0056b3;
+        }
+        
+        .health-action-btn.build-btn {
+            background: #dc3545;
+        }
+        
+        .health-action-btn.build-btn:hover {
+            background: #c82333;
+        }
+        
+        .health-action-btn.refresh-btn {
+            background: #17a2b8;
+        }
+        
+        .health-action-btn.refresh-btn:hover {
+            background: #138496;
+        }
+        
+        /* Validation Results Styles */
+        .validation-results {
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .validation-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .validation-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+        }
+        .validation-card h5 {
+            margin: 0 0 10px 0;
+            color: #495057;
+            font-size: 14px;
+        }
+        .validation-number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #007bff;
+            margin: 5px 0;
+        }
+        .validation-missing {
+            margin-top: 15px;
+        }
+        .missing-section {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+        }
+        .missing-section h5 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+        .missing-files {
+            font-size: 12px;
+            color: #6c757d;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        .no-missing {
+            color: #28a745;
+            font-weight: bold;
+        }
+        
+        /* Server Status Styles */
+        .server-instructions {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .server-instructions h4 {
+            margin-top: 0;
+            color: #856404;
+        }
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 8px 12px;
+            margin: 8px 0;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            position: relative;
+        }
+        .code-block code {
+            background: none;
+            padding: 0;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            padding: 2px 6px;
+            font-size: 10px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+            background: #0056b3;
+        }
+        .copy-btn.copied {
+            background: #28a745;
+        }
+        .status-online {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .status-offline {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .status-checking {
+            color: #6c757d;
+        }
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 8px;
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .modal-header {
+            background: #007bff;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-body {
+            padding: 20px;
+        }
+        .faq-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1001;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* Action Button Styles */
+        .action-button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 5px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        .action-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .action-button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            opacity: 0.7;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .actions-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        .status-feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            display: none;
+        }
+        .status-feedback.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status-feedback.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loading::after {
+            content: " ⏳";
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+    <button class="faq-button" onclick="openFAQ()">🔧 FAQ</button>
+    <h1>🚁 Helicopter KML Upload</h1>
+    
+    <div class="info">
+        <strong>🔓 No Auth Mode</strong> - Local development only | 
+        <strong>Backend:</strong> <span id="backendStatus">🔍 Checking...</span> | 
+        <strong>Static Site:</strong> <span id="staticStatus">🔍 Checking...</span>
+        <div id="serverInstructions" class="server-instructions" style="display: none;">
+            <h4>🚀 Start Server</h4>
+            <p>To use this interface, start the backend server:</p>
+            <div class="code-block">
+                <code>cd /Users/werner/Dev/heli/heli-map/backend && ./launch.sh</code>
+                <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend && ./launch.sh', this)">Copy</button>
+            </div>
+            <p>Or manually:</p>
+            <div class="code-block">
+                <code>cd /Users/werner/Dev/heli/heli-map/backend && node scripts/index-no-auth.cjs</code>
+                <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend && node scripts/index-no-auth.cjs', this)">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- FAQ Modal -->
+    <div id="faqModal" class="modal-overlay" onclick="closeFAQ()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3>🔧 Admin FAQ</h3>
+                <button class="modal-close" onclick="closeFAQ()">&times;</button>
+            </div>
+            <div class="modal-body">
+        
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
+            <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🌐 How to start the Static Site Server (for local testing)</summary>
+            <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                <p><strong>Why:</strong> The static site must be served via a local web server to load optimized KML files. This project is hardcoded to use <strong>http://localhost:8080</strong>.</p>
+                
+                <h5>Steps (Recommended):</h5>
+                <ol>
+                    <li>Open terminal and navigate to the backend scripts directory:
+                        <div class="code-block">
+                            <code>cd /Users/werner/Dev/heli/heli-map/backend/scripts</code>
+                            <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend/scripts', this)">Copy</button>
+                        </div>
+                    </li>
+                    <li>Start the static site server on port 8080:
+                        <div class="code-block">
+                            <code>node serve-static-site.cjs</code>
+                            <button class="copy-btn" onclick="copyToClipboard('node serve-static-site.cjs', this)">Copy</button>
+                        </div>
+                    </li>
+                    <li>Open your browser and go to:
+                        <div class="code-block">
+                            <code>http://localhost:8080</code>
+                            <button class="copy-btn" onclick="copyToClipboard('http://localhost:8080', this)">Copy</button>
+                        </div>
+                    </li>
+                </ol>
+                
+                <h5>Background mode (optional):</h5>
+                <div class="code-block">
+                    <code>nohup node /Users/werner/Dev/heli/heli-map/backend/scripts/serve-static-site.cjs > /Users/werner/Dev/heli/heli-map/backend/static-site-server.log 2>&1 &</code>
+                    <button class="copy-btn" onclick="copyToClipboard('nohup node /Users/werner/Dev/heli/heli-map/backend/scripts/serve-static-site.cjs > /Users/werner/Dev/heli/heli-map/backend/static-site-server.log 2>&1 &', this)">Copy</button>
+                </div>
+                <p><strong>Note:</strong> The static site must run on port <strong>8080</strong> for local testing.</p>
+            </div>
+        </details>
+        
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
+            <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🚁 How to start the Backend Server (for KML processing)</summary>
+            <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                <p><strong>Why:</strong> The backend server processes KML files, validates helicopter flights, generates PNG maps, and provides the API for this admin interface.</p>
+                
+                <h5>Easy Method (Recommended):</h5>
+                <div class="code-block">
+                    <code>cd /Users/werner/Dev/heli/heli-map/backend && ./launch.sh</code>
+                    <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend && ./launch.sh', this)">Copy</button>
+                </div>
+                
+                <h5>Manual Method:</h5>
+                <ol>
+                    <li>Navigate to the backend directory:
+                        <div class="code-block">
+                            <code>cd /Users/werner/Dev/heli/heli-map/backend</code>
+                            <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend', this)">Copy</button>
+                        </div>
+                    </li>
+                    <li>Start the server:
+                        <div class="code-block">
+                            <code>node scripts/index-no-auth.cjs</code>
+                            <button class="copy-btn" onclick="copyToClipboard('node scripts/index-no-auth.cjs', this)">Copy</button>
+                        </div>
+                    </li>
+                    <li>The server will be available at:
+                        <div class="code-block">
+                            <code>http://localhost:4000</code>
+                            <button class="copy-btn" onclick="copyToClipboard('http://localhost:4000', this)">Copy</button>
+                        </div>
+                    </li>
+                </ol>
+                
+                <p><strong>Features:</strong> Upload KML files, validate violations, generate flight maps, optimize files for the static site.</p>
+            </div>
+        </details>
+        
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
+            <summary style="cursor: pointer; font-weight: bold; color: #dc3545;">🛑 How to stop the servers</summary>
+            <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                <h5>Stop Static Site Server:</h5>
+                <ul>
+                    <li><strong>If running in terminal:</strong> Press <kbd>Ctrl+C</kbd> in the terminal window</li>
+                    <li><strong>If running in background:</strong> Stop the process listening on 8080:
+                        <div class="code-block">
+                            <code>lsof -ti:8080 | xargs kill -9</code>
+                            <button class="copy-btn" onclick="copyToClipboard('lsof -ti:8080 | xargs kill -9', this)">Copy</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <h5>Stop Backend Server:</h5>
+                <ul>
+                    <li><strong>If running in terminal:</strong> Press <kbd>Ctrl+C</kbd> in the terminal window</li>
+                    <li><strong>If running in background:</strong> Find and kill the process:
+                        <div class="code-block">
+                            <code>lsof -i :4000</code>
+                            <button class="copy-btn" onclick="copyToClipboard('lsof -i :4000', this)">Copy</button>
+                        </div>
+                        <div class="code-block">
+                            <code>kill [PID from above command]</code>
+                            <button class="copy-btn" onclick="copyToClipboard('kill ', this)">Copy</button>
+                        </div>
+                    </li>
+                </ul>
+                
+                <p><strong>Tip:</strong> If something goes wrong, you can always restart both servers using the instructions above. To verify the static site is running, use:</p>
+                <div class="code-block">
+                    <code>lsof -nP -i :8080</code>
+                    <button class="copy-btn" onclick="copyToClipboard('lsof -nP -i :8080', this)">Copy</button>
+                </div>
+            </div>
+        </details>
+        
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
+            <summary style="cursor: pointer; font-weight: bold; color: #28a745;">💡 Quick Troubleshooting</summary>
+            <div style="margin-top: 10px; padding: 10px; background: #d4edda; border-radius: 4px;">
+                <h5>Common Issues:</h5>
+                <ul>
+                    <li><strong>"Address already in use" error:</strong> Port 8080 is already taken. Free it with <code>lsof -ti:8080 | xargs kill -9</code> or restart the static-site server.</li>
+                    <li><strong>KML files won't load:</strong> Make sure you're accessing via <code>http://localhost:8080</code> and the static site server is running.</li>
+                    <li><strong>Backend API not working:</strong> Check that the backend server is running on port 4000 and this page shows "🟢 Server Online".</li>
+                    <li><strong>Can't upload files:</strong> Make sure the backend server is running and you're not blocked by CORS.</li>
+                </ul>
+                
+                <h5>Port Reference:</h5>
+                <ul>
+                    <li><strong>Port 8080:</strong> Static site (helicopter flight viewer)</li>
+                    <li><strong>Port 4000:</strong> Backend API (this admin interface)</li>
+                </ul>
+            </div>
+        </details>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step 1: File Validation -->
+
+
+    <!-- Step 2: Upload KML Files -->
+    <div class="upload-form">
+        <h3>Step 2: 📤 Upload KML Files</h3>
+        
+        <!-- Drag and Drop Area -->
+        <div id="dropZone" class="drop-zone">
+            <div class="drop-zone-content">
+                <div class="drop-icon">📁</div>
+                <p class="drop-text">Drag and drop KML files here</p>
+                <p class="drop-subtext">or click to browse</p>
+                <button type="button" id="browseBtn" class="browse-btn">Browse Files</button>
+            </div>
+        </div>
+        
+        <!-- Hidden File Input -->
+        <form id="uploadForm" enctype="multipart/form-data" style="display: none;">
+            <input type="file" id="fileInput" name="kml" accept=".kml" multiple>
+            <label>
+                <input type="checkbox" name="overwrite"> Overwrite existing files
+            </label>
+        </form>
+        
+        <!-- Selected Files List -->
+        <div id="selectedFiles" class="selected-files" style="display: none;">
+            <h4>Selected Files:</h4>
+            <div id="filesList"></div>
+            <div class="upload-controls">
+                <button id="uploadBtn" class="upload-btn">Upload All Files</button>
+                <button id="clearBtn" class="clear-btn">Clear All</button>
+            </div>
+        </div>
+        
+        <!-- Upload Progress -->
+        <div id="uploadProgress" class="upload-progress" style="display: none;">
+            <h4>Upload Progress:</h4>
+            <div class="progress-bar">
+                <div id="progressFill" class="progress-fill"></div>
+                <span id="progressText" class="progress-text">0%</span>
+            </div>
+            <div id="uploadStatus" class="upload-status"></div>
+        </div>
+        
+        <!-- Upload Results -->
+        <div id="uploadResults" class="upload-results" style="display: none;">
+            <h4>Upload Results:</h4>
+            <div id="resultsList"></div>
+        </div>
+    </div>
+
+    <!-- Validation Section -->
+    <div class="upload-form">
+        <h3>🔍 File Validation</h3>
+        <p>Check the status of KML files, optimized versions, and PNG flight maps.</p>
+        <button onclick="validateFiles()" style="background: #17a2b8;">Validate Files</button>
+        
+        <div id="validationResults" class="validation-results" style="display: none; margin-top: 15px;">
+            <h4>Validation Results:</h4>
+            <div id="validationContent"></div>
+        </div>
+    </div>
+    
+    <div class="actions-section">
+        <h3>⚙️ Admin Actions</h3>
+        <p>Process files, generate images, and manage your helicopter flight data</p>
+        <div class="action-buttons">
+            <button id="optimizeBtn" onclick="optimizeKMLs()" class="action-button" style="background: #ffc107;">Optimize KML Files</button>
+            <button id="generateBtn" onclick="generateMissingPNGs()" class="action-button" style="background: #28a745;">Generate Missing PNGs</button>
+            <button id="processNewBtn" onclick="processNewKMLs()" class="action-button" style="background: #6c757d;">Process New KMLs</button>
+            <button id="refreshBtn" onclick="refreshMetadata()" class="action-button" style="background: #17a2b8;">Refresh Metadata</button>
+            <button id="buildSiteBtn" onclick="buildStaticSite()" class="action-button" style="background: #dc3545;">Build Static Site</button>
+            <button id="deployBtn" onclick="deployToGitHub()" class="action-button" style="background: #28a745;">🚀 Deploy to GitHub</button>
+            <button onclick="viewUploads()" class="action-button" style="background: #6f42c1;">View Uploads</button>
+            <button onclick="viewMetadata()" class="action-button" style="background: #fd7e14;">View Metadata</button>
+        </div>
+        <div id="actionsStatus" class="status-feedback"></div>
+    </div>
+    
+    <!-- GitHub Deployment Status -->
+    <div id="deploymentSection" class="upload-form" style="display: none;">
+        <h3>🚀 GitHub Deployment Status</h3>
+        
+        <!-- Pending Files Display -->
+        <div id="pendingFiles" class="info" style="display: none;">
+            <h4>Files Ready for Deployment:</h4>
+            <div id="pendingFilesList"></div>
+        </div>
+        
+        <!-- Deployment Progress -->
+        <div id="deploymentProgress" class="upload-progress" style="display: none;">
+            <h4>Deployment Progress:</h4>
+            <div class="progress-bar">
+                <div id="deployProgressFill" class="progress-fill"></div>
+                <span id="deployProgressText" class="progress-text">0%</span>
+            </div>
+            <div id="deploymentStatus" class="upload-status"></div>
+        </div>
+        
+        <!-- Deployment Results -->
+        <div id="deploymentResults" class="upload-results" style="display: none;">
+            <h4>Deployment Results:</h4>
+            <div id="deploymentResultsList"></div>
+        </div>
+    </div>
+    
+    <div id="processingStatus"></div>
+
+    <script>
+        // NOTE: This is a standalone HTML file extracted from the backend server.
+        // For full functionality, it needs to be served by the backend server at localhost:4000
+        // which provides the API endpoints for upload, validation, and other actions.
+        
+        let selectedFiles = [];
+        let serverCheckInterval;
+        
+        // Copy to clipboard function
+        function copyToClipboard(text, button) {
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(text).then(() => {
+                    // Visual feedback
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    // Fallback: show alert with text
+                    alert('Copy this command: ' + text);
+                });
+            } else {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    // Visual feedback
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 2000);
+                } catch (err) {
+                    alert('Copy this command: ' + text);
+                }
+                document.body.removeChild(textArea);
+            }
+        }
+        
+        // Check server status
+        async function checkServerStatus() {
+            const statusIndicator = document.getElementById('statusIndicator');
+            const serverInstructions = document.getElementById('serverInstructions');
+            
+            try {
+                const response = await fetch('http://localhost:4000/', {
+                    method: 'HEAD',
+                    mode: 'no-cors' // This will prevent CORS errors but we won't get response details
+                });
+                
+                // If we get here without error, server is likely running
+                statusIndicator.innerHTML = '🟢 Server Online';
+                statusIndicator.className = 'status-online';
+                serverInstructions.style.display = 'none';
+                
+                // Try to get actual server info
+                try {
+                    const infoResponse = await fetch('http://localhost:4000/api/status');
+                    if (infoResponse.ok) {
+                        const info = await infoResponse.json();
+                        statusIndicator.innerHTML = `🟢 Server Online - ${info.flights || 0} flights, ${info.helicopters || 0} helicopters`;
+                    }
+                } catch (e) {
+                    // Fallback if status endpoint doesn't exist
+                }
+                
+            } catch (error) {
+                statusIndicator.innerHTML = '🔴 Server Offline';
+                statusIndicator.className = 'status-offline';
+                serverInstructions.style.display = 'block';
+            }
+        }
+        
+        // Start checking server status when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            checkServerStatus();
+            // Check every 5 seconds
+            serverCheckInterval = setInterval(checkServerStatus, 5000);
+        });
+        
+        // DOM elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const browseBtn = document.getElementById('browseBtn');
+        const selectedFilesDiv = document.getElementById('selectedFiles');
+        const filesList = document.getElementById('filesList');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const clearBtn = document.getElementById('clearBtn');
+        const uploadProgress = document.getElementById('uploadProgress');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const uploadStatus = document.getElementById('uploadStatus');
+        const uploadResults = document.getElementById('uploadResults');
+        const resultsList = document.getElementById('resultsList');
+        
+        // File size formatting
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        // Add files to selection
+        function addFiles(files) {
+            const newFiles = Array.from(files).filter(file => {
+                if (!file.name.toLowerCase().endsWith('.kml')) {
+                    alert('Skipping ' + file.name + ': Only KML files are allowed');
+                    return false;
+                }
+                // Check if file already selected
+                const exists = selectedFiles.some(f => f.name === file.name && f.size === file.size);
+                if (exists) {
+                    console.log('File ' + file.name + ' already selected');
+                    return false;
+                }
+                return true;
+            });
+            
+            selectedFiles = selectedFiles.concat(newFiles);
+            updateFilesList();
+        }
+        
+        // Update files list display
+        function updateFilesList() {
+            if (selectedFiles.length === 0) {
+                selectedFilesDiv.style.display = 'none';
+                return;
+            }
+            
+            selectedFilesDiv.style.display = 'block';
+            filesList.innerHTML = selectedFiles.map((file, index) =>
+                '<div class="file-item">' +
+                    '<span class="file-name">' + file.name + '</span>' +
+                    '<span class="file-size">' + formatFileSize(file.size) + '</span>' +
+                    '<button class="remove-file" onclick="removeFile(' + index + ')">Remove</button>' +
+                '</div>'
+            ).join('');
+        }
+        
+        // Remove file from selection
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updateFilesList();
+        }
+        
+        // Clear all selected files
+        function clearAllFiles() {
+            selectedFiles = [];
+            updateFilesList();
+            hideResults();
+        }
+        
+        // Hide upload progress but keep results visible
+        function hideResults() {
+            uploadProgress.style.display = 'none';
+            // Keep results visible - user can manually clear with "Clear" button
+            // Results should remain visible until explicitly cleared
+            console.log('📋 Keeping upload results visible for user review');
+        }
+        
+        // Update progress
+        function updateProgress(percent, status) {
+            progressFill.style.width = percent + '%';
+            progressText.textContent = percent + '%';
+            uploadStatus.textContent = status;
+        }
+        
+        // Upload files
+        async function uploadFiles() {
+            if (selectedFiles.length === 0) {
+                alert('No files selected');
+                return;
+            }
+            
+            // Show progress
+            uploadProgress.style.display = 'block';
+            // Don't hide previous results - keep duplicate warnings visible
+            // uploadResults.style.display = 'none';
+            updateProgress(0, 'Preparing upload...');
+            
+            try {
+                // Create FormData with all files
+                const formData = new FormData();
+                selectedFiles.forEach(file => {
+                    formData.append('kml', file);
+                });
+                
+                // Add overwrite checkbox value
+                const overwrite = document.querySelector('input[name="overwrite"]').checked;
+                formData.append('overwrite', overwrite);
+                
+                updateProgress(10, 'Uploading ' + selectedFiles.length + ' files...');
+                
+                // Upload with progress
+                const response = await fetch('http://localhost:4000/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                updateProgress(80, 'Processing files...');
+                
+                const result = await response.json();
+                
+                // Debug: Log result to console
+                console.log('📤 Upload result received:', result);
+                console.log('🔍 Smart Manager:', result.smartManager);
+                
+                // Show appropriate completion message based on results
+                let completionMessage = 'Upload completed!';
+                if (result.smartManager && result.smartManager.duplicates > 0) {
+                    completionMessage = `Upload completed! (${result.smartManager.duplicates} duplicate(s) detected)`;
+                    console.log('⚠️ Duplicate detected in progress message');
+                }
+                updateProgress(100, completionMessage);
+                
+                // Show results
+                setTimeout(() => {
+                    displayResults(result);
+                }, 500);
+                
+            } catch (error) {
+                console.error('Upload error:', error);
+                uploadStatus.textContent = 'Upload failed: ' + error.message;
+                uploadStatus.className = 'upload-status error';
+            }
+        }
+        
+        // Display upload results
+        function displayResults(result) {
+            console.log('🎨 Displaying results:', result);
+            uploadResults.style.display = 'block';
+            
+            // Ensure results stay visible
+            uploadResults.style.position = 'relative';
+            uploadResults.style.zIndex = '1';
+            
+            let html = '';
+            
+            if (result.success) {
+                console.log('✅ Checking duplicates:', result.smartManager?.duplicates);
+                if (result.smartManager && result.smartManager.duplicates > 0) {
+                    html += '<div class="result-item warning">' +
+                        '<span>⚠️ Duplicate Files Detected:</span>' +
+                        '<div class="result-details">Found ' + result.smartManager.duplicates + ' duplicate file(s) - rejected and deleted (already exist in system)</div>' +
+                    '</div>';
+                }
+                
+                if (result.smartManager && result.smartManager.processed > 0) {
+                    html += '<div class="result-item info">' +
+                        '<span>📋 File Processing Summary:</span>' +
+                        '<div class="result-details">' +
+                            '📁 Processed: ' + result.smartManager.processed + ' files | ' +
+                            '📝 Renamed: ' + result.smartManager.renamed + ' files | ' +
+                            '🔄 Duplicates: ' + result.smartManager.duplicates + ' files' +
+                        '</div>' +
+                    '</div>';
+                }
+                
+                html += '<div class="result-item success">' +
+                    '<span>✅ Upload completed: ' + result.processed + ' of ' + result.totalFiles + ' files processed</span>' +
+                    '<div class="result-details">Results will remain visible for review. Files will be cleared automatically in 10 seconds, or use the "Clear" button.</div>' +
+                '</div>';
+                
+                // Show successful uploads
+                if (result.results && result.results.length > 0) {
+                    result.results.forEach(file => {
+                        html += '<div class="result-item success">' +
+                            '<div>' +
+                                '<span class="result-filename">' + file.filename + '</span>' +
+                                '<div class="result-details">' +
+                                    (file.registration ? 'Registration: ' + file.registration : '') +
+                                    (file.date ? ' | Date: ' + file.date : '') +
+                                    (file.time ? ' | Time: ' + file.time : '') +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+                    });
+                }
+                
+                // Show errors if any
+                if (result.errors && result.errors.length > 0) {
+                    result.errors.forEach(error => {
+                        html += '<div class="result-item error">' +
+                            '<div>' +
+                                '<span class="result-filename">' + error.filename + '</span>' +
+                                '<div class="result-details">Error: ' + error.error + '</div>' +
+                            '</div>' +
+                        '</div>';
+                    });
+                }
+                
+                // Clear selected files after successful upload (increased timeout for better UX)
+                if (result.processed > 0) {
+                    setTimeout(() => {
+                        clearAllFiles();
+                    }, 10000); // Increased to 10 seconds
+                }
+            } else {
+                html = '<div class="result-item error">' +
+                    '<span>❌ Upload failed: ' + result.error + '</span>' +
+                '</div>';
+            }
+            
+            resultsList.innerHTML = html;
+        }
+        
+        // Event listeners
+        dropZone.addEventListener('click', () => fileInput.click());
+        browseBtn.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                addFiles(e.target.files);
+            }
+        });
+        
+        uploadBtn.addEventListener('click', uploadFiles);
+        clearBtn.addEventListener('click', clearAllFiles);
+        
+        // Drag and drop events
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-over');
+        });
+        
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            if (!dropZone.contains(e.relatedTarget)) {
+                dropZone.classList.remove('drag-over');
+            }
+        });
+        
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                addFiles(files);
+            }
+        });
+        
+        // Prevent default drag behaviors on document
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => e.preventDefault());
+        
+        async function refreshMetadata() {
+            const statusDiv = document.getElementById('actionsStatus');
+            try {
+                setButtonLoading(document.querySelector('button[onclick="refreshMetadata()"]'));
+                showActionStatus('🔄 Refreshing metadata and file counts...');
+                
+                const response = await fetch('http://localhost:4000/refresh-metadata', { method: 'POST' });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    showActionStatus('✅ Metadata refreshed! Updating file counts...');
+                    
+                    // After metadata refresh, also refresh the validation to update counts
+                    setTimeout(async () => {
+                        try {
+                            await validateFiles();
+                            showActionStatus('✅ Metadata refreshed and file counts updated');
+                            setTimeout(() => hideActionStatus(), 3000);
+                        } catch (validateError) {
+                            showActionStatus('⚠️ Metadata refreshed but validation update failed: ' + validateError.message);
+                            setTimeout(() => hideActionStatus(), 5000);
+                        }
+                    }, 1000);
+                } else {
+                    showActionStatus('❌ Metadata refresh failed: ' + result.error);
+                    setTimeout(() => hideActionStatus(), 5000);
+                }
+            } catch (error) {
+                showActionStatus('❌ Error refreshing metadata: ' + error.message);
+                setTimeout(() => hideActionStatus(), 5000);
+            } finally {
+                setButtonNormal(document.querySelector('button[onclick="refreshMetadata()"]'));
+            }
+        }
+        
+        function viewUploads() {
+            window.open('http://localhost:4000/uploads', '_blank');
+        }
+        
+        function viewMetadata() {
+            window.open('http://localhost:4000/metadata', '_blank');
+        }
+        
+        async function processKMLs() {
+            const statusDiv = document.getElementById('processingStatus');
+            try {
+                statusDiv.innerHTML = '<div class="status">🧠 Running Smart KML Manager...</div>';
+                const response = await fetch('http://localhost:4000/process-kmls', { method: 'POST' });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    const { processed, renamed, duplicates } = result.results;
+                    statusDiv.innerHTML = '<div class="status success">✅ Processing complete: ' + processed + ' processed, ' + renamed + ' renamed, ' + duplicates + ' duplicates found</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ Error: ' + result.error + '</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ Network error: ' + error.message + '</div>';
+            }
+        }
+        
+        async function optimizeKMLs() {
+            const statusDiv = document.getElementById('processingStatus');
+            try {
+                statusDiv.innerHTML = '<div class="status">🔧 Creating optimized KML files...</div>';
+                const response = await fetch('http://localhost:4000/optimize-kmls', { method: 'POST' });
+                const result = await response.json();
+                
+                if (response.ok) {
+                    statusDiv.innerHTML = '<div class="status success">✅ KML optimization completed successfully</div>';
+                } else {
+                    statusDiv.innerHTML = '<div class="status error">❌ Error: ' + result.error + '</div>';
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="status error">❌ Network error: ' + error.message + '</div>';
+            }
+        }
+        
+        async function validateFiles() {
+            const validationResults = document.getElementById('validationResults');
+            const validationContent = document.getElementById('validationContent');
+            
+            try {
+                validationResults.style.display = 'block';
+                validationContent.innerHTML = '<div class="status">🔍 Validating files...</div>';
+                
+                const response = await fetch('http://localhost:4000/validate-files');
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    const { counts, missing, healthCheck } = result;
+                    
+                    let html = '';
+                    
+                    // Health Check Section (Tier 1)
+                    if (healthCheck) {
+                        html += '<div class="health-check-section">';
+                        html += `<h4>${healthCheck.statusIcon} System Health Check</h4>`;
+                        html += `<div class="health-summary ${healthCheck.statusColor}">${healthCheck.summary}</div>`;
+                        
+                        if (healthCheck.backend && healthCheck.frontend) {
+                            html += '<div class="health-details">';
+                            html += `<div class="health-count">Backend Flights: <strong>${healthCheck.backend.success ? healthCheck.backend.count : 'Error'}</strong></div>`;
+                            html += `<div class="health-count">Frontend Flights: <strong>${healthCheck.frontend.success ? healthCheck.frontend.count : 'Error'}</strong></div>`;
+                            
+                            if (healthCheck.mismatch !== 0) {
+                                const mismatchText = healthCheck.mismatch > 0 ? 
+                                    `${healthCheck.mismatch} flights missing from frontend` :
+                                    `${Math.abs(healthCheck.mismatch)} extra flights in frontend`;
+                                html += `<div class="health-mismatch error">⚠️ ${mismatchText}</div>`;
+                            }
+                            html += '</div>';
+                        }
+                        
+                        // Auto-Fix Suggestions (Tier 3)
+                        if (healthCheck.suggestions && healthCheck.suggestions.length > 0) {
+                            html += '<div class="health-actions">';
+                            html += '<h5>💡 Suggested Actions:</h5>';
+                            healthCheck.suggestions.forEach(suggestion => {
+                                if (suggestion.includes('Build Static Site')) {
+                                    html += '<button data-action="buildSite" class="health-action-btn build-btn">🏗️ Build Static Site</button>';
+                                } else if (suggestion.includes('Refresh Metadata')) {
+                                    html += '<button data-action="refreshMeta" class="health-action-btn refresh-btn">🔄 Refresh Metadata</button>';
+                                }
+                            });
+                            html += '</div>';
+                        }
+                        
+                        html += '</div>';
+                    }
+                    
+                    // File Validation Section
+                    html += '<div class="validation-summary">';
+                    html += '<div class="validation-card">';
+                    html += '<h5>📁 KML Files</h5>';
+                    html += '<div class="validation-number">' + counts.uploads + '</div>';
+                    html += '<div>in uploads folder</div>';
+                    html += '</div>';
+                    
+                    html += '<div class="validation-card">';
+                    html += '<h5>⚡ Optimized Files</h5>';
+                    html += '<div class="validation-number">' + counts.optimized + '</div>';
+                    html += '<div>optimized versions</div>';
+                    html += '</div>';
+                    
+                    html += '<div class="validation-card">';
+                    html += '<h5>🖼️ PNG Images</h5>';
+                    html += '<div class="validation-number">' + counts.pngImages + '</div>';
+                    html += '<div>flight map images</div>';
+                    html += '</div>';
+                    html += '</div>';
+                    
+                    // Show missing files sections
+                    html += '<div class="validation-missing">';
+                    
+                    if (missing.optimized.length > 0) {
+                        html += '<div class="missing-section">';
+                        html += '<h5>⚠️ Missing Optimized Files (' + missing.optimized.length + ')</h5>';
+                        html += '<div class="missing-files">';
+                        missing.optimized.forEach(file => {
+                            html += '<div>• ' + file + '</div>';
+                        });
+                        html += '</div></div>';
+                    } else {
+                        html += '<div class="missing-section">';
+                        html += '<h5>✅ Optimized Files</h5>';
+                        html += '<div class="no-missing">All KML files have optimized versions</div>';
+                        html += '</div>';
+                    }
+                    
+                    if (missing.png.length > 0) {
+                        html += '<div class="missing-section">';
+                        html += '<h5>⚠️ Missing PNG Images (' + missing.png.length + ')</h5>';
+                        html += '<div class="missing-files">';
+                        missing.png.forEach(file => {
+                            html += '<div>• ' + file + '</div>';
+                        });
+                        html += '</div></div>';
+                    } else {
+                        html += '<div class="missing-section">';
+                        html += '<h5>✅ PNG Images</h5>';
+                        html += '<div class="no-missing">All KML files have PNG flight maps</div>';
+                        html += '</div>';
+                    }
+                    
+                    html += '</div>';
+                    
+                    validationContent.innerHTML = html;
+                    
+                    // Add event listeners for health action buttons
+                    const healthActionBtns = validationContent.querySelectorAll('.health-action-btn');
+                    healthActionBtns.forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const action = this.getAttribute('data-action');
+                            if (action === 'buildSite') {
+                                buildStaticSite();
+                            } else if (action === 'refreshMeta') {
+                                refreshMetadata();
+                            }
+                        });
+                    });
+                } else {
+                    validationContent.innerHTML = '<div class="status error">❌ Validation failed: ' + (result.error || 'Unknown error') + '</div>';
+                }
+            } catch (error) {
+                validationContent.innerHTML = '<div class="status error">❌ Network error: ' + error.message + '</div>';
+            }
+        }
+
+        // Modal Functions
+        function openFAQ() {
+            document.getElementById('faqModal').style.display = 'block';
+        }
+
+        function closeFAQ() {
+            document.getElementById('faqModal').style.display = 'none';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeFAQ();
+            }
+        });
+
+        // Helper Functions for Button States
+        function setButtonLoading(button) {
+            if (button) {
+                button.disabled = true;
+                button.classList.add('loading');
+            }
+        }
+
+        function setButtonNormal(button) {
+            if (button) {
+                button.disabled = false;
+                button.classList.remove('loading');
+            }
+        }
+
+        function showActionStatus(message, type = 'success') {
+            const statusDiv = document.getElementById('actionsStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status-feedback ' + type;
+            statusDiv.style.display = 'block';
+        }
+
+        function hideActionStatus() {
+            const statusDiv = document.getElementById('actionsStatus');
+            statusDiv.style.display = 'none';
+        }
+
+        // Enhanced Server Status Check (both backend and static site)
+        async function checkServerStatus() {
+            const backendStatusElement = document.getElementById('backendStatus');
+            const staticStatusElement = document.getElementById('staticStatus');
+            
+            // Check Backend Server (port 4000)
+            try {
+                const response = await fetch('http://localhost:4000/api/status', {
+                    method: 'GET',
+                    signal: AbortSignal.timeout(3000)
+                });
+                if (response.ok) {
+                    backendStatusElement.innerHTML = '🟢 Online';
+                    backendStatusElement.className = 'status-online';
+                } else {
+                    backendStatusElement.innerHTML = '🔴 Offline';
+                    backendStatusElement.className = 'status-offline';
+                }
+            } catch (error) {
+                backendStatusElement.innerHTML = '🔴 Offline';
+                backendStatusElement.className = 'status-offline';
+            }
+
+            // Check Static Site Server (port 8080)
+            try {
+                const response = await fetch('http://localhost:8080', {
+                    method: 'HEAD',
+                    signal: AbortSignal.timeout(3000)
+                });
+                if (response.ok) {
+                    staticStatusElement.innerHTML = '🟢 Online';
+                    staticStatusElement.className = 'status-online';
+                } else {
+                    staticStatusElement.innerHTML = '🔴 Offline';
+                    staticStatusElement.className = 'status-offline';
+                }
+            } catch (error) {
+                staticStatusElement.innerHTML = '🔴 Offline';
+                staticStatusElement.className = 'status-offline';
+            }
+        }
+
+        // Enhanced OptimizeKMLs Function
+        async function optimizeKMLs() {
+            const button = document.getElementById('optimizeBtn');
+            try {
+                setButtonLoading(button);
+                showActionStatus('🔄 Optimizing KML files...');
+                
+                const response = await fetch('http://localhost:4000/optimize-kmls', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showActionStatus(`✅ Optimization complete! Processed ${result.processed || 0} files`, 'success');
+                    // Auto-refresh validation after optimization
+                    setTimeout(() => validateFiles(), 2000);
+                } else {
+                    showActionStatus('❌ Optimization failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showActionStatus('❌ Network error: ' + error.message, 'error');
+            } finally {
+                setButtonNormal(button);
+            }
+        }
+
+        // Enhanced Refresh Metadata Function
+        async function refreshMetadata() {
+            const button = document.getElementById('refreshBtn');
+            try {
+                setButtonLoading(button);
+                showActionStatus('🔄 Refreshing metadata and file counts...');
+                
+                const response = await fetch('http://localhost:4000/refresh-metadata', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showActionStatus('✅ Metadata refreshed successfully!', 'success');
+                    // Auto-refresh validation after metadata refresh
+                    setTimeout(() => validateFiles(), 2000);
+                } else {
+                    showActionStatus('❌ Metadata refresh failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showActionStatus('❌ Network error: ' + error.message, 'error');
+            } finally {
+                setButtonNormal(button);
+            }
+        }
+
+        // New Generate Missing PNGs Function
+        async function generateMissingPNGs() {
+            const button = document.getElementById('generateBtn');
+            try {
+                setButtonLoading(button);
+                showActionStatus('🖼️ Generating missing PNG images...');
+                
+                const response = await fetch('http://localhost:4000/generate-missing-pngs', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const alreadyExists = result.processed === 0 ? 'All' : result.processed;
+                    const msg = `✅ PNG generation complete! Generated: ${result.processed}, Already existed: ${alreadyExists}, Errors: ${result.errors}`;
+                    showActionStatus(msg, result.errors > 0 ? 'error' : 'success');
+                    
+                    if (result.errors > 0 && result.errorDetails) {
+                        const errorMsg = `\n\n❌ Failed files: ${result.errorDetails.join(', ')}`;
+                        showActionStatus(msg + errorMsg, 'error');
+                    }
+                    
+                    // Auto-refresh validation after generation
+                    setTimeout(() => validateFiles(), 2000);
+                } else {
+                    showActionStatus('❌ PNG generation failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showActionStatus('❌ Network error: ' + error.message, 'error');
+            } finally {
+                setButtonNormal(button);
+            }
+        }
+
+        // New Process New KMLs Function  
+        async function processNewKMLs() {
+            const button = document.getElementById('processNewBtn');
+            try {
+                setButtonLoading(button);
+                showActionStatus('🔄 Processing newly uploaded KML files...');
+                
+                const response = await fetch('http://localhost:4000/process-kmls', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const msg = `✅ Processing complete! Processed: ${result.processed}, Renamed: ${result.renamed}, Duplicates: ${result.duplicates}`;
+                    showActionStatus(msg, 'success');
+                    
+                    // Auto-refresh validation after processing
+                    setTimeout(() => validateFiles(), 2000);
+                } else {
+                    showActionStatus('❌ Processing failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showActionStatus('❌ Network error: ' + error.message, 'error');
+            } finally {
+                setButtonNormal(button);
+            }
+        }
+
+        // Build Static Site Function
+        async function buildStaticSite() {
+            const button = document.getElementById('buildSiteBtn');
+            try {
+                setButtonLoading(button);
+                showActionStatus('🏗️ Building static site with latest flights...');
+                
+                const response = await fetch('http://localhost:4000/build-static-site', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    const msg = `✅ Static site built successfully! Processed: ${result.processed || 0} flights, Generated: ${result.generated || 0} optimized files`;
+                    showActionStatus(msg, 'success');
+                    
+                    // Auto-refresh validation after building
+                    setTimeout(() => validateFiles(), 2000);
+                } else {
+                    showActionStatus('❌ Static site build failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showActionStatus('❌ Network error: ' + error.message, 'error');
+            } finally {
+                setButtonNormal(button);
+            }
+        }
+
+        // GitHub Deployment Functions
+        let deploymentStatusInterval;
+        
+        async function deployToGitHub() {
+            const button = document.getElementById('deployBtn');
+            const deploymentSection = document.getElementById('deploymentSection');
+            
+            try {
+                // First, check for pending files
+                await showPendingFiles();
+                
+                setButtonLoading(button);
+                showActionStatus('🚀 Starting GitHub deployment...');
+                deploymentSection.style.display = 'block';
+                
+                const response = await fetch('http://localhost:4000/api/deploy-to-github', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    showActionStatus('✅ Deployment started successfully!', 'success');
+                    startDeploymentStatusPolling();
+                } else {
+                    showActionStatus('❌ Failed to start deployment: ' + (result.error || 'Unknown error'), 'error');
+                    setButtonNormal(button);
+                }
+            } catch (error) {
+                showActionStatus('❌ Network error: ' + error.message, 'error');
+                setButtonNormal(button);
+            }
+        }
+        
+        async function showPendingFiles() {
+            try {
+                const response = await fetch('http://localhost:4000/api/pending-deployment-files');
+                const result = await response.json();
+                
+                const pendingFilesDiv = document.getElementById('pendingFiles');
+                const pendingFilesList = document.getElementById('pendingFilesList');
+                
+                if (result.success && result.totalFiles > 0) {
+                    let html = `<p><strong>${result.totalFiles} files ready for deployment:</strong></p>`;
+                    
+                    if (result.registrations.length > 0) {
+                        html += `<p><strong>Helicopter registrations:</strong> ${result.registrations.join(', ')}</p>`;
+                    }
+                    
+                    html += '<ul>';
+                    if (result.summary['kml-original'].length > 0) {
+                        html += `<li><strong>Original KML files:</strong> ${result.summary['kml-original'].length}</li>`;
+                    }
+                    if (result.summary['png-map'].length > 0) {
+                        html += `<li><strong>PNG flight maps:</strong> ${result.summary['png-map'].length}</li>`;
+                    }
+                    if (result.summary['kml-optimised'].length > 0) {
+                        html += `<li><strong>Optimized KML files:</strong> ${result.summary['kml-optimised'].length}</li>`;
+                    }
+                    html += '</ul>';
+                    
+                    pendingFilesList.innerHTML = html;
+                    pendingFilesDiv.style.display = 'block';
+                } else {
+                    pendingFilesList.innerHTML = '<p>No new files found for deployment.</p>';
+                    pendingFilesDiv.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Failed to fetch pending files:', error);
+            }
+        }
+        
+        function startDeploymentStatusPolling() {
+            const progressDiv = document.getElementById('deploymentProgress');
+            const progressFill = document.getElementById('deployProgressFill');
+            const progressText = document.getElementById('deployProgressText');
+            const statusDiv = document.getElementById('deploymentStatus');
+            
+            progressDiv.style.display = 'block';
+            
+            deploymentStatusInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('http://localhost:4000/api/deployment-status');
+                    const result = await response.json();
+                    
+                    if (result.success && result.status) {
+                        const status = result.status;
+                        
+                        // Update progress bar
+                        progressFill.style.width = status.progress + '%';
+                        progressText.textContent = status.progress + '%';
+                        
+                        // Update status message
+                        let statusMessage = status.message;
+                        if (status.filesProcessed && status.totalFiles) {
+                            statusMessage += ` (${status.filesProcessed}/${status.totalFiles} files)`;
+                        }
+                        statusDiv.textContent = statusMessage;
+                        
+                        // Handle completion or error
+                        if (status.stage === 'complete') {
+                            clearInterval(deploymentStatusInterval);
+                            showDeploymentComplete(status);
+                        } else if (status.stage === 'error') {
+                            clearInterval(deploymentStatusInterval);
+                            showDeploymentError(status);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch deployment status:', error);
+                }
+            }, 1000); // Poll every second
+        }
+        
+        function showDeploymentComplete(status) {
+            const button = document.getElementById('deployBtn');
+            const resultsDiv = document.getElementById('deploymentResults');
+            const resultsList = document.getElementById('deploymentResultsList');
+            
+            setButtonNormal(button);
+            showActionStatus('✅ Deployment completed successfully!', 'success');
+            
+            let html = `
+                <div class="result-item success">
+                    <div class="result-filename">✅ Deployment Successful</div>
+                    <div class="result-details">${status.message}</div>
+                </div>
+            `;
+            
+            resultsList.innerHTML = html;
+            resultsDiv.style.display = 'block';
+            
+            // Auto-refresh validation after deployment
+            setTimeout(() => validateFiles(), 2000);
+        }
+        
+        function showDeploymentError(status) {
+            const button = document.getElementById('deployBtn');
+            const resultsDiv = document.getElementById('deploymentResults');
+            const resultsList = document.getElementById('deploymentResultsList');
+            
+            setButtonNormal(button);
+            showActionStatus('❌ Deployment failed: ' + status.message, 'error');
+            
+            let html = `
+                <div class="result-item error">
+                    <div class="result-filename">❌ Deployment Failed</div>
+                    <div class="result-details">${status.message}</div>
+                    ${status.error ? `<div class="result-details">Error: ${status.error}</div>` : ''}
+                </div>
+            `;
+            
+            resultsList.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

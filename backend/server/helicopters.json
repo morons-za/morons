@@ -1,0 +1,62 @@
+{
+  "ZS-HBO": {
+    "registration": "ZS-HBO",
+    "owner": "Cape Town Helicopters",
+    "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+    "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0"
+  },
+  "ZS-HIE": {
+    "registration": "ZS-HIE",
+    "owner": "Cape Town Helicopters",
+    "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+    "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0"
+  },
+  "ZS-HIM": {
+    "registration": "ZS-HIM",
+    "owner": "Cape Town Helicopters",
+    "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+    "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0"
+  },
+  "ZS-HMB": {
+    "registration": "ZS-HMB",
+    "owner": "Sport Helicopters",
+    "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+    "imageUrl": ""
+  },
+  "ZS-RTG": {
+    "registration": "ZS-RTG",
+    "owner": "Cape Town Helicopters",
+    "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+    "imageUrl": "https://cdn.jetphotos.com/200/5/541479_1728643363_tb.jpg?v=0"
+  },
+  "ZS-RLC": {
+    "registration": "ZS-RLC",
+    "owner": "NAC",
+    "contact": "National Airways Corporation (NAC)\nPhone: +27 11 961 1700\nEmail: info@nac.co.za\nWebsite: www.nac.co.za",
+    "imageUrl": ""
+  },
+  "ZT-HOT": {
+    "registration": "ZT-HOT",
+    "owner": "Cape Town Helicopters",
+    "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+    "imageUrl": ""
+  },
+  "ZT-REG": {
+    "registration": "ZT-REG",
+    "owner": "NAC",
+    "contact": "National Airways Corporation (NAC)\nPhone: +27 11 961 1700\nEmail: info@nac.co.za\nWebsite: www.nac.co.za",
+    "imageUrl": "https://cdn.jetphotos.com/200/6/58588_1562879091_tb.jpg?v=0"
+  },
+  "ZT-RMS": {
+    "registration": "ZT-RMS",
+    "owner": "Cape Town Helicopters",
+    "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+    "imageUrl": "https://cdn.jetphotos.com/200/6/1266217_1691655199_tb.jpg?v=0"
+  },
+  "ZT-RPG": {
+    "registration": "ZT-RPG",
+    "owner": "NAC",
+    "contact": "National Airways Corporation (NAC)\nPhone: +27 11 961 1700\nEmail: info@nac.co.za\nWebsite: www.nac.co.za",
+    "imageUrl": ""
+  }
+}
