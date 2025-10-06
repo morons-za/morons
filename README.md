@@ -1,17 +1,17 @@
 # 🚁 TMNP Helicopter Tracking System
 
-A comprehensive web application for monitoring and analyzing helicopter flights that violate Table Mountain National Park (TMNP) restricted airspace in Cape Town, South Africa.
+A comprehensive system for monitoring and analyzing helicopter flights that violate Table Mountain National Park (TMNP) restricted airspace in Cape Town, South Africa. This project consists of a **static website** for public viewing and a **backend processing system** for data management and analysis.
 
 ## 📋 Table of Contents
 - [Overview](#overview)
 - [Why This Project Exists](#why-this-project-exists)
+- [Architecture Overview](#architecture-overview)
+- [Static Site](#static-site)
+- [Backend System](#backend-system)
 - [Quick Start](#quick-start)
-- [Performance Highlights](#performance-highlights)
 - [Project Structure](#project-structure)
-- [Data Structure](#data-structure)
-- [Adding New Flight Data](#adding-new-flight-data)
-- [API Endpoints](#api-endpoints)
-- [Technical Details](#technical-details)
+- [Data Processing Workflow](#data-processing-workflow)
+- [Deployment](#deployment)
 - [Tracked Helicopters](#tracked-helicopters)
 - [Contributing](#contributing)
 - [License](#license)
@@ -21,15 +21,41 @@ A comprehensive web application for monitoring and analyzing helicopter flights 
 This system tracks helicopter flights that enter restricted airspace around Table Mountain National Park. It processes KML flight data from sources like FlightRadar24 and ADS-B Exchange, automatically detects airspace violations, and generates detailed flight map visualizations with violation markers.
 
 ### Key Features
-- **⚡ Ultra-Fast Startup**: Server loads in 8 seconds (down from minutes) using pre-generated metadata
-- **🚀 Optimized Deployments**: Deploy in 2-3 minutes (down from 8-12 minutes) with smart caching
-- **📊 Comprehensive Analytics**: 422 flights, 1128.39 MB of data, file sizes 0.46-2.16+ MB
-- **🔄 Automated KML Processing**: Rename improperly formatted files and extract metadata
+- **🗺️ Interactive Web Interface**: Browse flights with filtering, search, and detailed views
+- **⚡ Optimized KML Processing**: Rename improperly formatted files and extract metadata
 - **🎯 Airspace Violation Detection**: Identify flights that enter TMNP restricted zones
 - **🗺️ Flight Map Generation**: Create detailed PNG maps with OSM backgrounds, flight paths, and violation markers
-- **💻 Interactive Web Interface**: Browse flights with filtering, search, and detailed views
-- **📋 Report Generation**: Generate violation reports with maps for regulatory purposes
+- **📊 Data Analytics**: Comprehensive flight statistics and violation patterns
 - **✅ Data Validation**: Ensure data quality by removing false positives
+
+## 🏢 Architecture Overview
+
+This project is split into two main components designed for different purposes:
+
+### 🌐 **Static Site** (`/static-site/`)
+- **Purpose**: Public-facing website hosted on cheap cloud platforms
+- **Audience**: End users, researchers, aviation authorities
+- **Content**: 
+  - Interactive map with all violation flights
+  - Optimized KML files (smaller, processed versions)
+  - Flight statistics and analytics
+  - Search and filtering capabilities
+- **Does NOT contain**: Original full-sized KML files or PNG violation screenshots
+- **Hosting**: Designed for static hosting (GitHub Pages, Netlify, Vercel, etc.)
+
+### 🔧 **Backend System** (`/backend/`)
+- **Purpose**: Local data processing and analysis environment
+- **Audience**: Data administrators and analysts
+- **Content**:
+  - Original full-sized KML files
+  - Generated PNG flight violation screenshots
+  - Processing scripts and tools
+  - Backend web interface (`backend.html`)
+- **Key Functions**:
+  - Upload and validate new flight data
+  - Generate PNG violation screenshots
+  - Process and optimize KML files
+  - Prepare data for static site deployment
 
 ## 🌍 Why This Project Exists
 
@@ -43,302 +69,491 @@ Table Mountain National Park has restricted airspace to protect wildlife and ens
 
 The data helps aviation authorities, park management, and concerned citizens understand the scope of violations and take appropriate action.
 
+## 🌐 Static Site
+
+The static site is the **public face** of the project, designed to be hosted on affordable cloud platforms and accessible to end users worldwide.
+
+### 🏠 Hosting Strategy
+- **Platform**: GitHub Pages, Netlify, Vercel, or similar static hosting
+- **Cost**: Free or very low cost (typically under $10/month)
+- **Performance**: Fast global CDN delivery
+- **Scalability**: Handles unlimited concurrent users
+
+### 📁 What's Included
+- **Interactive Flight Map**: Browse all violation flights with filtering
+- **Optimized KML Files**: Smaller, processed versions for fast loading
+- **Flight Statistics**: Analytics dashboard with violation patterns
+- **Search & Filter**: Find specific flights by date, aircraft, or operator
+- **Responsive Design**: Works on desktop, tablet, and mobile devices
+
+### 🚫 What's NOT Included
+- **Original Full KML Files**: Too large for static hosting
+- **PNG Violation Screenshots**: Detailed violation imagery stays in backend
+- **Processing Tools**: Data manipulation happens in backend only
+
+### 🚀 Deployment Process
+1. Backend processes and optimizes data
+2. Optimized files are copied to `static-site/`
+3. Static site is pushed to GitHub
+4. Hosting platform automatically deploys updated site
+
+## 🔧 Backend System
+
+The backend system is where the **data processing magic happens**, designed to run locally for data administrators and analysts.
+
+### 💻 Backend Web Interface
+- **Access**: Start the server with `./launch.sh` and open `http://localhost:4000`
+- **Purpose**: Manage and analyze flight data through a web interface
+- **Features**:
+  - Upload new KML files (drag & drop or file picker)
+  - Smart KML Manager for automatic file organization
+  - Real-time PNG violation screenshot generation
+  - Metadata refresh and validation
+  - File processing statistics and logs
+  - Copy-to-clipboard admin commands for easy server management
+
+### 📂 What's Stored Here
+- **Original KML Files**: Full-resolution flight tracking data
+- **PNG Screenshots**: Detailed violation maps with markers
+- **Processing Scripts**: Tools for data validation and optimization
+- **Metadata Cache**: Flight information and statistics
+- **Legacy Data**: Historical processing files and backups
+
+### 🔄 Data Processing Workflow
+1. **Upload**: Add new KML files via web interface (drag & drop supported)
+2. **Smart Processing**: Automatic file organization and duplicate detection
+3. **Validate**: Check flights for TMNP airspace violations with real-time feedback
+4. **Generate**: Create PNG screenshots showing violation points with OSM tiles
+5. **Refresh**: Update metadata to include new flights in the system
+6. **Build**: Generate optimized static site with new flight data
+7. **Deploy**: Push optimized data to static site repository
+
 ## 🚀 Quick Start
 
-Note! 
-Always restart the server after running node generate-master-metadata.cjs
-Or run node generate-master-metadata.cjs before starting the server
-Check the server logs for messages like "🚀 Loaded X flights from master metadata" to confirm it's using the fast path
+The project is split into two parts: a static site and a backend. You can work with either component independently.
 
-### 🚁 KML Validation Portal
+### Static Site (Public)
+- Lives in: `static-site/`
+- What it serves: Optimized KML files only (no large KMLs or PNGs)
+- How it's updated: Pushing changes to GitHub triggers deployment
 
-The system includes a **KML Validation Portal** accessible at:
-- **Local Development**: `http://localhost:4000/validate`
-- **Production**: `https://yourdomain.com/validate`
-
-**🚀 Complete Workflow Integration**: The validation portal now automatically handles the entire process that previously required manual steps. After uploading KML files, it automatically:
-- Renames files to proper format (YYYY-MM-DD-REGISTRATION-HASH.kml)
-- Generates PNG flight path images
-- Updates master metadata
-- Clears server cache
-- Makes flights immediately accessible in the main interface
-
-**Features:**
-- **Drag & Drop Interface**: Upload multiple KML files at once
-- **Automatic Validation**: Checks if flights enter TMNP restricted airspace
-- **Complete Processing**: Automatically renames files, generates PNG maps, and updates metadata
-- **Smart Filtering**: Only saves violating flights, rejects non-violating ones
-- **Real-time Results**: Immediate feedback on validation status with processing details
-- **Ready to Use**: Violating flights immediately appear in main tracking interface
-- **Local-Only Access**: Endpoint is secured to prevent external abuse
-
-**How to Use:**
-1. Navigate to `/validate` in your browser
-2. Drag & drop KML files or click "Choose Files"
-3. Click "Validate Files" to process
-4. Review results - only violating flights are saved to your system
-5. **Automatic processing** - Files are renamed, PNG maps generated, and metadata updated
-6. **Ready to use** - Flights immediately appear in your main tracking interface with full functionality
-
-**Security Note**: The validation endpoint only accepts connections from local networks (127.0.0.1, 192.168.x.x, 10.x.x.x, 172.x.x.x) to prevent external abuse while keeping your code public.
+### Backend (Local Processing)
+- Lives in: `backend/`
+- Open `backend/backend.html` to:
+  - Validate and process flights
+  - Generate PNG violation screenshots
+  - Optimize KML files
+- When done, push updates so the static site reflects the new flights
 
 ### Development Setup
 
-1. **Install dependencies:**
+1. **Install backend dependencies:**
    ```bash
+   cd backend
    npm install
    ```
 
-2. **Generate master metadata for ultra-fast server startup:**
+2. **Start the backend server:**
    ```bash
-   node generate-master-metadata.cjs
+   cd backend
+   ./launch.sh
+   # OR manually:
+   node scripts/index-no-auth.cjs
    ```
-   *This processes all KML files once and creates optimized metadata for instant loading*
+   The server will run at `http://localhost:4000`
 
-3. **Start the development servers:**
+3. **Start the static site server (for testing):**
    ```bash
-   npm run dev:all
+   # Navigate to backend scripts directory
+   cd backend/scripts
+   # Start the static site server on port 8080
+   node serve-static-site.cjs
    ```
-   - Frontend: http://localhost:5173
-   - Backend: http://localhost:4000
+   The static site will be available at `http://localhost:8080`
+   
+   **Important**: The static site server MUST be running on port 8080 for local testing. This server serves the optimized KML files and other static assets locally before the site is deployed to the internet. Without this server, the "View Flight" functionality will fail because it cannot access the local optimized KML files.
 
-4. **Or start production server:**
-   ```bash
-   npm run build  # Build frontend first
-   npm start      # Serves everything on http://localhost:4000
-   ```
+4. **Backend Administration:**
+   - Open `http://localhost:4000` in your browser for the admin interface
+   - Use the web interface for all processing tasks
 
-### Adding New KML Files - Optimized Workflow
+5. **Process flow:**
+   - Upload KMLs via web interface → Smart KML Manager organizes files → PNG generation → Refresh Metadata → Build static site
 
-1. **Drop KML files** into `server/uploads/`
-
-2. **Process new files (one command does everything):**
-   ```bash
-   node process-new-kmls.cjs
-   ```
-   This script will:
-   - ✅ Rename files to proper format (YYYY-MM-DD-REGISTRATION-ID.kml)
-   - 🖼️ Generate PNG flight path images
-   - 📝 **Update master metadata incrementally** (only processes new files)
-   - 🗑️ Clear server cache
-   - ⚡ Ensure fast server startup
-
-3. **Commit changes to git:**
+6. **Deploy updates:**
    ```bash
    git add .
-   git commit -m "Add new helicopter flights"
+   git commit -m "Process new flights"
    git push
    ```
+   Your static site host will deploy the updated `static-site/` automatically (if configured).
 
-4. **Deploy automatically** - Render will build and deploy in 2-3 minutes
+### 🌐 Static Site Testing
 
-## ⚡ Performance Highlights
+**Before testing the static site locally, you MUST start the static site server:**
 
-### 🚀 Server Startup Performance
-- **Before**: Scanned 423 KML files individually on every startup (MINUTES)
-- **After**: Reads one pre-generated 105KB JSON file (8 SECONDS)
-- **Improvement**: 2000% faster startup time
+```bash
+# Navigate to backend scripts directory
+cd backend/scripts
 
-### 🎯 Deployment Performance  
-- **Before**: Regenerated all metadata on every deploy (8-12 minutes)
-- **After**: Uses committed metadata file, only builds frontend (2-3 minutes)
-- **Improvement**: 80% faster deployments
+# Start the static site server (always use port 8080)
+node serve-static-site.cjs
+```
 
-### 📊 Data Processing Performance
-- **Smart Incremental Updates**: Only processes new files, not entire dataset
-- **Pre-calculated File Sizes**: No dynamic file fetching on frontend
-- **Optimized Metadata**: All flight data pre-processed and cached
+**Server Requirements:**
+- **Port**: Must always be 8080 (hardcoded in the static site)
+- **Purpose**: Serves optimized KML files and static assets locally
+- **When to use**: Before deploying to internet, for local testing
+- **Critical**: Without this server, "View Flight" buttons will fail
 
-### 💾 Current Dataset Stats
-- **Total Files**: 423 KML files
-- **Valid Flights**: 422 (1 excluded for missing registration)
-- **Total Size**: 1128.39 MB
-- **Average File Size**: 2.67 MB
-- **Size Range**: 0.46 MB - 2.16+ MB per file
+**Access Points:**
+- **Static Site**: http://localhost:8080
+- **Backend Admin**: http://localhost:4000 (separate server)
+
+**Troubleshooting:**
+- If port 8080 is in use: `lsof -ti:8080 | xargs kill -9`
+- Server logs show: "🌐 Static site server running at http://localhost:8080"
+- Verify files are served from: `/Users/werner/Dev/heli/heli-map/static-site`
+
 
 ## 📂 Project Structure
 
 ```
 heli-map/
-├── README.md                          # This file
-├── process-new-kmls.cjs              # ⭐ Main script for processing new KML files
-├── generate-master-metadata.cjs      # ⭐ Generates optimized metadata for fast startup
-├── package.json                       # Node.js dependencies
-├── vite.config.js                    # Frontend build configuration
-├── index.html                        # Main HTML entry point
-├── src/                              # Frontend React application
-│   ├── App.jsx                       # Main React component
-│   ├── App.css                       # Styles
-│   └── KMLValidationPortal.jsx      # 🚁 KML validation portal component
-├── server/                           # Backend Node.js application
-│   ├── index.cjs                     # ⭐ Express server (optimized for fast startup)
-│   ├── master-metadata.json          # ⭐ Pre-generated flight metadata (105KB)
-│   ├── uploads/                      # KML flight data files (423 files, 1.1GB)
-│   ├── flight-maps/                  # Generated PNG flight maps
-│   ├── generate-flight-image.cjs     # PNG map generation script
-│   ├── check-zero-violations.cjs     # Data validation utility
-│   └── remove-deleted-flights.cjs    # Cleanup utility
-├── public/                           # Static assets
-│   ├── tmnp.kml                      # TMNP boundary definition
-│   └── flight-images/                # Public PNG flight maps (symlink)
-└── scripts/                          # Utility scripts
-    └── deploy-check.js               # Deployment validation
+├── README.md                         # This documentation
+├── .env                             # Environment configuration
+├── .gitignore                       # Git ignore rules
+│
+├── static-site/                     # 🌐 PUBLIC WEBSITE (hosted)
+│   ├── index.html                   # Main website interface
+│   ├── icon.svg                     # Website favicon
+│   ├── tmnp.kml                     # TMNP boundary definition
+│   ├── kml-optimised/              # Optimized KML files (public)
+│   ├── flight-maps/                # Basic flight maps (if included)
+│   └── images/                     # Website assets
+│       ├── helicopters/            # Helicopter photos
+│       ├── marker-icon.png         # Map marker icons
+│       ├── marker-icon-2x.png      # High-DPI markers
+│       └── marker-shadow.png       # Marker shadows
+│
+└── backend/                        # 🔧 DATA PROCESSING (local)
+    ├── launch.sh                   # Server startup script
+    ├── package.json                # Node.js dependencies
+    ├── uploads/                    # ✅ Original KML files (FULL SIZE) - NEW LOCATION
+    │   ├── ZS-HBO/                # Organized by aircraft registration
+    │   ├── ZS-HIE/                # Each folder contains aircraft's KML files
+    │   └── [other-aircraft]/      # Automatic organization by Smart KML Manager
+    ├── flight-maps/               # ✅ PNG violation screenshots - NEW LOCATION
+    │   ├── ZS-HBO/                # Screenshots organized by aircraft
+    │   ├── ZS-HIE/                # Detailed violation imagery (private)
+    │   └── [other-aircraft]/      # Not served on public site
+    ├── images/                    # Backend assets
+    │   └── warning.png            # Violation marker icon
+    ├── scripts/                   # Processing tools
+    │   ├── index-no-auth.cjs      # Main backend server
+    │   ├── smart-kml-manager.cjs  # File organization & duplicates
+    │   ├── generate-flight-image.cjs # PNG generation script
+    │   ├── generate-master-metadata-main.cjs # Metadata generator
+    │   ├── build-static-site.cjs  # Static site builder
+    │   ├── serve-static-site.cjs  # Static site local testing server
+    │   └── optimise_kml.py        # KML optimization script
+    ├── server/                    # Metadata and configuration files
+    │   ├── duplicates/            # Duplicate flight files (moved here)
+    │   ├── master-metadata.json   # Flight metadata cache
+    │   ├── helicopters.json       # Aircraft information
+    │   └── images/                # Helicopter photos
+    └── node_modules/              # Backend dependencies
 ```
 
-**⭐ = Performance-critical files**
+## 🔄 Admin Workflow - Step-by-Step KML Processing
 
-## 📊 Data Structure
+This is the **complete admin workflow** for processing new helicopter flight data from upload to deployment:
 
-### Master Metadata System
-The system now uses a pre-generated metadata file (`server/master-metadata.json`) containing:
-```json
-{
-  "flights": [
-    {
-      "filename": "2025-06-01-ZS-RTG-3a9862ef.kml",
-      "registration": "ZS-RTG",
-      "date": "2025-06-01", 
-      "time": "07:53",
-      "owner": "Cape Town Helicopters",
-      "imageUrl": "https://cdn.jetphotos.com/200/5/541479_1728643363_tb.jpg?v=0",
-      "fileSizeMB": 1.23
-    }
-  ],
-  "generatedAt": "2025-01-23T10:30:00.000Z",
-  "totalFlights": 422,
-  "totalSizeMB": 1128.39
-}
-```
+### ⚠️ Recent Changes & Fixes (October 2025)
 
-### KML Files
-Flight data is stored as KML files with a standardized naming convention:
-```
-YYYY-MM-DD-REGISTRATION-HASH.kml
-```
-Examples:
-- `2025-06-01-ZS-RTG-3a9862ef.kml` (Cape Town Helicopters)
-- `2025-05-25-ZT-REG-3a7dc922.kml` (Private owner)
+**File Path Restructuring:**
+- All server files moved from `/backend/server/` to `/backend/` root directory
+- PNG flight maps now in `/backend/flight-maps/` (was `/backend/server/flight-maps/`)
+- Original KML files now in `/backend/uploads/` (was `/backend/server/uploads/`)
+- Metadata files now in `/backend/server/` (consolidated location)
 
-### Flight Metadata
-Each flight includes:
-- **Date/Time**: When the flight occurred
-- **Registration**: Aircraft registration (e.g., ZS-RTG, ZT-REG)
-- **Owner**: Operator name (Cape Town Helicopters, Private owner, etc.)
-- **Source**: Data source (FlightRadar24, ADS-B Exchange)
-- **File Size**: Pre-calculated size in MB (0.46-2.16+ MB range)
-- **Image URL**: Aircraft photo from JetPhotos
-- **Coordinates**: GPS tracking points throughout the flight
-- **Violations**: Points where aircraft entered restricted airspace
+**URL System Fixes:**
+- **KML Downloads**: Fixed to use `raw.githubusercontent.com` for text files
+- **PNG Images**: Use `media.githubusercontent.com` for Git LFS binary files
+- **Static Site**: All file references updated to new backend paths
+- **Build Scripts**: Updated to generate correct GitHub URLs
 
-### Generated Maps
-Each KML file has a corresponding PNG flight map showing:
-- **OpenStreetMap Background**: Detailed terrain and landmarks
-- **TMNP Boundaries**: Red restricted airspace zones
-- **Flight Path**: Blue line showing aircraft route
-- **Violation Markers**: Red warning icons at violation points
-- **Metadata**: Aircraft registration, date, and owner information
+**Key URLs:**
+- KML files: `https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/[filename]`
+- PNG images: `https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/[filename]`
 
-## ➕ Adding New Flight Data
-
-### Optimized Workflow (Recommended)
+### Initial Setup
+**Admin starts the server:**
 ```bash
-# 1. Add KML files to server/uploads/
-# 2. Process everything with one command:
-node process-new-kmls.cjs
+cd backend
+./launch.sh
+```
+Open `http://localhost:4000` for the admin interface.
 
-# 3. Commit and deploy:
-git add .
-git commit -m "Add new helicopter flights"  
+### Step 1: Upload KML Files
+**Admin uploads KML file(s):**
+- Use drag-and-drop interface or file picker in admin web interface
+- Can upload single or multiple KML files simultaneously  
+- Files typically come from FlightRadar24, ADS-B Exchange, or manual flight tracking exports
+
+### Step 2: Automatic Duplicate Detection
+**System automatically checks for duplicates:**
+- Compares uploaded files against existing flights in the database
+- Uses flight path analysis, not just filename comparison
+- Prevents re-processing identical flights even if they have different filenames
+- Duplicate files are moved to `/backend/server/duplicates/` folder
+- Admin gets notification if duplicates are detected
+
+### Step 3: TMNP Violation Detection
+**System automatically validates if flight violates TMNP boundaries:**
+- Analyzes flight path coordinates against Table Mountain National Park restricted airspace
+- Uses geometric intersection analysis to detect boundary violations
+- Only flights that actually entered restricted airspace proceed to next steps
+- Non-violating flights are rejected with explanation to admin
+
+### Step 4: File Renaming and Organization
+**If flight is a valid violation, system automatically:**
+- Renames KML file to standardized format: `[AIRCRAFT-REG]_[DATE]_violation.kml`
+- Places renamed file in appropriate subfolder: `/backend/uploads/[AIRCRAFT-REGISTRATION]/`
+- Organizes files by aircraft registration (e.g., `ZS-HBO`, `ZT-REG`, etc.)
+- Updates file metadata and tracking information
+
+### Step 5: Optimized KML Generation
+**System automatically creates web-optimized version:**
+- Generates compressed/optimized KML for better web performance
+- Removes unnecessary data points while preserving violation evidence
+- Saves optimized file to `/static-site/kml-optimised/` folder
+- These optimized files are used by the public website for fast loading
+
+### Step 6: PNG Violation Map Generation
+**System automatically generates violation screenshot:**
+- Creates detailed PNG image showing:
+  - Flight path overlaid on OpenStreetMap background
+  - TMNP boundary lines clearly marked
+  - Specific violation points highlighted with markers
+  - Aircraft registration and violation timestamp
+- Saves PNG to `/backend/flight-maps/[AIRCRAFT-REGISTRATION]/` folder
+- These detailed images remain private (backend only, not served on public site)
+
+### Step 7: Git Deployment
+**Admin manually commits and pushes to GitHub:**
+```bash
+# Add new KML files and PNG images to Git
+git add backend/uploads/ backend/flight-maps/ static-site/kml-optimised/
+git commit -m "Add new helicopter violations: [aircraft-registrations]"
+git push origin main
+```
+
+### Step 8: Static Site Deployment
+**Upload new static-site files to internet:**
+- If using GitHub Pages/Netlify/Vercel: deployment happens automatically after Git push
+- If using manual hosting: upload `/static-site/` folder contents to web server
+- Public website will now display new violations with optimized KML files
+
+## ⚠️ Critical Architecture Principle
+
+### File Separation Rule
+**The `/static-site/` NEVER references anything in `/backend/`:**
+
+✅ **Static Site CAN Reference:**
+- Files within `/static-site/` directory (like optimized KMLs)
+- Images and KMLs served from GitHub raw URLs
+- External CDN resources
+
+❌ **Static Site CANNOT Reference:**
+- Any files in `/backend/uploads/`
+- Any files in `/backend/flight-maps/`
+- Local backend server endpoints
+- Relative paths pointing to backend folders
+
+### Serving Strategy
+- **Optimized KMLs**: Served from `/static-site/kml-optimised/` folder
+- **Large Original KMLs**: Remain in backend, served from GitHub raw URLs when needed
+- **PNG Screenshots**: Remain private in backend, NOT served on public site
+- **Public Images**: Only helicopter photos and icons in `/static-site/images/`
+
+### Step 3: File Organization
+
+After processing, files are organized as:
+```
+backend/
+├── uploads/           # ✅ Original KML files (FULL SIZE) - NEW LOCATION
+│   ├── ZS-HBO/        # Organized by aircraft registration  
+│   └── [aircraft]/    # Each aircraft gets its own folder
+├── flight-maps/      # ✅ PNG violation screenshots - NEW LOCATION
+│   ├── ZS-HBO/        # Screenshots organized by aircraft
+│   └── [aircraft]/    # Private detailed imagery
+└── server/
+    └── duplicates/   # Duplicate flight files
+
+static-site/
+└── kml-optimised/    # Public KML files (optimized only)
+```
+
+### Step 4: Static Site Update
+- Optimized KMLs are copied to `static-site/kml-optimised/`
+- Flight metadata is updated in static site
+- Large PNG screenshots remain in backend only
+- Static site gets new flights without bloat
+
+### Step 5: Deployment
+1. **Commit Changes**:
+   ```bash
+   git add .
+   git commit -m "Add new helicopter flights"
+   git push
+   ```
+2. **Automatic Deployment**: Hosting platform detects changes and deploys
+3. **Public Access**: New flights appear on public website
+
+## 🚀 Deployment
+
+### Static Site Deployment
+The `static-site/` folder is designed for deployment to:
+- **GitHub Pages**: Free, automatic deployment from repository
+- **Netlify**: Free tier with custom domains
+- **Vercel**: Free tier with excellent performance
+- **Any Static Host**: Basic web hosting
+
+### Deployment Process
+1. **Process Data**: Use backend to validate and optimize flights
+2. **Commit to Git**: Push optimized data to repository
+3. **Automatic Deploy**: Hosting platform builds and deploys
+4. **Live Updates**: Public site reflects new flights
+
+### What Gets Deployed
+✅ **Included in Static Site:**
+- Interactive flight map interface
+- Optimized KML files (small, fast loading)
+- Flight statistics and metadata
+- Helicopter photos and basic assets
+
+🚫 **NOT Included in Static Site:**
+- Original large KML files
+- PNG violation screenshots
+- Processing scripts and tools
+- Backend administration interface
+
+### Backend Hosting
+The backend remains local and is not deployed:
+- **Purpose**: Data processing only
+- **Access**: Local development environment
+- **Security**: Sensitive processing tools stay private
+- **Performance**: No hosting costs for large files
+
+## 📈 System Summary
+
+This helicopter tracking system successfully separates **public access** from **data processing**:
+
+- **🌐 Static Site**: Lightweight, fast, affordable public interface
+- **🔧 Backend**: Powerful local processing environment
+- **🔄 Workflow**: Backend processes data → Static site displays results
+- **🚀 Deployment**: Automated updates via Git push
+
+The result is a cost-effective solution that can handle large datasets while providing fast public access to violation data.
+
+## 🔧 Server Management & Troubleshooting
+
+### ⚠️ Post-Migration Troubleshooting
+
+After the recent file restructuring (October 2025), you may encounter these issues:
+
+**Missing Files After Git Pull:**
+```bash
+# If files seem missing after pulling recent changes:
+# Check that files moved to new locations:
+ls -la backend/uploads/     # Should contain aircraft folders (ZS-HBO/, ZS-HIE/, etc.)
+ls -la backend/flight-maps/ # Should contain PNG screenshots by aircraft
+ls -la backend/server/      # Should contain metadata files
+```
+
+**KML Download Links Not Working:**
+- **Symptom**: Clicking download buttons does nothing or shows 404 errors
+- **Cause**: Static site may have old URLs pointing to `media.githubusercontent.com` instead of `raw.githubusercontent.com`
+- **Solution**: Rebuild static site to generate updated URLs:
+```bash
+cd backend
+node scripts/build-static-site.cjs
+git add static-site/
+git commit -m "Update static site with fixed KML URLs"
 git push
 ```
 
-**What happens automatically:**
-- ✅ File renaming and metadata extraction
-- 🖼️ PNG map generation  
-- 📝 Master metadata update (incremental)
-- 🗑️ Cache clearing
-- ⚡ Ready for ultra-fast server startup
+**PNG Images Not Loading:**
+- **Symptom**: "Take Action" button doesn't show flight images
+- **Cause**: Static site references old `/server/flight-maps/` paths
+- **Solution**: Already fixed in build scripts, rebuild if needed
 
-### Manual Metadata Regeneration
-If you need to regenerate all metadata from scratch:
+**Build Script Errors:**
 ```bash
-node generate-master-metadata.cjs
+# If build script fails with path errors:
+# Verify the new file structure exists:
+find backend -name "*.kml" -type f | head -5  # Should show files in uploads/ subfolders
+find backend -name "*.png" -type f | head -5  # Should show files in flight-maps/ subfolders
 ```
 
-**When to run this:**
-- After major changes to KML processing logic
-- If master metadata becomes corrupted
-- Before major deployments (optional)
+### Starting the Backend Server
 
-### Data Sources
-The system accepts KML files from:
-- **FlightRadar24**: Commercial flight tracking (most common)
-- **ADS-B Exchange**: Open source aircraft tracking
-- **Manual Imports**: Custom KML files with proper format
-
-### File Format Requirements
-KML files must contain:
-- Aircraft registration in name field or placemark name
-- Timestamp data in `<when>` elements or placemark names
-- Coordinate data in `<coordinates>` or `<gx:coord>` elements
-
-## 🔌 API Endpoints
-
-### Flight Data
-- `GET /api/flights` - Get all flight metadata (loads from master-metadata.json)
-- `GET /api/flights/:id` - Get specific flight details
-
-### KML Validation
-- `POST /api/validate-kml` - Validate KML files for airspace violations (local-only access)
-
-### File Serving  
-- `GET /flight-maps/:filename` - Serve PNG flight maps
-- `GET /uploads/:filename` - Serve KML files (restricted)
-
-### Static Assets
-- `GET /tmnp.kml` - TMNP boundary definition
-
-## 🔧 Technical Details
-
-### Performance Architecture
-```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   KML Files     │ -> │ Master Metadata  │ -> │ Ultra-Fast      │
-│   (423 files    │    │ Generator        │    │ Server Startup  │
-│    1.1GB)       │    │ (runs locally)   │    │ (8 seconds)     │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+**Recommended method:**
+```bash
+cd backend
+./launch.sh
 ```
 
-### Backend (Node.js/Express)
-- **🚀 Fast Startup**: Loads pre-generated metadata instead of scanning files
-- **📝 Smart Processing**: Incremental updates for new files only  
-- **🗺️ Map Generation**: SVG to PNG conversion with OpenStreetMap tiles
-- **💾 Intelligent Caching**: Metadata cached locally and in git
-- **🔍 Geospatial Analysis**: Point-in-polygon detection for airspace violations
+**Manual method:**
+```bash
+cd backend  
+node scripts/index-no-auth.cjs
+```
 
-### Frontend (React/Vite)
-- **📱 Responsive Design**: Works on desktop and mobile devices
-- **🔄 Real-time Updates**: Automatic refresh when new data is added
-- **🗺️ Interactive Maps**: Click to view detailed flight information
-- **📊 File Size Display**: Pre-calculated sizes shown instantly
-- **📥 Export Features**: Download reports and flight maps
+**Background mode (server keeps running after closing terminal):**
+```bash
+cd backend
+nohup node scripts/index-no-auth.cjs > server.log 2>&1 &
+```
 
-### Key Technologies
-- **Node.js**: Backend runtime
-- **Express**: Web server framework  
-- **React**: Frontend user interface
-- **Vite**: Frontend build tool
-- **Sharp**: Image processing for PNG generation
-- **fast-xml-parser**: KML file parsing
-- **Turf.js**: Geospatial calculations
+### Server Status & Monitoring
 
-### Performance Optimizations
-- **⚡ Master Metadata**: Pre-generated JSON file for instant loading
-- **📈 Incremental Processing**: Only handle new files, not entire dataset
-- **💾 Git-based Caching**: Metadata committed to repository
-- **🖼️ Lazy Loading**: Load flight maps on demand
-- **🗺️ Tile Caching**: Cache OpenStreetMap tiles locally
-- **📦 Batch Processing**: Efficient handling of large datasets
+- **Admin Interface**: `http://localhost:4000`
+- **Server Logs**: Check `backend/server.log` for processing details
+- **Status**: Admin interface shows current flights loaded and helicopter count
+
+### Common Issues & Solutions
+
+**Server won't start:**
+```bash
+# Check if port 4000 is in use
+lsof -i :4000
+# Kill any existing server
+pkill -f "node.*index-no-auth.cjs"
+```
+
+**Missing dependencies:**
+```bash
+cd backend
+npm install
+```
+
+**Metadata not updating:**
+1. Use "Refresh Metadata" button in admin interface
+2. Or manually regenerate: `node scripts/generate-master-metadata-main.cjs`
+
+**Static site testing (must be port 8080):**
+```bash
+# Start the static site server (runs on 8080)
+nohup node backend/scripts/serve-static-site.cjs > backend/static-site-server.log 2>&1 &
+
+# Verify it's listening
+lsof -nP -i :8080
+
+# Then visit:
+# http://localhost:8080
+```
 
 ## 🚁 Tracked Helicopters
 
@@ -366,57 +581,80 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 
 *Note: This represents only helicopters with recorded airspace violations. Many more helicopters operate legally in the Cape Town area without entering restricted airspace.*
 
+## 📝 Development Notes
+
+### ✅ Recent Major Changes (October 2025)
+
+**File System Restructuring:**
+- Moved all core data files from nested `/backend/server/` to `/backend/` root level
+- This simplifies the architecture and makes file locations more intuitive
+- Updated all scripts and build processes to use new paths
+
+**URL System Overhaul:**
+- **KML Files**: Now correctly use `raw.githubusercontent.com` (for text files)
+- **PNG Files**: Use `media.githubusercontent.com` (for Git LFS binary files)
+- **Static Site**: All references updated to point to correct GitHub URLs
+- **Build Scripts**: Generate proper URLs automatically
+
+**Why This Matters for AI Agents:**
+- File paths are now consistent and predictable
+- GitHub URLs work correctly for both KML downloads and PNG previews
+- Build system automatically generates correct URLs
+- No more manual URL fixes needed after deployment
+
+**Key Architecture Points:**
+1. **Backend Processing**: Files stay in `/backend/uploads/` and `/backend/flight-maps/`
+2. **Static Site Serving**: References files via GitHub raw/media URLs
+3. **URL Domain Logic**: 
+   - Text files (KML) → `raw.githubusercontent.com`
+   - Binary files (PNG) → `media.githubusercontent.com`
+4. **Build Process**: Automatically generates correct URLs based on file type
+
+### 🚀 For Future Development
+
+When working on this project, remember:
+
+**File Locations (Post-October 2025):**
+- Original KMLs: `/backend/uploads/[aircraft]/[filename].kml`
+- PNG Screenshots: `/backend/flight-maps/[aircraft]/[filename].png`
+- Metadata: `/backend/server/master-metadata.json`
+- Optimized KMLs: `/static-site/kml-optimised/[filename].kml`
+
+**URL Generation:**
+- Use `build-static-site.cjs` to generate URLs automatically
+- Don't hardcode GitHub URLs in templates
+- Test both KML downloads and PNG previews after changes
+
+**Testing:**
+- Always test with the static site server on port 8080
+- Verify KML downloads work from GitHub URLs
+- Check PNG previews load correctly in "Take Action" modals
+
 ## 🤝 Contributing
+
+Contributions are welcome! This project can be improved in many areas:
+
+### Development Areas
+- **🌐 Static Site**: Enhance the public interface and user experience
+- **🔧 Backend Processing**: Improve data validation and optimization scripts
+- **🗺️ Visualizations**: Better maps and violation detection displays
+- **📱 Mobile Experience**: Optimize for mobile devices
+- **📊 Analytics**: Advanced violation pattern analysis
+- **📋 Documentation**: Expand guides and tutorials
 
 ### Development Workflow
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/new-feature`
-3. Make your changes
-4. **Run performance tests**: Ensure fast startup still works
-5. **Update master metadata**: Run `node generate-master-metadata.cjs` if needed
-6. Test thoroughly with real data
-7. Commit with descriptive messages
-8. Push to your fork: `git push origin feature/new-feature`
-9. Create a Pull Request
+3. Make your changes to either `static-site/` or `backend/`
+4. Test thoroughly with real data
+5. Commit with descriptive messages
+6. Push to your fork and create a Pull Request
 
-### Areas for Contribution
-- **🚀 Performance**: Further optimize startup and processing times
-- **📊 Data Analysis**: Advanced violation pattern detection
-- **🗺️ Visualizations**: Enhanced map generation features
-- **📱 Mobile**: Improve mobile interface
-- **🔌 Integrations**: Add support for additional flight tracking APIs
-- **📝 Documentation**: Expand documentation and tutorials
-- **🧪 Testing**: Add automated tests for reliability
-
-### Code Style
-- Use descriptive variable names
-- Comment complex geospatial calculations  
+### Code Guidelines
 - Follow existing file organization patterns
-- **Performance-conscious**: Consider impact on startup time
+- Comment complex geospatial calculations
 - Test with real KML data before submitting
-
-## 📈 Future Enhancements
-
-### Planned Features
-- **📡 Real-time Monitoring**: Live flight tracking integration
-- **🔔 Alert System**: Notifications for new violations
-- **📊 Historical Analysis**: Trend analysis and reporting
-- **📱 Mobile App**: Native mobile application
-- **🔌 API Expansion**: Public API for third-party integrations
-- **☁️ Cloud Storage**: Offload large KML files to cloud storage
-
-### Performance Roadmap
-- **⚡ Sub-second Startup**: Target under 1 second server startup
-- **🔄 Real-time Updates**: WebSocket-based live updates
-- **📦 Incremental Deployments**: Only deploy changed files
-- **🗄️ Database Migration**: Move from JSON to proper database
-- **🌐 CDN Integration**: Serve static assets from CDN
-
-### Research Applications
-- **🦅 Wildlife Impact Studies**: Correlate flights with wildlife behavior
-- **🔊 Noise Pollution Analysis**: Map noise impact zones
-- **📅 Seasonal Patterns**: Identify peak violation periods
-- **🏢 Operator Analysis**: Track compliance by helicopter company
+- Keep static site lightweight for fast hosting
 
 ## 📄 License
 
