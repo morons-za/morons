@@ -121,29 +121,14 @@ try {
       );
     }
     
-    // Remove duplicate entries - prefer full renamed filenames over short hash filenames
-    const seenFlights = new Map();
+    // Remove duplicate entries based on filename (most reliable method)
+    const seenFilenames = new Set();
     const filteredFlights = [];
     
     for (const flight of flightData) {
-      // Extract the hash from the filename (last part before .kml)
-      const hash = flight.filename.replace('.kml', '').split('-').pop();
-      const key = `${flight.registration}-${flight.date}-${flight.time}-${hash}`;
-      
-      if (seenFlights.has(key)) {
-        // This is a duplicate - prefer the full filename over short filename
-        const existingFlight = seenFlights.get(key);
-        if (flight.filename.length > existingFlight.filename.length) {
-          // Replace with the longer (full) filename
-          const index = filteredFlights.indexOf(existingFlight);
-          filteredFlights[index] = flight;
-          seenFlights.set(key, flight);
-        }
-        // Otherwise, keep the existing flight (ignore the shorter filename)
-      } else {
-        // New flight - add it
+      if (!seenFilenames.has(flight.filename)) {
         filteredFlights.push(flight);
-        seenFlights.set(key, flight);
+        seenFilenames.add(flight.filename);
       }
     }
     
@@ -182,6 +167,15 @@ try {
   console.error('❌ Error loading metadata:', error.message);
   process.exit(1);
 }
+
+// Generate timestamp data
+const now = new Date();
+const buildTimestamp = now.toISOString();
+const latestFlightDate = flightData.length > 0 ? 
+  flightData.map(f => f.date).sort().slice(-1)[0] : null;
+
+console.log(`🕒 Build timestamp: ${buildTimestamp}`);
+console.log(`📅 Latest flight data: ${latestFlightDate}`);
 
 // UTC to South Africa time conversion
 function utcToSaTime(date, time) {
@@ -595,6 +589,39 @@ const htmlContent = `<!DOCTYPE html>
                 margin: 4px 0;
             }
         }
+        
+        /* Last Updated Timestamp - Gmail-like styling */
+        .last-updated-timestamp {
+            position: fixed;
+            bottom: 8px;
+            right: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #5f6368;
+            font-size: 11px;
+            font-family: 'Roboto', Arial, sans-serif;
+            padding: 4px 8px;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            pointer-events: none;
+            user-select: none;
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+        }
+        
+        .last-updated-timestamp span {
+            display: inline;
+        }
+        
+        /* Ensure it doesn't interfere with mobile layout */
+        @media (max-width: 768px) {
+            .last-updated-timestamp {
+                bottom: 4px;
+                right: 4px;
+                font-size: 10px;
+                padding: 3px 6px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -686,7 +713,9 @@ const htmlContent = `<!DOCTYPE html>
                 <div id="filtersContent" class="filters-content" style="display: none;">
                     <div class="filter-group">
                         <label>Registration:</label>
-                        <input type="text" id="registrationFilter" placeholder="Type registration...">
+                        <select id="registrationFilter">
+                            <option value="">All Registrations</option>
+                        </select>
                     </div>
                     <div class="filter-group">
                         <label>Date from:</label>
@@ -787,6 +816,8 @@ const htmlContent = `<!DOCTYPE html>
     </script>
     <script id="flight-data-script">
         window.embeddedFlightData = ${JSON.stringify(JSON.stringify(flightData))};
+        window.buildTimestamp = ${JSON.stringify(buildTimestamp)};
+        window.latestFlightDate = ${JSON.stringify(latestFlightDate)};
     </script>
     <script id="tmnp-kml-script">
         window.embeddedTmnpKml = ${JSON.stringify(tmnpKmlContent)};
@@ -969,15 +1000,36 @@ const htmlContent = `<!DOCTYPE html>
             instructionDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 25px 35px; border-radius: 12px; z-index: 1000; font-size: 14px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.4); max-width: 300px;';
             map.getContainer().appendChild(instructionDiv);
             
-            // Auto-hide instruction after 8 seconds
-            setTimeout(() => {
-                if (instructionDiv.parentNode) {
-                    instructionDiv.parentNode.removeChild(instructionDiv);
-                }
-            }, 8000);
+            // Disable map scroll zoom while instruction overlay is visible
+            map.scrollWheelZoom.disable();
+        }
+        
+        function populateRegistrationDropdown() {
+            const registrationSelect = document.getElementById('registrationFilter');
+            
+            // Get unique registrations from flight data
+            const uniqueRegistrations = [...new Set(flightData.map(flight => flight.registration))]
+                .filter(reg => reg && reg.trim()) // Filter out empty/null registrations
+                .sort(); // Sort alphabetically
+            
+            // Clear existing options (except "All Registrations")
+            registrationSelect.innerHTML = '<option value="">All Registrations</option>';
+            
+            // Add each unique registration as an option
+            uniqueRegistrations.forEach(registration => {
+                const option = document.createElement('option');
+                option.value = registration;
+                option.textContent = registration;
+                registrationSelect.appendChild(option);
+            });
+            
+            console.log(\`✅ Populated registration dropdown with \${uniqueRegistrations.length} unique registrations\`);
         }
         
         function setupEventListeners() {
+            // Populate registration dropdown
+            populateRegistrationDropdown();
+            
             // Set initial date range
             if (flightData.length > 0) {
                 const dates = flightData.map(f => f.date).sort();
@@ -986,12 +1038,19 @@ const htmlContent = `<!DOCTYPE html>
             }
             
             // Filter input events
-            document.getElementById('registrationFilter').addEventListener('input', applyFilters);
+            document.getElementById('registrationFilter').addEventListener('change', applyFilters);
             document.getElementById('dateStart').addEventListener('change', applyFilters);
             document.getElementById('dateEnd').addEventListener('change', applyFilters);
             
-            // Update clear button visibility on input
-            ['registrationFilter', 'dateStart', 'dateEnd'].forEach(id => {
+            // Update clear button visibility on input/change
+            document.getElementById('registrationFilter').addEventListener('change', () => {
+                const hasFilters = document.getElementById('registrationFilter').value || 
+                                  document.getElementById('dateStart').value || 
+                                  document.getElementById('dateEnd').value;
+                document.querySelector('.clear-btn').style.display = hasFilters ? 'block' : 'none';
+            });
+            
+            ['dateStart', 'dateEnd'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
                     const hasFilters = document.getElementById('registrationFilter').value || 
                                       document.getElementById('dateStart').value || 
@@ -1002,12 +1061,12 @@ const htmlContent = `<!DOCTYPE html>
         }
         
         function applyFilters() {
-            const registration = document.getElementById('registrationFilter').value.toLowerCase();
+            const registration = document.getElementById('registrationFilter').value;
             const dateStart = document.getElementById('dateStart').value;
             const dateEnd = document.getElementById('dateEnd').value;
             
             filteredData = flightData.filter(flight => {
-                const regMatch = !registration || flight.registration.toLowerCase().includes(registration);
+                const regMatch = !registration || flight.registration === registration;
                 const dateMatch = (!dateStart || flight.date >= dateStart) && (!dateEnd || flight.date <= dateEnd);
                 return regMatch && dateMatch;
             });
@@ -1148,6 +1207,8 @@ const htmlContent = `<!DOCTYPE html>
             const instructionOverlay = document.getElementById('instructionOverlay');
             if (instructionOverlay) {
                 instructionOverlay.remove();
+                // Re-enable map scroll zoom now that user is interacting with flights
+                map.scrollWheelZoom.enable();
             }
             
              // Show loading indicator in center of map
@@ -1654,6 +1715,19 @@ const htmlContent = `<!DOCTYPE html>
                 map.removeLayer(currentFlightLayer);
                 currentFlightLayer = null;
             }
+            
+            // Show instruction overlay again
+            const existingOverlay = document.getElementById('instructionOverlay');
+            if (!existingOverlay) {
+                const instructionDiv = document.createElement('div');
+                instructionDiv.id = 'instructionOverlay';
+                instructionDiv.innerHTML = '<div style="text-align: center; line-height: 1.4;"><div style="font-size: 18px; margin-bottom: 8px;">🗺️ Flight Tracking Map</div><div style="font-size: 14px; margin-bottom: 12px;">Scroll down to view flights</div><div style="font-size: 12px; color: #ccc;">Click the 👀 button on any flight to see its path</div></div>';
+                instructionDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 25px 35px; border-radius: 12px; z-index: 1000; font-size: 14px; font-weight: 500; box-shadow: 0 6px 20px rgba(0,0,0,0.4); max-width: 300px;';
+                map.getContainer().appendChild(instructionDiv);
+            }
+            
+            // Disable map scroll zoom so users can scroll the page
+            map.scrollWheelZoom.disable();
         }
         
             function jumpToTable() {
@@ -1683,6 +1757,62 @@ const htmlContent = `<!DOCTYPE html>
                     alert('No flight selected. Please click the eye button on a flight first.');
                 }
             }
+    </script>
+    
+    <!-- Last Updated Timestamp -->
+    <div id="lastUpdatedTimestamp" class="last-updated-timestamp">
+        <span id="siteUpdateTime"></span>
+        <span id="flightDataTime"></span>
+    </div>
+    
+    <script>
+        // Format and display last updated timestamp
+        function formatRelativeTime(dateString) {
+            const now = new Date();
+            const date = new Date(dateString);
+            const diffMs = now - date;
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            if (diffMins < 1) return 'just now';
+            if (diffMins < 60) return \`\${diffMins} minute\${diffMins === 1 ? '' : 's'} ago\`;
+            if (diffHours < 24) return \`\${diffHours} hour\${diffHours === 1 ? '' : 's'} ago\`;
+            if (diffDays < 7) return \`\${diffDays} day\${diffDays === 1 ? '' : 's'} ago\`;
+            
+            // For older dates, show the actual date
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+            });
+        }
+        
+        function formatFlightDate(dateString) {
+            if (!dateString) return 'No data';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: date.getFullYear() !== new Date().getFullYear() ? 'numeric' : undefined
+            });
+        }
+        
+        // Update timestamp display
+        document.addEventListener('DOMContentLoaded', function() {
+            const siteUpdateEl = document.getElementById('siteUpdateTime');
+            const flightDataEl = document.getElementById('flightDataTime');
+            
+            if (window.buildTimestamp) {
+                const relativeTime = formatRelativeTime(window.buildTimestamp);
+                siteUpdateEl.textContent = \`Site updated \${relativeTime}\`;
+            }
+            
+            if (window.latestFlightDate) {
+                const flightDate = formatFlightDate(window.latestFlightDate);
+                flightDataEl.textContent = \` • Flight data up to \${flightDate}\`;
+            }
+        });
     </script>
 </body>
 </html>`;
