@@ -577,13 +577,70 @@ const htmlContent = `<!DOCTYPE html>
                 font-size: 1.5rem;
             }
             
-            .filters {
+            /* Summary cards - stack vertically on mobile */
+            .summary-cards {
                 flex-direction: column;
+                gap: 0;
+            }
+            
+            .summary-card {
+                border-right: none;
+                border-bottom: 1px solid #e9ecef;
+                padding: 12px 16px;
+            }
+            
+            .summary-card:last-child {
+                border-bottom: none;
+            }
+            
+            .summary-label {
+                font-size: 11px;
+                margin-bottom: 6px;
+            }
+            
+            .summary-value {
+                font-size: 20px;
+            }
+            
+            /* Tools and filters - improve mobile layout */
+            .filters {
+                padding: 16px;
+            }
+            
+            .filters-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+                margin-bottom: 16px;
+            }
+            
+            .filters-controls {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .filters-content {
+                flex-direction: column;
+                gap: 16px;
                 align-items: stretch;
             }
             
-            .filters input, .filters button {
-                margin: 4px 0;
+            .filter-group {
+                min-width: unset;
+                width: 100%;
+            }
+            
+            .filter-group select,
+            .filter-group input {
+                width: 100%;
+                box-sizing: border-box;
+            }
+            
+            /* Export CSV button - full width on mobile */
+            .filter-group button {
+                width: 100%;
+                padding: 12px 16px;
+                font-size: 16px;
             }
         }
         
