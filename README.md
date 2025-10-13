@@ -11,7 +11,7 @@ A comprehensive system for monitoring and analyzing helicopter flights that viol
 - [Quick Start](#quick-start)
 - [Project Structure](#project-structure)
 - [Data Processing Workflow](#data-processing-workflow)
-- [Deployment](#deployment)
+- [Deployment](#deployment) - See also [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment system docs
 - [Tracked Helicopters](#tracked-helicopters)
 - [Contributing](#contributing)
 - [License](#license)
@@ -130,6 +130,15 @@ The backend system is where the **data processing magic happens**, designed to r
 
 ## 🚀 Quick Start
 
+**🏃 Want to start immediately?** Just run:
+```bash
+cd /Users/werner/Dev/heli/heli-map
+./launch.sh
+```
+This starts both servers and opens both interfaces automatically!
+
+---
+
 The project is split into two parts: a static site and a backend. You can work with either component independently.
 
 ### Static Site (Public)
@@ -153,29 +162,29 @@ The project is split into two parts: a static site and a backend. You can work w
    npm install
    ```
 
-2. **Start the backend server:**
+2. **Start both servers (Unified Launcher - Recommended):**
    ```bash
-   cd backend
    ./launch.sh
-   # OR manually:
-   node scripts/index-no-auth.cjs
    ```
-   The server will run at `http://localhost:4000`
+   This starts both the backend admin server (port 4000) AND the static site server (port 8080), then opens both interfaces in your browser automatically.
 
-3. **Start the static site server (for testing):**
+3. **OR start servers individually (Advanced):**
    ```bash
-   # Navigate to backend scripts directory
+   # Backend only
+   cd backend
+   node scripts/index-no-auth.cjs
+   
+   # Static site only (in a separate terminal)
    cd backend/scripts
-   # Start the static site server on port 8080
    node serve-static-site.cjs
    ```
-   The static site will be available at `http://localhost:8080`
    
    **Important**: The static site server MUST be running on port 8080 for local testing. This server serves the optimized KML files and other static assets locally before the site is deployed to the internet. Without this server, the "View Flight" functionality will fail because it cannot access the local optimized KML files.
 
-4. **Backend Administration:**
-   - Open `http://localhost:4000` in your browser for the admin interface
-   - Use the web interface for all processing tasks
+4. **Access the interfaces:**
+   - **Backend Admin**: `http://localhost:4000` (opens automatically)
+   - **Static Site**: `http://localhost:8080` (opens automatically)
+   - Both interfaces open in your browser when using the unified launcher
 
 5. **Process flow:**
    - Upload KMLs via web interface → Smart KML Manager organizes files → PNG generation → Refresh Metadata → Build static site
@@ -188,27 +197,26 @@ The project is split into two parts: a static site and a backend. You can work w
    ```
    Your static site host will deploy the updated `static-site/` automatically (if configured).
 
-### 🌐 Static Site Testing
+### 🌐 Local Testing
 
-**Before testing the static site locally, you MUST start the static site server:**
+**Easy Way - Use the Unified Launcher:**
 
 ```bash
-# Navigate to backend scripts directory
-cd backend/scripts
-
-# Start the static site server (always use port 8080)
-node serve-static-site.cjs
+# From project root
+./launch.sh
 ```
 
-**Server Requirements:**
-- **Port**: Must always be 8080 (hardcoded in the static site)
-- **Purpose**: Serves optimized KML files and static assets locally
-- **When to use**: Before deploying to internet, for local testing
-- **Critical**: Without this server, "View Flight" buttons will fail
+This automatically:
+- ✅ Starts backend server (port 4000)
+- ✅ Starts static site server (port 8080)
+- ✅ Opens both interfaces in your browser
+- ✅ Press Ctrl+C to stop both servers
 
 **Access Points:**
+- **Backend Admin**: http://localhost:4000
 - **Static Site**: http://localhost:8080
-- **Backend Admin**: http://localhost:4000 (separate server)
+
+**Why port 8080?** The static site must run on port 8080 (hardcoded) to serve optimized KML files locally before deployment.
 
 **Troubleshooting:**
 - If port 8080 is in use: `lsof -ti:8080 | xargs kill -9`
@@ -220,6 +228,7 @@ node serve-static-site.cjs
 
 ```
 heli-map/
+├── launch.sh                        # 🚀 Unified launcher (starts both servers)
 ├── README.md                         # This documentation
 ├── WARP.md                          # Terminal/Warp guidelines
 ├── DEPLOYMENT.md                    # Deployment system documentation
@@ -232,7 +241,7 @@ heli-map/
 │   ├── icon.svg                     # Website favicon
 │   ├── tmnp.kml                     # TMNP boundary definition
 │   ├── kml-optimised/              # Optimized KML files (public)
-│   ├── flight-maps/                # Basic flight maps (if included)
+│   ├── README.md                   # Static site documentation
 │   └── images/                     # Website assets
 │       ├── helicopters/            # Helicopter photos
 │       ├── marker-icon.png         # Map marker icons
@@ -241,17 +250,18 @@ heli-map/
 │
 └── backend/                        # 🔧 DATA PROCESSING (local)
     ├── backend.html                # Admin web interface
-    ├── launch.sh                   # Server startup script
+    ├── launch-backend-only.sh      # Backend-only launcher (advanced)
     ├── package.json                # Node.js dependencies
     │
     ├── config/                     # ⚙️ Configuration files
     │   ├── deployment-config.json  # GitHub deployment settings
     │   └── deployment-status.json  # Current deployment state
     │
-    ├── tests/                      # 🧪 Test & debug scripts
-    │   └── debug/                  # Debug scripts
-    │       ├── test-*.cjs          # Test scripts
-    │       └── debug-*.cjs         # Debug scripts
+    ├── logs/                       # 📋 Log files (auto-generated, gitignored)
+    │   ├── server.log              # Main backend server logs
+    │   ├── static-site-server.log  # Static site server logs
+    │   ├── deployment.log          # Deployment system logs
+    │   └── optimize-kml.log        # KML optimization logs
     │
     ├── scripts/                    # 🚀 Production scripts
     │   ├── index-no-auth.cjs       # Main backend server
@@ -262,6 +272,11 @@ heli-map/
     │   ├── serve-static-site.cjs   # Static site local testing server
     │   ├── deploy-to-github.cjs    # Git deployment automation
     │   └── optimise_kml.py         # KML optimization script
+    │
+    ├── tests/                      # 🧪 Test & debug scripts
+    │   └── debug/                  # Debug scripts
+    │       ├── test-*.cjs          # Test scripts
+    │       └── debug-*.cjs         # Debug scripts
     │
     ├── server/                     # 📊 Metadata and runtime data
     │   ├── duplicates/             # Duplicate flight files
@@ -462,8 +477,8 @@ The `static-site/` folder is designed for deployment to:
 - Helicopter photos and basic assets
 
 🚫 **NOT Included in Static Site:**
-- Original large KML files
-- PNG violation screenshots
+- Original large KML files (stay in `/backend/uploads/`)
+- PNG violation screenshots (stay in `/backend/flight-maps/`, referenced via GitHub URLs)
 - Processing scripts and tools
 - Backend administration interface
 
@@ -542,13 +557,13 @@ node scripts/index-no-auth.cjs
 **Background mode (server keeps running after closing terminal):**
 ```bash
 cd backend
-nohup node scripts/index-no-auth.cjs > server.log 2>&1 &
+nohup node scripts/index-no-auth.cjs > logs/server.log 2>&1 &
 ```
 
 ### Server Status & Monitoring
 
 - **Admin Interface**: `http://localhost:4000`
-- **Server Logs**: Check `backend/server.log` for processing details
+- **Server Logs**: Check `backend/logs/server.log` for processing details
 - **Status**: Admin interface shows current flights loaded and helicopter count
 
 ### Common Issues & Solutions
@@ -571,13 +586,13 @@ npm install
 1. Use "Refresh Metadata" button in admin interface
 2. Or manually regenerate: `node scripts/generate-master-metadata-main.cjs`
 
-**Static site testing (must be port 8080):**
+**Stop all servers:**
 ```bash
-# Start the static site server (runs on 8080)
-nohup node backend/scripts/serve-static-site.cjs > backend/static-site-server.log 2>&1 &
+# Stop both backend and static site servers
+lsof -ti:4000 -ti:8080 | xargs kill -9
 
-# Verify it's listening
-lsof -nP -i :8080
+# Verify they're stopped
+lsof -i :4000 -i :8080
 
 # Then visit:
 # http://localhost:8080
@@ -613,13 +628,27 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 
 ### ✅ Recent Major Changes (October 2025)
 
+**Unified Launcher Created (October 9, 2025):**
+- Created `/launch.sh` in project root - **ONE command to start everything**
+- Starts both backend (port 4000) and static site (port 8080) servers
+- Automatically opens both interfaces in browser
+- Graceful shutdown with Ctrl+C (stops both servers cleanly)
+- Logs written to `/backend/logs/` for troubleshooting
+- Moved old `/backend/launch.sh` to `/backend/launch-backend-only.sh` (advanced use)
+
 **File Organization Restructuring (October 9, 2025):**
 - Created `/backend/tests/debug/` directory for all test and debug scripts
 - Created `/backend/config/` directory for configuration files
+- Created `/backend/logs/` directory for all log files
 - Moved 16 test/debug scripts from `/backend/` root to `/backend/tests/debug/`
 - Moved configuration files to `/backend/config/`
+- Moved all log files to `/backend/logs/` (centralized logging)
 - Moved `DEPLOYMENT-README.md` from `/backend/` to project root as `DEPLOYMENT.md`
-- Established principle: **All `.md` documentation files belong in project root**
+- Removed `/static-site/flight-maps/` directory (empty, violated architecture principle)
+- Established principles:
+  - **All `.md` documentation files belong in project root**
+  - **All `.log` files go in `/backend/logs/`** (never in backend root or project root)
+  - **PNG flight maps NEVER go in static site** (backend only, referenced via GitHub URLs)
 - Created `.ai/guidelines` file with comprehensive file organization rules for AI agents
 - Updated all documentation (README.md, WARP.md, DEPLOYMENT.md) with new structure
 - All relative paths in moved scripts updated to work from new locations
@@ -655,7 +684,7 @@ When working on this project, remember:
 
 **File Locations (Post-October 9, 2025):**
 - Production Scripts: `/backend/scripts/[script-name].cjs`
-- Test/Debug Scripts: `/backend/tests/debug/[test-name].cjs`
+- Test/Debug Scripts: `/backend/scripts/tests/[test-name].cjs`
 - Configuration Files: `/backend/config/[config-name].json`
 - Original KMLs: `/backend/uploads/[aircraft]/[filename].kml`
 - PNG Screenshots: `/backend/flight-maps/[aircraft]/[filename].png`
@@ -678,7 +707,7 @@ When working on this project, remember:
 - Always test with the static site server on port 8080
 - Verify KML downloads work from GitHub URLs
 - Check PNG previews load correctly in "Take Action" modals
-- Debug scripts are available in `/backend/tests/debug/`
+- Debug scripts are available in `/backend/scripts/tests/`
 
 ## 🤝 Contributing
 

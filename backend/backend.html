@@ -595,113 +595,110 @@
             </div>
             <div class="modal-body">
         
-        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
-            <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🌐 How to start the Static Site Server (for local testing)</summary>
-            <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
-                <p><strong>Why:</strong> The static site must be served via a local web server to load optimized KML files. This project is hardcoded to use <strong>http://localhost:8080</strong>.</p>
-                
-                <h5>Steps (Recommended):</h5>
-                <ol>
-                    <li>Open terminal and navigate to the backend scripts directory:
-                        <div class="code-block">
-                            <code>cd /Users/werner/Dev/heli/heli-map/backend/scripts</code>
-                            <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend/scripts', this)">Copy</button>
-                        </div>
-                    </li>
-                    <li>Start the static site server on port 8080:
-                        <div class="code-block">
-                            <code>node serve-static-site.cjs</code>
-                            <button class="copy-btn" onclick="copyToClipboard('node serve-static-site.cjs', this)">Copy</button>
-                        </div>
-                    </li>
-                    <li>Open your browser and go to:
-                        <div class="code-block">
-                            <code>http://localhost:8080</code>
-                            <button class="copy-btn" onclick="copyToClipboard('http://localhost:8080', this)">Copy</button>
-                        </div>
-                    </li>
-                </ol>
-                
-                <h5>Background mode (optional):</h5>
-                <div class="code-block">
-                    <code>nohup node /Users/werner/Dev/heli/heli-map/backend/scripts/serve-static-site.cjs > /Users/werner/Dev/heli/heli-map/backend/static-site-server.log 2>&1 &</code>
-                    <button class="copy-btn" onclick="copyToClipboard('nohup node /Users/werner/Dev/heli/heli-map/backend/scripts/serve-static-site.cjs > /Users/werner/Dev/heli/heli-map/backend/static-site-server.log 2>&1 &', this)">Copy</button>
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;" open>
+            <summary style="cursor: pointer; font-weight: bold; color: #28a745; font-size: 18px;">🚀 START Both Servers</summary>
+            <div style="margin-top: 10px; padding: 20px; background: #d4edda; border-radius: 4px; border: 2px solid #28a745;">
+                <p style="font-size: 16px; margin-bottom: 15px;"><strong>Copy and paste into Terminal:</strong></p>
+                <div class="code-block" style="font-size: 14px;">
+                    <code>cd /Users/werner/Dev/heli/heli-map && ./launch.sh</code>
+                    <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map && ./launch.sh', this)">Copy</button>
                 </div>
-                <p><strong>Note:</strong> The static site must run on port <strong>8080</strong> for local testing.</p>
+                <p style="font-size: 13px; color: #155724; margin-top: 10px;">✅ Starts backend (4000) + static site (8080) + opens both in browser</p>
+            </div>
+        </details>
+        
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;" open>
+            <summary style="cursor: pointer; font-weight: bold; color: #dc3545; font-size: 18px;">🛑 STOP Both Servers</summary>
+            <div style="margin-top: 10px; padding: 20px; background: #f8d7da; border-radius: 4px; border: 2px solid #dc3545;">
+                <p style="font-size: 16px; margin-bottom: 15px;"><strong>Copy and paste into Terminal:</strong></p>
+                <div class="code-block" style="font-size: 14px;">
+                    <code>lsof -ti:4000 -ti:8080 | xargs kill -9</code>
+                    <button class="copy-btn" onclick="copyToClipboard('lsof -ti:4000 -ti:8080 | xargs kill -9', this)">Copy</button>
+                </div>
+                <p style="font-size: 13px; color: #721c24; margin-top: 10px;">💥 Kills all servers immediately (port 4000 and 8080)</p>
+                <p style="font-size: 12px; color: #666; margin-top: 10px; background: #fff; padding: 8px; border-radius: 4px;">
+                    <strong>Note:</strong> If you used ./launch.sh, you can also press <kbd>Ctrl+C</kbd> in the Terminal window where it's running.
+                </p>
             </div>
         </details>
         
         <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
-            <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🚁 How to start the Backend Server (for KML processing)</summary>
+            <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🚁 Start Backend Server Only (Advanced)</summary>
             <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
                 <p><strong>Why:</strong> The backend server processes KML files, validates helicopter flights, generates PNG maps, and provides the API for this admin interface.</p>
                 
-                <h5>Easy Method (Recommended):</h5>
+                <h5>Copy and paste this into Terminal:</h5>
                 <div class="code-block">
-                    <code>cd /Users/werner/Dev/heli/heli-map/backend && ./launch.sh</code>
-                    <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend && ./launch.sh', this)">Copy</button>
+                    <code>cd /Users/werner/Dev/heli/heli-map/backend && node scripts/index-no-auth.cjs</code>
+                    <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend && node scripts/index-no-auth.cjs', this)">Copy</button>
                 </div>
                 
-                <h5>Manual Method:</h5>
-                <ol>
-                    <li>Navigate to the backend directory:
-                        <div class="code-block">
-                            <code>cd /Users/werner/Dev/heli/heli-map/backend</code>
-                            <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend', this)">Copy</button>
-                        </div>
-                    </li>
-                    <li>Start the server:
-                        <div class="code-block">
-                            <code>node scripts/index-no-auth.cjs</code>
-                            <button class="copy-btn" onclick="copyToClipboard('node scripts/index-no-auth.cjs', this)">Copy</button>
-                        </div>
-                    </li>
-                    <li>The server will be available at:
-                        <div class="code-block">
-                            <code>http://localhost:4000</code>
-                            <button class="copy-btn" onclick="copyToClipboard('http://localhost:4000', this)">Copy</button>
-                        </div>
-                    </li>
-                </ol>
+                <p><strong>Then visit:</strong> <a href="http://localhost:4000" target="_blank">http://localhost:4000</a></p>
                 
                 <p><strong>Features:</strong> Upload KML files, validate violations, generate flight maps, optimize files for the static site.</p>
             </div>
         </details>
         
         <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
-            <summary style="cursor: pointer; font-weight: bold; color: #dc3545;">🛑 How to stop the servers</summary>
-            <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 4px;">
-                <h5>Stop Static Site Server:</h5>
-                <ul>
-                    <li><strong>If running in terminal:</strong> Press <kbd>Ctrl+C</kbd> in the terminal window</li>
-                    <li><strong>If running in background:</strong> Stop the process listening on 8080:
-                        <div class="code-block">
-                            <code>lsof -ti:8080 | xargs kill -9</code>
-                            <button class="copy-btn" onclick="copyToClipboard('lsof -ti:8080 | xargs kill -9', this)">Copy</button>
-                        </div>
-                    </li>
-                </ul>
+            <summary style="cursor: pointer; font-weight: bold; color: #007bff;">🌐 Start Static Site Server Only (Advanced)</summary>
+            <div style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                <p><strong>Why:</strong> The static site must be served via a local web server to load optimized KML files. This project uses <strong>http://localhost:8080</strong>.</p>
                 
-                <h5>Stop Backend Server:</h5>
-                <ul>
-                    <li><strong>If running in terminal:</strong> Press <kbd>Ctrl+C</kbd> in the terminal window</li>
-                    <li><strong>If running in background:</strong> Find and kill the process:
-                        <div class="code-block">
-                            <code>lsof -i :4000</code>
-                            <button class="copy-btn" onclick="copyToClipboard('lsof -i :4000', this)">Copy</button>
-                        </div>
-                        <div class="code-block">
-                            <code>kill [PID from above command]</code>
-                            <button class="copy-btn" onclick="copyToClipboard('kill ', this)">Copy</button>
-                        </div>
-                    </li>
-                </ul>
-                
-                <p><strong>Tip:</strong> If something goes wrong, you can always restart both servers using the instructions above. To verify the static site is running, use:</p>
+                <h5>Copy and paste this into Terminal:</h5>
                 <div class="code-block">
-                    <code>lsof -nP -i :8080</code>
-                    <button class="copy-btn" onclick="copyToClipboard('lsof -nP -i :8080', this)">Copy</button>
+                    <code>cd /Users/werner/Dev/heli/heli-map/backend/scripts && node serve-static-site.cjs</code>
+                    <button class="copy-btn" onclick="copyToClipboard('cd /Users/werner/Dev/heli/heli-map/backend/scripts && node serve-static-site.cjs', this)">Copy</button>
                 </div>
+                
+                <p><strong>Then visit:</strong> <a href="http://localhost:8080" target="_blank">http://localhost:8080</a></p>
+                
+                <p><strong>Note:</strong> The static site must run on port <strong>8080</strong> for local testing.</p>
+            </div>
+        </details>
+        
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
+            <summary style="cursor: pointer; font-weight: bold; color: #dc3545; font-size: 16px;">🛑 STOP SERVERS (Important!)</summary>
+            <div style="margin-top: 10px; padding: 15px; background: #f8d7da; border-radius: 4px; border: 2px solid #dc3545;">
+                <p><strong>Choose the method that matches how you started the servers:</strong></p>
+                
+                <h5>✅ If you used the Unified Launcher (./launch.sh):</h5>
+                <div style="background: #fff; padding: 10px; border-radius: 4px; margin: 10px 0;">
+                    <p><strong>Simply press <kbd>Ctrl+C</kbd> in the Terminal window</strong></p>
+                    <p>This will stop BOTH servers automatically and clean up everything. ✨</p>
+                </div>
+                
+                <h5>🔧 If servers are running in background (or Ctrl+C didn't work):</h5>
+                <p><strong>Stop ALL servers with one command:</strong></p>
+                <div class="code-block">
+                    <code>lsof -ti:4000 -ti:8080 | xargs kill -9</code>
+                    <button class="copy-btn" onclick="copyToClipboard('lsof -ti:4000 -ti:8080 | xargs kill -9', this)">Copy</button>
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">This kills both backend (4000) and static site (8080) servers.</p>
+                
+                <hr style="margin: 15px 0; border: 1px solid #ddd;">
+                
+                <h5>🎯 Stop Individual Servers (Advanced):</h5>
+                
+                <p><strong>Stop Backend Server (port 4000):</strong></p>
+                <div class="code-block">
+                    <code>lsof -ti:4000 | xargs kill -9</code>
+                    <button class="copy-btn" onclick="copyToClipboard('lsof -ti:4000 | xargs kill -9', this)">Copy</button>
+                </div>
+                
+                <p><strong>Stop Static Site Server (port 8080):</strong></p>
+                <div class="code-block">
+                    <code>lsof -ti:8080 | xargs kill -9</code>
+                    <button class="copy-btn" onclick="copyToClipboard('lsof -ti:8080 | xargs kill -9', this)">Copy</button>
+                </div>
+                
+                <hr style="margin: 15px 0; border: 1px solid #ddd;">
+                
+                <h5>🔍 Check if servers are running:</h5>
+                <div class="code-block">
+                    <code>lsof -i :4000 -i :8080</code>
+                    <button class="copy-btn" onclick="copyToClipboard('lsof -i :4000 -i :8080', this)">Copy</button>
+                </div>
+                <p style="font-size: 12px; color: #666; margin-top: 5px;">If nothing appears, no servers are running. If you see output, servers are running.</p>
             </div>
         </details>
         

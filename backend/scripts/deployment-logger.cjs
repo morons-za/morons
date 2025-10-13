@@ -3,7 +3,7 @@ const path = require('path');
 
 class DeploymentLogger {
     constructor(logFilePath = null) {
-        this.logFile = logFilePath || path.join(__dirname, '..', 'deployment.log');
+        this.logFile = logFilePath || path.join(__dirname, '..', 'logs', 'deployment.log');
         this.enabled = true;
     }
 

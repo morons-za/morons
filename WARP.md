@@ -14,14 +14,17 @@ This is the **TMNP Helicopter Tracking System** - a Node.js web application that
 cd backend
 npm install
 
-# Start backend server (admin interface)
+# Start BOTH servers (Recommended)
+cd ..  # Back to project root
 ./launch.sh
-# OR manually:
-node scripts/index-no-auth.cjs
 
-# Start static site server (for local testing)
+# OR start servers individually (Advanced)
+cd backend
+node scripts/index-no-auth.cjs  # Backend only
+
+# In another terminal:
 cd backend/scripts
-node serve-static-site.cjs
+node serve-static-site.cjs  # Static site only
 ```
 
 ### Server Management
@@ -176,15 +179,14 @@ backend/
 ├── config/                    # Configuration files
 │   ├── deployment-config.json
 │   └── deployment-status.json
-├── tests/                     # Test and debug scripts
-│   └── debug/                # Debug scripts
-│       ├── test-*.cjs        # Test scripts
-│       └── debug-*.cjs       # Debug scripts
 ├── scripts/                   # Production scripts
 │   ├── index-no-auth.cjs     # Main server
 │   ├── smart-kml-manager.cjs # KML processing
 │   ├── generate-flight-image.cjs # PNG generation
-│   └── build-static-site.cjs # Site builder
+│   ├── build-static-site.cjs # Site builder
+│   └── tests/                # Test and debug scripts
+│       ├── test-*.cjs        # Test scripts
+│       └── debug-*.cjs       # Debug scripts
 ├── uploads/                   # Original KML files
 │   ├── ZS-HBO/               # Organized by aircraft
 │   │   ├── ZS-HBO_2024-03-15_violation.kml
@@ -236,7 +238,7 @@ static-site/
 curl http://localhost:4000/api/status
 
 # View processing logs
-tail -f backend/server.log
+tail -f backend/logs/server.log
 
 # Reset stuck uploads
 rm -rf backend/uploads/temp/
@@ -251,7 +253,7 @@ rm -rf backend/uploads/temp/
 - Examples: `generate-flight-image.cjs`, `smart-kml-manager.cjs`, `build-static-site.cjs`
 - Naming: `[action]-[noun].cjs` (e.g., `generate-flight-image.cjs`)
 
-**Test/Debug Scripts**: `/backend/tests/debug/`
+**Test/Debug Scripts**: `/backend/scripts/tests/`
 - Temporary debugging scripts
 - Unit tests for features
 - Examples: `test-violation.cjs`, `debug-coordinates.cjs`
@@ -279,7 +281,7 @@ rm -rf backend/uploads/temp/
 
 ### Before Creating a New File, Ask:
 1. Is this production code? → `/backend/scripts/`
-2. Is this a test/debug script? → `/backend/tests/debug/`
+2. Is this a test/debug script? → `/backend/scripts/tests/`
 3. Is this configuration? → `/backend/config/`
 4. Is this metadata/runtime data? → `/backend/server/`
 

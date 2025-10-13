@@ -105,8 +105,8 @@ let flightData = [];
 
 try {
   // Try to load from master metadata first
-  if (fs.existsSync('backend/server/master-metadata.json')) {
-    const masterMetadata = JSON.parse(fs.readFileSync('backend/server/master-metadata.json', 'utf8'));
+  if (fs.existsSync('backend/scripts/master-metadata.json')) {
+    const masterMetadata = JSON.parse(fs.readFileSync('backend/scripts/master-metadata.json', 'utf8'));
     console.log('✅ Loaded master metadata');
     
     // Handle both array and object formats
@@ -133,8 +133,8 @@ try {
     }
     
     flightData = filteredFlights;
-  } else if (fs.existsSync('backend/server/kml-metadata-cache.json')) {
-    const cacheMetadata = JSON.parse(fs.readFileSync('backend/server/kml-metadata-cache.json', 'utf8'));
+  } else if (fs.existsSync('backend/scripts/kml-metadata-cache.json')) {
+    const cacheMetadata = JSON.parse(fs.readFileSync('backend/scripts/kml-metadata-cache.json', 'utf8'));
     console.log('✅ Loaded cache metadata');
     
     // Convert to flat array format
@@ -718,6 +718,12 @@ const htmlContent = `<!DOCTYPE html>
                         </select>
                     </div>
                     <div class="filter-group">
+                        <label>Owner:</label>
+                        <select id="ownerFilter">
+                            <option value="">All Owners</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
                         <label>Date from:</label>
                         <input type="date" id="dateStart">
                     </div>
@@ -863,6 +869,7 @@ const htmlContent = `<!DOCTYPE html>
             
             // Show/hide clear button based on active filters
             const hasFilters = document.getElementById('registrationFilter').value || 
+                              document.getElementById('ownerFilter').value ||
                               document.getElementById('dateStart').value || 
                               document.getElementById('dateEnd').value;
             clearBtn.style.display = hasFilters ? 'block' : 'none';
@@ -1026,9 +1033,32 @@ const htmlContent = `<!DOCTYPE html>
             console.log(\`✅ Populated registration dropdown with \${uniqueRegistrations.length} unique registrations\`);
         }
         
+        function populateOwnerDropdown() {
+            const ownerSelect = document.getElementById('ownerFilter');
+            
+            // Get unique owners from flight data
+            const uniqueOwners = [...new Set(flightData.map(flight => flight.owner))]
+                .filter(owner => owner && owner.trim()) // Filter out empty/null owners
+                .sort(); // Sort alphabetically
+            
+            // Clear existing options (except "All Owners")
+            ownerSelect.innerHTML = '<option value="">All Owners</option>';
+            
+            // Add each unique owner as an option
+            uniqueOwners.forEach(owner => {
+                const option = document.createElement('option');
+                option.value = owner;
+                option.textContent = owner;
+                ownerSelect.appendChild(option);
+            });
+            
+            console.log(\`✅ Populated owner dropdown with \${uniqueOwners.length} unique owners\`);
+        }
+        
         function setupEventListeners() {
-            // Populate registration dropdown
+            // Populate dropdowns
             populateRegistrationDropdown();
+            populateOwnerDropdown();
             
             // Set initial date range
             if (flightData.length > 0) {
@@ -1039,12 +1069,22 @@ const htmlContent = `<!DOCTYPE html>
             
             // Filter input events
             document.getElementById('registrationFilter').addEventListener('change', applyFilters);
+            document.getElementById('ownerFilter').addEventListener('change', applyFilters);
             document.getElementById('dateStart').addEventListener('change', applyFilters);
             document.getElementById('dateEnd').addEventListener('change', applyFilters);
             
             // Update clear button visibility on input/change
             document.getElementById('registrationFilter').addEventListener('change', () => {
                 const hasFilters = document.getElementById('registrationFilter').value || 
+                                  document.getElementById('ownerFilter').value ||
+                                  document.getElementById('dateStart').value || 
+                                  document.getElementById('dateEnd').value;
+                document.querySelector('.clear-btn').style.display = hasFilters ? 'block' : 'none';
+            });
+            
+            document.getElementById('ownerFilter').addEventListener('change', () => {
+                const hasFilters = document.getElementById('registrationFilter').value || 
+                                  document.getElementById('ownerFilter').value ||
                                   document.getElementById('dateStart').value || 
                                   document.getElementById('dateEnd').value;
                 document.querySelector('.clear-btn').style.display = hasFilters ? 'block' : 'none';
@@ -1053,6 +1093,7 @@ const htmlContent = `<!DOCTYPE html>
             ['dateStart', 'dateEnd'].forEach(id => {
                 document.getElementById(id).addEventListener('input', () => {
                     const hasFilters = document.getElementById('registrationFilter').value || 
+                                      document.getElementById('ownerFilter').value ||
                                       document.getElementById('dateStart').value || 
                                       document.getElementById('dateEnd').value;
                     document.querySelector('.clear-btn').style.display = hasFilters ? 'block' : 'none';
@@ -1062,13 +1103,15 @@ const htmlContent = `<!DOCTYPE html>
         
         function applyFilters() {
             const registration = document.getElementById('registrationFilter').value;
+            const owner = document.getElementById('ownerFilter').value;
             const dateStart = document.getElementById('dateStart').value;
             const dateEnd = document.getElementById('dateEnd').value;
             
             filteredData = flightData.filter(flight => {
                 const regMatch = !registration || flight.registration === registration;
+                const ownerMatch = !owner || flight.owner === owner;
                 const dateMatch = (!dateStart || flight.date >= dateStart) && (!dateEnd || flight.date <= dateEnd);
-                return regMatch && dateMatch;
+                return regMatch && ownerMatch && dateMatch;
             });
             
             renderTable();
@@ -1077,6 +1120,7 @@ const htmlContent = `<!DOCTYPE html>
         
         function clearFilters() {
             document.getElementById('registrationFilter').value = '';
+            document.getElementById('ownerFilter').value = '';
             document.getElementById('dateStart').value = '';
             document.getElementById('dateEnd').value = '';
             filteredData = [...flightData];
@@ -1115,6 +1159,7 @@ const htmlContent = `<!DOCTYPE html>
             
             // Show/hide clear button
             const hasFilters = document.getElementById('registrationFilter').value || 
+                              document.getElementById('ownerFilter').value ||
                               document.getElementById('dateStart').value || 
                               document.getElementById('dateEnd').value;
             document.querySelector('.clear-btn').style.display = hasFilters ? 'block' : 'none';

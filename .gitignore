@@ -6,6 +6,9 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Backend logs directory (all logs are auto-generated)
+backend/logs/*.log
+
 node_modules
 dist
 dist-ssr

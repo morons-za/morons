@@ -1,47 +1,29 @@
 {
   "rejected": [
     {
-      "file": "ZS-HMB-track-EGM96-2.kml",
-      "duplicateOf": "2025-09-29-ZS-HMB-4c20703e.kml",
+      "file": "3c76001a.kml",
+      "duplicateOf": "2025-10-01-ZS-HIE-3c76001a.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-07T15:17:18.047Z"
+      "timestamp": "2025-10-13T08:46:13.419Z"
     },
     {
-      "file": "ZS-HMB-track-EGM96-3.kml",
-      "duplicateOf": "2025-09-29-ZS-HMB-eabebb78.kml",
+      "file": "3c7e57c7.kml",
+      "duplicateOf": "2025-10-03-ZS-HIE-3c7e57c7.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-07T15:17:18.047Z"
+      "timestamp": "2025-10-13T08:46:13.419Z"
     },
     {
-      "file": "ZS-HMB-track-EGM96-4.kml",
-      "duplicateOf": "2025-09-29-ZS-HMB-8bfa9c4e.kml",
+      "file": "3c7ea7bd.kml",
+      "duplicateOf": "2025-10-03-ZS-HIE-3c7ea7bd.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-07T15:17:18.047Z"
+      "timestamp": "2025-10-13T08:46:13.419Z"
     },
     {
-      "file": "ZS-HMB-track-EGM96-5.kml",
-      "duplicateOf": "2025-09-26-ZS-HMB-b699bf40.kml",
+      "file": "3c823374.kml",
+      "duplicateOf": "2025-10-04-ZS-HIE-3c823374.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-07T15:17:18.047Z"
-    },
-    {
-      "file": "ZS-HMB-track-EGM96-6.kml",
-      "duplicateOf": "2025-09-19-ZS-HMB-3240c4fe.kml",
-      "action": "DELETED",
-      "timestamp": "2025-10-07T15:17:18.047Z"
-    },
-    {
-      "file": "ZS-HMB-track-EGM96-7.kml",
-      "duplicateOf": "2025-09-14-ZS-HMB-e4f2a9ff.kml",
-      "action": "DELETED",
-      "timestamp": "2025-10-07T15:17:18.047Z"
-    },
-    {
-      "file": "ZS-HMB-track-EGM96.kml",
-      "duplicateOf": "2025-09-30-ZS-HMB-EGM96.kml",
-      "action": "DELETED",
-      "timestamp": "2025-10-07T15:17:18.047Z"
+      "timestamp": "2025-10-13T08:46:13.419Z"
     }
   ],
-  "summary": "7 duplicate files rejected and deleted"
+  "summary": "4 duplicate files rejected and deleted"
 }

@@ -13,8 +13,8 @@
   },
   "notifications": {
     "enableLogging": true,
-    "logFile": "backend/deployment.log",
+    "logFile": "backend/logs/deployment.log",
     "enableStatusFile": true,
-    "statusFile": "backend/deployment-status.json"
+    "statusFile": "backend/config/deployment-status.json"
   }
 }

@@ -20,8 +20,8 @@ const { XMLParser } = require('fast-xml-parser');
  */
 
 const uploadsDir = path.join(__dirname, '..', 'uploads');
-const helicoptersFile = path.join(__dirname, 'server/helicopters.json');
-const masterMetadataFile = path.join(__dirname, 'server/master-metadata.json');
+const helicoptersFile = path.join(__dirname, 'helicopters.json');
+const masterMetadataFile = path.join(__dirname, 'master-metadata.json');
 
 // Load helicopter metadata
 function loadHelicopterMetadata() {
@@ -42,6 +42,7 @@ function extractKmlInfoFromFile(filePath, filename) {
     let registration = '';
     let date = '';
     let time = '';
+    let owner = '';
 
     const doc = xml.kml && xml.kml.Document ? xml.kml.Document : null;
     const kmlRoot = doc || xml.kml;
@@ -156,11 +157,26 @@ function extractKmlInfoFromFile(filePath, filename) {
       }
     }
 
-    console.log(`[KML DEBUG] ${filename}: registration=${registration}, date=${date}, time=${time}`);
-    return { filename, registration, date, time };
+    // Extract owner information from KML description
+    if (doc && doc.description) {
+      const description = doc.description;
+      // Look for "Private owner" or other owner patterns in the description
+      if (description.includes('Private owner')) {
+        owner = 'Private owner';
+      } else if (description.includes('Cape Town Helicopters')) {
+        owner = 'Cape Town Helicopters';
+      } else if (description.includes('Sport Helicopters')) {
+        owner = 'Sport Helicopters';
+      } else if (description.includes('NAC')) {
+        owner = 'NAC';
+      }
+    }
+
+    console.log(`[KML DEBUG] ${filename}: registration=${registration}, date=${date}, time=${time}, owner=${owner}`);
+    return { filename, registration, date, time, owner };
   } catch (e) {
     console.log(`[KML ERROR] ${filename}:`, e.message);
-    return { filename, registration: '', date: '', time: '' };
+    return { filename, registration: '', date: '', time: '', owner: '' };
   }
 }
 
@@ -216,12 +232,14 @@ async function generateMasterMetadata() {
       const fileSizeBytes = fs.statSync(filePath).size;
       const fileSizeMB = parseFloat((fileSizeBytes / (1024 * 1024)).toFixed(2));
       
+      // Priority: helicopters.json (curated data) > KML extraction (FlightRadar24)
+      // This allows manual research to override generic "Private owner" from KML
       allFlights.push({
         filename: meta.filename,
         registration: meta.registration,
         date: meta.date,
         time: meta.time,
-        owner: heliData.owner || '',
+        owner: heliData.owner || meta.owner || '',
         imageUrl: heliData.imageUrl || '',
         fileSizeMB: fileSizeMB
       });

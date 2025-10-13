@@ -8,7 +8,7 @@ const DeploymentLogger = require('./deployment-logger.cjs');
 class GitDeployer {
     constructor() {
         this.projectRoot = path.resolve(__dirname, '../..');
-        this.logger = new DeploymentLogger(path.join(this.projectRoot, 'backend/deployment.log'));
+        this.logger = new DeploymentLogger(path.join(this.projectRoot, 'backend/logs/deployment.log'));
         this.config = {
             remote: 'origin',
             branch: 'main',
