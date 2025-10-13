@@ -309,7 +309,7 @@ const htmlContent = `<!DOCTYPE html>
         .filters-container {
             width: 100%;
             margin: 0 auto 24px auto;
-            max-width: 800px;
+            max-width: 1000px;
         }
         
         .filters {
@@ -357,15 +357,17 @@ const htmlContent = `<!DOCTYPE html>
         
         .filters-content {
             display: flex;
-            gap: 24px;
+            gap: 16px;
             margin-top: 8px;
             align-items: center;
             justify-content: flex-start;
+            flex-wrap: wrap;
         }
         
         .filter-group {
             position: relative;
-            min-width: 180px;
+            min-width: 160px;
+            flex: 0 0 auto;
         }
         
         .filter-group label {
