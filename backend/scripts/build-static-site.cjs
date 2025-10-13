@@ -20,12 +20,6 @@ if (!fs.existsSync(BUILD_DIR)) {
   fs.mkdirSync(BUILD_DIR, { recursive: true });
 }
 console.log('🧹 Cleaning build subdirectories (preserving kml-optimised)...');
-// Remove generated subdirs but keep kml-optimised
-const FLIGHT_MAPS_DIR = path.join(BUILD_DIR, 'flight-maps');
-if (fs.existsSync(FLIGHT_MAPS_DIR)) fs.rmSync(FLIGHT_MAPS_DIR, { recursive: true });
-
-// Create subdirectories (no KML dir needed - KMLs stay in uploads)
-fs.mkdirSync(FLIGHT_MAPS_DIR, { recursive: true });
 // Ensure optimized folder exists (do not delete contents)
 fs.mkdirSync(path.join(BUILD_DIR, 'kml-optimised'), { recursive: true });
 
