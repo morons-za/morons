@@ -74,8 +74,8 @@ The data helps aviation authorities, park management, and concerned citizens und
 The static site is the **public face** of the project, designed to be hosted on affordable cloud platforms and accessible to end users worldwide.
 
 ### 🏠 Hosting Strategy
-- **Platform**: GitHub Pages, Netlify, Vercel, or similar static hosting
-- **Cost**: Free or very low cost (typically under $10/month)
+- **Platform**: GitHub Pages
+- **Cost**: Free
 - **Performance**: Fast global CDN delivery
 - **Scalability**: Handles unlimited concurrent users
 
@@ -263,7 +263,7 @@ heli-map/
     │   ├── deployment.log          # Deployment system logs
     │   └── optimize-kml.log        # KML optimization logs
     │
-    ├── scripts/                    # 🚀 Production scripts
+    ├── scripts/                    # 🚀 Production scripts & metadata
     │   ├── index-no-auth.cjs       # Main backend server
     │   ├── smart-kml-manager.cjs   # File organization & duplicates
     │   ├── generate-flight-image.cjs # PNG generation script
@@ -271,18 +271,18 @@ heli-map/
     │   ├── build-static-site.cjs   # Static site builder
     │   ├── serve-static-site.cjs   # Static site local testing server
     │   ├── deploy-to-github.cjs    # Git deployment automation
-    │   └── optimise_kml.py         # KML optimization script
+    │   ├── optimise_kml.py         # KML optimization script
+    │   ├── helicopters.json        # Aircraft owner information (curated)
+    │   ├── master-metadata.json    # Flight metadata cache
+    │   ├── processed-files.json    # Processing tracking
+    │   ├── duplicates/             # Duplicate flight files
+    │   ├── images/                 # Helicopter photos
+    │   └── hot-reload.sh           # Development utility
     │
     ├── tests/                      # 🧪 Test & debug scripts
     │   └── debug/                  # Debug scripts
     │       ├── test-*.cjs          # Test scripts
     │       └── debug-*.cjs         # Debug scripts
-    │
-    ├── server/                     # 📊 Metadata and runtime data
-    │   ├── duplicates/             # Duplicate flight files
-    │   ├── master-metadata.json    # Flight metadata cache
-    │   ├── helicopters.json        # Aircraft information
-    │   └── images/                 # Helicopter photos
     │
     ├── uploads/                    # ✈️ Original KML files (FULL SIZE)
     │   ├── ZS-HBO/                 # Organized by aircraft registration
@@ -386,9 +386,9 @@ git push origin main
 
 ### Step 8: Static Site Deployment
 **Upload new static-site files to internet:**
-- If using GitHub Pages/Netlify/Vercel: deployment happens automatically after Git push
-- If using manual hosting: upload `/static-site/` folder contents to web server
+- Deployment to GitHub Pages happens automatically after Git push
 - Public website will now display new violations with optimized KML files
+- Use the backend admin interface "Deploy to GitHub" button for automated deployment
 
 ## ⚠️ Critical Architecture Principle
 
@@ -457,17 +457,14 @@ static-site/
 ## 🚀 Deployment
 
 ### Static Site Deployment
-The `static-site/` folder is designed for deployment to:
-- **GitHub Pages**: Free, automatic deployment from repository
-- **Netlify**: Free tier with custom domains
-- **Vercel**: Free tier with excellent performance
-- **Any Static Host**: Basic web hosting
+The `static-site/` folder is deployed to **GitHub Pages**.
 
 ### Deployment Process
 1. **Process Data**: Use backend to validate and optimize flights
-2. **Commit to Git**: Push optimized data to repository
-3. **Automatic Deploy**: Hosting platform builds and deploys
-4. **Live Updates**: Public site reflects new flights
+2. **Build Static Site**: Run `node backend/scripts/build-static-site.cjs`
+3. **Deploy to GitHub**: Use the "Deploy to GitHub" button in the backend admin interface (http://localhost:4000)
+4. **Automatic Deploy**: GitHub Pages automatically deploys the updates
+5. **Live Updates**: Public site reflects new flights within minutes
 
 ### What Gets Deployed
 ✅ **Included in Static Site:**
@@ -602,25 +599,26 @@ lsof -i :4000 -i :8080
 
 Below is a list of helicopters for which we have found flight tracks. There are undoubtedly more helicopters operating in the Cape Town area that we have not yet captured data for.
 
-**⚠️ Data Accuracy Disclaimer**: The owner information listed below may contain errors and cannot be guaranteed to be completely accurate. This information was compiled from various sources including social media, company promotional pages, and third-party databases. If you notice any inaccuracies, please report them through GitHub issues.
+**⚠️ Data Accuracy Disclaimer**: The owner information listed below has been verified through manual research and represents the current operational status. This information was compiled from official sources, company websites, and aviation databases. If you notice any inaccuracies, please report them through GitHub issues.
 
 | **Registration** | **Owner/Operator** | **Tracked Flights** | **Data Size** |
 |------------------|-------------------|---------------------|---------------|
-| **ZS-HBO** | Cape Town Helicopters | 72 flights | ~192 MB |
-| **ZS-HIE** | Cape Town Helicopters | 74 flights | ~197 MB |
-| **ZS-HIM** | Cape Town Helicopters | 33 flights | ~88 MB |
-| **ZS-HMB** | Sport Helicopters | 12 flights | ~32 MB |
-| **ZS-RTG** | Cape Town Helicopters | 85 flights | ~227 MB |
-| **ZT-HOT** | Cape Town Helicopters | 69 flights | ~184 MB |
-| **ZT-REG** | NAC | 65 flights | ~174 MB |
-| **ZT-RMS** | Cape Town Helicopters | 7 flights | ~19 MB |
+| **ZS-HBO** | Cape Town Helicopters | 137 flights | ~358 MB |
+| **ZS-HIE** | Cape Town Helicopters | 143 flights | ~249 MB |
+| **ZS-HIM** | Cape Town Helicopters | 82 flights | ~155 MB |
+| **ZS-HMB** | Sport Helicopters | 88 flights | ~243 MB |
+| **ZS-RTG** | Cape Town Helicopters | 131 flights | ~509 MB |
+| **ZT-HOT** | Cape Town Helicopters | 133 flights | ~360 MB |
+| **ZT-REG** | NAC | 67 flights | ~59 MB |
+| **ZT-RMS** | Cape Town Helicopters | 16 flights | ~14 MB |
+| **ZT-RNW** | Cape Town Helicopters | 31 flights | ~132 MB |
 
 ### Fleet Summary by Operator
-- **Cape Town Helicopters**: 6 aircraft (ZS-HBO, ZS-HIE, ZS-HIM, ZS-RTG, ZT-HOT, ZT-RMS) - 340 flights (~907 MB)
-- **NAC**: 1 aircraft (ZT-REG) - 65 flights (~174 MB)  
-- **Sport Helicopters**: 1 aircraft (ZS-HMB) - 12 flights (~32 MB)
+- **Cape Town Helicopters**: 7 aircraft (ZS-HBO, ZS-HIE, ZS-HIM, ZS-RTG, ZT-HOT, ZT-RMS, ZT-RNW) - 673 flights (~1,777 MB)
+- **Sport Helicopters**: 1 aircraft (ZS-HMB) - 88 flights (~243 MB)
+- **NAC**: 1 aircraft (ZT-REG) - 67 flights (~59 MB)
 
-**Total Dataset**: 422 valid flights, 1128.39 MB, average 2.67 MB per file
+**Total Dataset**: 828 valid flights, ~2,079 MB, average 2.51 MB per file
 
 *Note: This represents only helicopters with recorded airspace violations. Many more helicopters operate legally in the Cape Town area without entering restricted airspace.*
 
@@ -636,6 +634,24 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 - Logs written to `/backend/logs/` for troubleshooting
 - Moved old `/backend/launch.sh` to `/backend/launch-backend-only.sh` (advanced use)
 
+**Owner Filter Feature (October 13, 2025):**
+- Added owner dropdown filter to static site's Tools and Filters section
+- Dynamically populated with unique helicopter owners from flight data
+- Users can now filter flights by specific operators (Cape Town Helicopters, Sport Helicopters, NAC, Stellenbosch Flying Club)
+- Enhanced metadata extraction to parse owner information directly from KML files
+- Implemented priority system: `helicopters.json` (curated data) takes precedence over KML extraction
+- Removed ZS-KUI (identified as not a helicopter) - 4 flights and associated files deleted
+- All helicopter owner data now 100% accurate with manual research verification
+
+**Backend Server Folder Deprecation (October 13, 2025):**
+- Deprecated `/backend/server/` folder - all files moved to `/backend/scripts/`
+- Consolidated metadata files: `helicopters.json`, `master-metadata.json`, `processed-files.json` now in scripts/
+- Merged helicopter images from server/images/ to scripts/images/
+- Moved duplicates folder from server/ to scripts/
+- Updated all script paths to reference new locations
+- Priority logic: helicopters.json (curated) > KML extraction (FlightRadar24) > Unknown
+- **Important**: `/backend/server/` folder no longer exists - all data is in `/backend/scripts/`
+
 **File Organization Restructuring (October 9, 2025):**
 - Created `/backend/tests/debug/` directory for all test and debug scripts
 - Created `/backend/config/` directory for configuration files
@@ -645,10 +661,12 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 - Moved all log files to `/backend/logs/` (centralized logging)
 - Moved `DEPLOYMENT-README.md` from `/backend/` to project root as `DEPLOYMENT.md`
 - Removed `/static-site/flight-maps/` directory (empty, violated architecture principle)
+- Removed legacy code that created empty flight-maps/ folder during build
 - Established principles:
   - **All `.md` documentation files belong in project root**
   - **All `.log` files go in `/backend/logs/`** (never in backend root or project root)
   - **PNG flight maps NEVER go in static site** (backend only, referenced via GitHub URLs)
+  - **No empty directories created during build process**
 - Created `.ai/guidelines` file with comprehensive file organization rules for AI agents
 - Updated all documentation (README.md, WARP.md, DEPLOYMENT.md) with new structure
 - All relative paths in moved scripts updated to work from new locations
@@ -682,14 +700,16 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 
 When working on this project, remember:
 
-**File Locations (Post-October 9, 2025):**
+**File Locations (Post-October 13, 2025):**
 - Production Scripts: `/backend/scripts/[script-name].cjs`
-- Test/Debug Scripts: `/backend/scripts/tests/[test-name].cjs`
+- Test/Debug Scripts: `/backend/tests/debug/[test-name].cjs`
 - Configuration Files: `/backend/config/[config-name].json`
 - Original KMLs: `/backend/uploads/[aircraft]/[filename].kml`
 - PNG Screenshots: `/backend/flight-maps/[aircraft]/[filename].png`
-- Metadata: `/backend/server/master-metadata.json`
+- Metadata: `/backend/scripts/master-metadata.json` (moved from server/)
+- Helicopter Data: `/backend/scripts/helicopters.json` (moved from server/)
 - Optimized KMLs: `/static-site/kml-optimised/[filename].kml`
+- **Note**: `/backend/server/` folder deprecated - use `/backend/scripts/` instead
 
 **File Organization Guidelines:**
 - **See `.ai/guidelines`** for comprehensive file organization rules
@@ -697,6 +717,25 @@ When working on this project, remember:
 - Never create config files in `/backend/` root
 - Use proper naming: `test-*.cjs`, `debug-*.cjs`, or `[action]-[noun].cjs`
 - Keep production and debug code separate
+
+**Managing Helicopter Owner Data:**
+- Edit `/backend/scripts/helicopters.json` to add or update helicopter owner information
+- This curated database takes priority over FlightRadar24's generic "Private owner" labels
+- After updating helicopters.json:
+  1. Regenerate metadata: `node backend/scripts/generate-master-metadata-main.cjs`
+  2. Rebuild static site: `node backend/scripts/build-static-site.cjs`
+  3. Deploy changes via backend admin interface
+- Owner information is extracted using this priority:
+  1. **First**: helicopters.json (your curated research)
+  2. **Second**: KML file description (FlightRadar24 data)
+  3. **Third**: Empty/Unknown
+- To remove an aircraft entirely (e.g., not a helicopter):
+  1. Delete KML files from `/backend/uploads/`
+  2. Delete PNG files from `/backend/flight-maps/`
+  3. Delete optimized KML files from `/static-site/kml-optimised/`
+  4. Remove entry from `/backend/scripts/helicopters.json`
+  5. Regenerate metadata and rebuild static site
+  6. Commit and push deletions to GitHub
 
 **URL Generation:**
 - Use `build-static-site.cjs` to generate URLs automatically
