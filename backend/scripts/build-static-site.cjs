@@ -678,6 +678,184 @@ const htmlContent = `<!DOCTYPE html>
                 padding: 3px 6px;
             }
         }
+        
+        /* FAQ Modern Card Styles */
+        #faqPage {
+            background: #f8f9fa;
+        }
+        
+        .faq-container {
+            max-width: 800px !important;
+            margin: 60px auto !important;
+            padding: 24px !important;
+        }
+        
+        .faq-card {
+            background: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        
+        .faq-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            transform: translateY(-1px);
+        }
+        
+        .faq-button {
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            padding: 24px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            transition: all 0.2s ease;
+            outline: none;
+        }
+        
+        .faq-button:hover {
+            background: rgba(0,123,255,0.02);
+            color: #007bff;
+        }
+        
+        .faq-button:focus {
+            background: rgba(0,123,255,0.04);
+            color: #007bff;
+        }
+        
+        .faq-question-text {
+            flex: 1;
+        }
+        
+        .faq-icon {
+            flex-shrink: 0;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #007bff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .faq-answer-content {
+            padding: 0 24px 24px 24px;
+            color: #555;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+        .faq-answer p {
+            margin-bottom: 16px;
+        }
+        
+        .faq-answer p:last-child {
+            margin-bottom: 0;
+        }
+        
+        .faq-answer ul {
+            margin: 16px 0;
+            padding-left: 24px;
+        }
+        
+        .faq-answer li {
+            margin-bottom: 8px;
+            color: #666;
+        }
+        
+        .faq-answer li strong {
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .faq-answer a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .faq-answer a:hover {
+            text-decoration: underline;
+        }
+        
+        .faq-back-button {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .faq-back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+        }
+        
+        .faq-back-button:active {
+            transform: translateY(0);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Mobile FAQ Styles */
+        @media (max-width: 768px) {
+            .faq-container {
+                margin: 20px auto !important;
+                padding: 16px !important;
+            }
+            
+            .faq-button {
+                padding: 20px;
+                font-size: 16px;
+                gap: 12px;
+            }
+            
+            .faq-icon {
+                width: 24px;
+                height: 24px;
+                font-size: 14px;
+            }
+            
+            .faq-answer-content {
+                padding: 0 20px 20px 20px;
+                font-size: 15px;
+            }
+            
+            .faq-back-button {
+                width: 100%;
+                padding: 16px;
+                font-size: 16px;
+                margin-top: 20px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -847,17 +1025,17 @@ const htmlContent = `<!DOCTYPE html>
     </div>
 
     <!-- FAQ Page -->
-    <div id="faqPage" style="display: none; min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 70px;">
-        <div style="max-width: 700px; margin: 60px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 32px;">
-            <h1 style="text-align: center;">FAQ</h1>
+    <div id="faqPage" style="display: none; min-height: 100vh; padding-top: 70px;">
+        <div class="faq-container">
+            <h1 style="text-align: center; color: #2c3e50; margin-bottom: 40px; font-size: 2.5rem; font-weight: 700;">Frequently Asked Questions</h1>
             <div id="faqContent">
                 <!-- FAQ items will be populated by JavaScript -->
             </div>
-        </div>
-        <div style="text-align: center; margin-top: 24px;">
-            <button onclick="showHome()" style="padding: 8px 24px; border-radius: 6px; background: #007bff; color: #fff; border: none; font-weight: 600; font-size: 16px; cursor: pointer;">
-                Back
-            </button>
+            <div style="text-align: center; margin-top: 40px;">
+                <button onclick="showHome()" class="faq-back-button">
+                    ← Back to Home
+                </button>
+            </div>
         </div>
     </div>
 
@@ -1742,25 +1920,35 @@ const htmlContent = `<!DOCTYPE html>
             ];
             
             faqContent.innerHTML = faqs.map((faq, idx) => 
-                '<div style="margin-bottom: 18px; border-bottom: 1px solid #eee; padding-bottom: 8px;">' +
-                    '<button onclick="toggleFAQ(' + idx + ')" style="background: none; border: none; color: #007bff; font-weight: 600; font-size: 18px; cursor: pointer; width: 100%; text-align: left; padding: 8px 0; outline: none; display: flex; align-items: center; gap: 8px;">' +
-                        '<span id="faqArrow' + idx + '">▶</span> ' + faq.question +
+                '<div class="faq-card">' +
+                    '<button class="faq-button" onclick="toggleFAQ(' + idx + ')" aria-expanded="false" aria-controls="faq-answer-' + idx + '">' +
+                        '<span class="faq-question-text">' + faq.question + '</span>' +
+                        '<span class="faq-icon" id="faq-icon-' + idx + '">+</span>' +
                     '</button>' +
-                    '<div id="faqAnswer' + idx + '" style="display: none; margin-top: 8px; color: #333; font-size: 16px; text-align: left;">' + faq.answer + '</div>' +
+                    '<div id="faq-answer-' + idx + '" class="faq-answer" role="region" aria-labelledby="faq-button-' + idx + '">' +
+                        '<div class="faq-answer-content">' + faq.answer + '</div>' +
+                    '</div>' +
                 '</div>'
             ).join('');
         }
         
         function toggleFAQ(idx) {
-            const answer = document.getElementById('faqAnswer' + idx);
-            const arrow = document.getElementById('faqArrow' + idx);
+            const answer = document.getElementById('faq-answer-' + idx);
+            const icon = document.getElementById('faq-icon-' + idx);
+            const button = answer.previousElementSibling; // Get the button element
             
-            if (answer.style.display === 'none') {
-                answer.style.display = 'block';
-                arrow.textContent = '▼';
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+            
+            if (isExpanded) {
+                // Collapse
+                answer.style.maxHeight = '0px';
+                icon.textContent = '+';
+                button.setAttribute('aria-expanded', 'false');
             } else {
-                answer.style.display = 'none';
-                arrow.textContent = '▶';
+                // Expand
+                answer.style.maxHeight = answer.scrollHeight + 'px';
+                icon.textContent = '−'; // minus sign
+                button.setAttribute('aria-expanded', 'true');
             }
         }
         
