@@ -1884,13 +1884,9 @@ This is a static website generated from the TMNP Helicopter Tracking System.
 
 ## 🌐 Deployment
 
-This static site can be deployed to any static hosting service:
+This static site is deployed to **GitHub Pages**.
 
-- **GitHub Pages**: Free hosting for public repositories
-- **Netlify**: Free tier with drag & drop deployment
-- **Vercel**: Free tier with automatic deployments
-- **AWS S3**: Low-cost static hosting
-- **Any web server**: Traditional hosting
+To deploy updates, use the backend admin interface at http://localhost:4000
 
 ## 🔧 Local Development
 
@@ -1923,12 +1919,6 @@ console.log(`   • flight-maps/ (served from GitHub LFS)`);
 console.log('   • tmnp.kml (boundary file)');
 
 console.log('\n🚀 Next Steps:');
-console.log('1. Test the site locally: open static-site/index.html in your browser');
-console.log('2. Deploy to your preferred hosting service');
+console.log('1. Test the site locally: ./launch.sh (opens http://localhost:8080)');
+console.log('2. Deploy to GitHub Pages using the backend admin interface');
 console.log('3. Share the URL with users who need to view the data');
-
-console.log('\n💡 Deployment Options:');
-console.log('• GitHub Pages: Free, automatic updates from git');
-console.log('• Netlify: Free, drag & drop deployment');
-console.log('• Vercel: Free, automatic deployments');
-console.log('• AWS S3: Low-cost, scalable hosting');
