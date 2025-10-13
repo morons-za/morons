@@ -221,8 +221,11 @@ node serve-static-site.cjs
 ```
 heli-map/
 ├── README.md                         # This documentation
-├── .env                             # Environment configuration
+├── WARP.md                          # Terminal/Warp guidelines
+├── DEPLOYMENT.md                    # Deployment system documentation
 ├── .gitignore                       # Git ignore rules
+├── .ai/                            # AI agent guidelines
+│   └── guidelines                   # File organization rules for AI
 │
 ├── static-site/                     # 🌐 PUBLIC WEBSITE (hosted)
 │   ├── index.html                   # Main website interface
@@ -237,32 +240,49 @@ heli-map/
 │       └── marker-shadow.png       # Marker shadows
 │
 └── backend/                        # 🔧 DATA PROCESSING (local)
+    ├── backend.html                # Admin web interface
     ├── launch.sh                   # Server startup script
     ├── package.json                # Node.js dependencies
-    ├── uploads/                    # ✅ Original KML files (FULL SIZE) - NEW LOCATION
-    │   ├── ZS-HBO/                # Organized by aircraft registration
-    │   ├── ZS-HIE/                # Each folder contains aircraft's KML files
-    │   └── [other-aircraft]/      # Automatic organization by Smart KML Manager
-    ├── flight-maps/               # ✅ PNG violation screenshots - NEW LOCATION
-    │   ├── ZS-HBO/                # Screenshots organized by aircraft
-    │   ├── ZS-HIE/                # Detailed violation imagery (private)
-    │   └── [other-aircraft]/      # Not served on public site
-    ├── images/                    # Backend assets
-    │   └── warning.png            # Violation marker icon
-    ├── scripts/                   # Processing tools
-    │   ├── index-no-auth.cjs      # Main backend server
-    │   ├── smart-kml-manager.cjs  # File organization & duplicates
+    │
+    ├── config/                     # ⚙️ Configuration files
+    │   ├── deployment-config.json  # GitHub deployment settings
+    │   └── deployment-status.json  # Current deployment state
+    │
+    ├── tests/                      # 🧪 Test & debug scripts
+    │   └── debug/                  # Debug scripts
+    │       ├── test-*.cjs          # Test scripts
+    │       └── debug-*.cjs         # Debug scripts
+    │
+    ├── scripts/                    # 🚀 Production scripts
+    │   ├── index-no-auth.cjs       # Main backend server
+    │   ├── smart-kml-manager.cjs   # File organization & duplicates
     │   ├── generate-flight-image.cjs # PNG generation script
     │   ├── generate-master-metadata-main.cjs # Metadata generator
-    │   ├── build-static-site.cjs  # Static site builder
-    │   ├── serve-static-site.cjs  # Static site local testing server
-    │   └── optimise_kml.py        # KML optimization script
-    ├── server/                    # Metadata and configuration files
-    │   ├── duplicates/            # Duplicate flight files (moved here)
-    │   ├── master-metadata.json   # Flight metadata cache
-    │   ├── helicopters.json       # Aircraft information
-    │   └── images/                # Helicopter photos
-    └── node_modules/              # Backend dependencies
+    │   ├── build-static-site.cjs   # Static site builder
+    │   ├── serve-static-site.cjs   # Static site local testing server
+    │   ├── deploy-to-github.cjs    # Git deployment automation
+    │   └── optimise_kml.py         # KML optimization script
+    │
+    ├── server/                     # 📊 Metadata and runtime data
+    │   ├── duplicates/             # Duplicate flight files
+    │   ├── master-metadata.json    # Flight metadata cache
+    │   ├── helicopters.json        # Aircraft information
+    │   └── images/                 # Helicopter photos
+    │
+    ├── uploads/                    # ✈️ Original KML files (FULL SIZE)
+    │   ├── ZS-HBO/                 # Organized by aircraft registration
+    │   ├── ZS-HIE/                 # Each folder contains aircraft's KML files
+    │   └── [other-aircraft]/       # Automatic organization by Smart KML Manager
+    │
+    ├── flight-maps/                # 🗺️ PNG violation screenshots
+    │   ├── ZS-HBO/                 # Screenshots organized by aircraft
+    │   ├── ZS-HIE/                 # Detailed violation imagery (private)
+    │   └── [other-aircraft]/       # Not served on public site
+    │
+    ├── images/                     # Backend assets
+    │   └── warning.png             # Violation marker icon
+    │
+    └── node_modules/               # Backend dependencies
 ```
 
 ## 🔄 Admin Workflow - Step-by-Step KML Processing
@@ -382,17 +402,25 @@ git push origin main
 After processing, files are organized as:
 ```
 backend/
-├── uploads/           # ✅ Original KML files (FULL SIZE) - NEW LOCATION
-│   ├── ZS-HBO/        # Organized by aircraft registration  
-│   └── [aircraft]/    # Each aircraft gets its own folder
-├── flight-maps/      # ✅ PNG violation screenshots - NEW LOCATION
-│   ├── ZS-HBO/        # Screenshots organized by aircraft
-│   └── [aircraft]/    # Private detailed imagery
-└── server/
-    └── duplicates/   # Duplicate flight files
+├── config/            # Configuration files
+│   ├── deployment-config.json
+│   └── deployment-status.json
+├── tests/            # Test and debug scripts
+│   └── debug/        # Debug scripts
+├── scripts/          # Production processing scripts
+├── uploads/          # ✅ Original KML files (FULL SIZE)
+│   ├── ZS-HBO/       # Organized by aircraft registration  
+│   └── [aircraft]/   # Each aircraft gets its own folder
+├── flight-maps/     # ✅ PNG violation screenshots
+│   ├── ZS-HBO/       # Screenshots organized by aircraft
+│   └── [aircraft]/   # Private detailed imagery
+└── server/          # Metadata and runtime data
+    ├── duplicates/  # Duplicate flight files
+    ├── master-metadata.json
+    └── helicopters.json
 
 static-site/
-└── kml-optimised/    # Public KML files (optimized only)
+└── kml-optimised/   # Public KML files (optimized only)
 ```
 
 ### Step 4: Static Site Update
@@ -585,7 +613,18 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 
 ### ✅ Recent Major Changes (October 2025)
 
-**File System Restructuring:**
+**File Organization Restructuring (October 9, 2025):**
+- Created `/backend/tests/debug/` directory for all test and debug scripts
+- Created `/backend/config/` directory for configuration files
+- Moved 16 test/debug scripts from `/backend/` root to `/backend/tests/debug/`
+- Moved configuration files to `/backend/config/`
+- Moved `DEPLOYMENT-README.md` from `/backend/` to project root as `DEPLOYMENT.md`
+- Established principle: **All `.md` documentation files belong in project root**
+- Created `.ai/guidelines` file with comprehensive file organization rules for AI agents
+- Updated all documentation (README.md, WARP.md, DEPLOYMENT.md) with new structure
+- All relative paths in moved scripts updated to work from new locations
+
+**File System Restructuring (October 2025):**
 - Moved all core data files from nested `/backend/server/` to `/backend/` root level
 - This simplifies the architecture and makes file locations more intuitive
 - Updated all scripts and build processes to use new paths
@@ -614,11 +653,21 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 
 When working on this project, remember:
 
-**File Locations (Post-October 2025):**
+**File Locations (Post-October 9, 2025):**
+- Production Scripts: `/backend/scripts/[script-name].cjs`
+- Test/Debug Scripts: `/backend/tests/debug/[test-name].cjs`
+- Configuration Files: `/backend/config/[config-name].json`
 - Original KMLs: `/backend/uploads/[aircraft]/[filename].kml`
 - PNG Screenshots: `/backend/flight-maps/[aircraft]/[filename].png`
 - Metadata: `/backend/server/master-metadata.json`
 - Optimized KMLs: `/static-site/kml-optimised/[filename].kml`
+
+**File Organization Guidelines:**
+- **See `.ai/guidelines`** for comprehensive file organization rules
+- Never create test/debug scripts in `/backend/` root
+- Never create config files in `/backend/` root
+- Use proper naming: `test-*.cjs`, `debug-*.cjs`, or `[action]-[noun].cjs`
+- Keep production and debug code separate
 
 **URL Generation:**
 - Use `build-static-site.cjs` to generate URLs automatically
@@ -629,6 +678,7 @@ When working on this project, remember:
 - Always test with the static site server on port 8080
 - Verify KML downloads work from GitHub URLs
 - Check PNG previews load correctly in "Take Action" modals
+- Debug scripts are available in `/backend/tests/debug/`
 
 ## 🤝 Contributing
 

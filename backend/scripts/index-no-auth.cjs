@@ -52,11 +52,8 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   fileFilter: function (req, file, cb) {
-    const overwrite = req.body.overwrite === 'true';
-    const filePath = path.join(uploadsDir, file.originalname);
-    if (fs.existsSync(filePath) && !overwrite) {
-      return cb(new Error('File already exists'), false);
-    }
+    // Don't reject files at Multer level - handle duplicates in the upload endpoint
+    // This prevents the entire request from failing
     cb(null, true);
   }
 });
@@ -340,7 +337,7 @@ function loadTMNPCoordinates() {
             const lon = parseFloat(parts[0]);
             const lat = parseFloat(parts[1]);
             if (!isNaN(lat) && !isNaN(lon)) {
-              outer.push([lat, lon]); // Store as lat,lon for pointInPolygon function
+              outer.push([lon, lat]); // Store as lon,lat for pointInPolygon function
             }
           }
         }
@@ -365,7 +362,7 @@ function loadTMNPCoordinates() {
                 const lon = parseFloat(parts[0]);
                 const lat = parseFloat(parts[1]);
                 if (!isNaN(lat) && !isNaN(lon)) {
-                  hole.push([lat, lon]); // Store as lat,lon for pointInPolygon function
+                  hole.push([lon, lat]); // Store as lon,lat for pointInPolygon function
                 }
               }
             }
@@ -444,6 +441,7 @@ function pointInTMNP(lat, lon, tmnpPolygons) {
   
   for (const polygon of tmnpPolygons) {
     // Check if point is in outer boundary
+    // Polygon is stored as [lat, lon], but pointInPolygon expects [lon, lat] for ray-casting
     const inOuter = pointInPolygon([lon, lat], polygon.outer);
     
     if (inOuter) {
@@ -506,6 +504,19 @@ async function checkForViolations(filePath) {
             if (!isNaN(lat) && !isNaN(lon)) {
               coordinates.push({ lat, lon });
             }
+          }
+        }
+      }
+      
+      // Check for Point coordinates (individual point format)
+      if (obj.Point && obj.Point.coordinates) {
+        const coordStr = obj.Point.coordinates;
+        const parts = coordStr.split(',');
+        if (parts.length >= 2) {
+          const lon = parseFloat(parts[0]);
+          const lat = parseFloat(parts[1]);
+          if (!isNaN(lat) && !isNaN(lon)) {
+            coordinates.push({ lat, lon });
           }
         }
       }
@@ -805,17 +816,17 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
       console.log(`🚁 Checking violations for non-duplicate flight: ${file.originalname}`);
       const hasViolations = await checkForViolations(file.path);
       
-      if (hasViolations) {
-        console.log(`🚨 VIOLATION DETECTED: ${file.originalname} enters TMNP airspace`);
+      if (!hasViolations) {
+        console.log(`❌ NO VIOLATIONS: ${file.originalname} does not enter TMNP airspace - REJECTED`);
         
-        // Clean up violating file
+        // Clean up non-violating file
         try {
           if (fs.existsSync(file.path)) {
             fs.unlinkSync(file.path);
-            console.log(`🗑️ Cleaned up violating file: ${file.path}`);
+            console.log(`🗑️ Cleaned up non-violating file: ${file.path}`);
           }
         } catch (cleanupError) {
-          console.log(`⚠️ Could not clean up violating file: ${cleanupError.message}`);
+          console.log(`⚠️ Could not clean up non-violating file: ${cleanupError.message}`);
         }
         
         results.push({
@@ -824,15 +835,15 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
           registration: meta.registration,
           date: meta.date,
           time: meta.time,
-          status: 'VIOLATION_REJECTED',
-          error: 'Flight enters restricted TMNP airspace',
-          details: 'This flight violates restricted airspace regulations and has been rejected'
+          status: 'NO_VIOLATION_REJECTED',
+          error: 'Flight does not enter TMNP restricted airspace',
+          details: 'Only flights that violate TMNP airspace are accepted by this system'
         });
         continue;
       }
       
-      // File passed all validations - process normally
-      console.log(`✅ Validation passed: ${file.originalname}`);
+      // File has violations - process normally (this is what we want)
+      console.log(`✅ VIOLATION CONFIRMED: ${file.originalname} enters TMNP airspace - ACCEPTED`);
       
       // Cache image if available
       if (meta.imageUrl && meta.registration) {
@@ -926,9 +937,16 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
     console.log(`⚠️ Some PNG generations may have failed: ${error.message}`);
   }
   
+  // Count only successfully processed files (not duplicates or rejections)
+  const successfullyProcessed = results.filter(r => r.status === 'success').length;
+  const duplicates = results.filter(r => r.status === 'DUPLICATE_SKIPPED').length;
+  const rejections = results.filter(r => r.status === 'NO_VIOLATION_REJECTED').length;
+  
   // Log what we're sending to frontend
   console.log('📤 Sending response to frontend:', {
-    processed: results.length,
+    processed: successfullyProcessed,
+    duplicates: duplicates,
+    rejections: rejections,
     smartManager: smartManagerResults
   });
   
@@ -936,7 +954,9 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
   res.json({
     success: true,
     totalFiles: req.files.length,
-    processed: results.length,
+    processed: successfullyProcessed,
+    duplicates: duplicates,
+    rejections: rejections,
     errors: errors.length,
     results: results,
     errors: errors,
@@ -1195,7 +1215,100 @@ app.get('/kml-metadata', (req, res) => {
   }
 });
 
-// Endpoint to refresh KML metadata (NO AUTH required)
+// Endpoint to add missing files to metadata (FAST)
+app.post('/add-missing-metadata', async (req, res) => {
+  try {
+    console.log('🔍 Scanning for files missing from metadata...');
+    
+    // Get all KML files in uploads folder
+    const allKmlFiles = fs.readdirSync(uploadsDir)
+      .filter(f => f.toLowerCase().endsWith('.kml'))
+      .sort();
+    
+    // Get existing filenames from metadata
+    const existingFilenames = new Set(kmlMetadata.map(flight => flight.filename));
+    
+    // Find missing files
+    const missingFiles = allKmlFiles.filter(filename => !existingFilenames.has(filename));
+    
+    console.log(`📊 Found ${allKmlFiles.length} total files, ${existingFilenames.size} in metadata`);
+    console.log(`➕ Adding ${missingFiles.length} missing files to metadata`);
+    
+    let addedCount = 0;
+    
+    // Process each missing file
+    for (const filename of missingFiles) {
+      try {
+        const filePath = path.join(uploadsDir, filename);
+        const metadata = extractKmlInfoFromFile(filePath, filename);
+        
+        if (metadata.registration && metadata.registration !== 'UNKNOWN') {
+          // Add to in-memory metadata
+          kmlMetadata.push({
+            filename: metadata.filename,
+            registration: metadata.registration,
+            date: metadata.date || 'UNKNOWN',
+            time: metadata.time || 'UNKNOWN'
+          });
+          
+          addedCount++;
+          console.log(`✅ Added ${filename} (${metadata.registration}) to metadata`);
+        } else {
+          console.log(`⚠️ Skipped ${filename} - no valid registration found`);
+        }
+      } catch (error) {
+        console.log(`❌ Error processing ${filename}: ${error.message}`);
+      }
+    }
+    
+    // Update master metadata file if it exists
+    const masterFile = path.join(__dirname, '..', 'server', 'master-metadata.json');
+    if (fs.existsSync(masterFile) && addedCount > 0) {
+      try {
+        const masterData = JSON.parse(fs.readFileSync(masterFile, 'utf8'));
+        if (masterData.flights) {
+          masterData.flights = kmlMetadata;
+          fs.writeFileSync(masterFile, JSON.stringify(masterData, null, 2));
+          console.log(`💾 Updated master metadata file with ${addedCount} new entries`);
+        }
+      } catch (error) {
+        console.log(`⚠️ Could not update master file: ${error.message}`);
+      }
+    }
+    
+    // Clear cache so it gets regenerated
+    const cacheFile = path.join(__dirname, '..', 'server', 'kml-metadata-cache.json');
+    if (fs.existsSync(cacheFile)) {
+      try {
+        fs.unlinkSync(cacheFile);
+        console.log(`🗑️ Cleared cache for regeneration`);
+      } catch (e) {
+        console.log(`⚠️ Could not clear cache: ${e.message}`);
+      }
+    }
+    
+    res.json({
+      success: true,
+      message: `Added ${addedCount} missing files to metadata`,
+      added: addedCount,
+      total: kmlMetadata.length,
+      details: {
+        totalFiles: allKmlFiles.length,
+        previousMetadataCount: existingFilenames.size,
+        newMetadataCount: kmlMetadata.length
+      }
+    });
+    
+  } catch (error) {
+    console.log(`❌ Error adding missing metadata: ${error.message}`);
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+// Endpoint to refresh KML metadata (NO AUTH required) - FULL RESCAN
 app.post('/refresh-metadata', (req, res) => {
   // Force full rescan by deleting cache
   const cacheFile = path.join(__dirname, '..', 'server', 'kml-metadata-cache.json');
@@ -1393,7 +1506,7 @@ app.post('/generate-missing-pngs', async (req, res) => {
     console.log('🖼️ Generating missing PNG images for existing KML files...');
     
     const uploadsDir = path.join(__dirname, '../uploads');
-    const flightMapsDir = path.join(__dirname, 'flight-maps');
+    const flightMapsDir = path.join(__dirname, '..', 'flight-maps');
     const generateScript = path.join(__dirname, 'generate-flight-image.cjs');
     
     // Get list of KML files in uploads directory
@@ -1650,8 +1763,8 @@ app.post('/build-static-site', async (req, res) => {
         error: `Failed to start static site build: ${error.message}`
       });
     });
-    
-  } catch (error) {
+                    
+                } catch (error) {
     console.log(`❌ Static site build error: ${error.message}`);
     res.status(500).json({
       success: false,
@@ -1717,11 +1830,11 @@ app.get('/api/deployment-status', async (req, res) => {
     } else {
       // Try to read status from file if no active deployer
       try {
-        const statusFile = path.join(__dirname, '..', 'deployment-status.json');
+        const statusFile = path.join(__dirname, '..', 'config', 'deployment-status.json');
         if (fs.existsSync(statusFile)) {
           const fileStatus = JSON.parse(fs.readFileSync(statusFile, 'utf8'));
           res.json({ success: true, status: fileStatus });
-        } else {
+                    } else {
           res.json({ 
             success: true, 
             status: { 
@@ -1731,8 +1844,8 @@ app.get('/api/deployment-status', async (req, res) => {
               error: null 
             } 
           });
-        }
-      } catch (error) {
+                    }
+                } catch (error) {
         res.json({ 
           success: true, 
           status: { 
@@ -1743,8 +1856,8 @@ app.get('/api/deployment-status', async (req, res) => {
           } 
         });
       }
-    }
-  } catch (error) {
+                    }
+                } catch (error) {
     console.error('❌ Status endpoint error:', error.message);
     res.status(500).json({
       success: false,

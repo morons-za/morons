@@ -19,7 +19,7 @@ class GitDeployer {
         
         // Try to load config file
         try {
-            const configPath = path.join(this.projectRoot, 'backend/deployment-config.json');
+            const configPath = path.join(this.projectRoot, 'backend/config/deployment-config.json');
             const configJson = require(configPath);
             if (configJson && configJson.git) {
                 this.config = { ...this.config, ...configJson.git };
@@ -61,7 +61,7 @@ class GitDeployer {
         // Write status to file for API access
         try {
             await fs.writeFile(
-                path.join(this.projectRoot, 'backend/deployment-status.json'),
+                path.join(this.projectRoot, 'backend/config/deployment-status.json'),
                 JSON.stringify(this.status, null, 2)
             );
         } catch (err) {

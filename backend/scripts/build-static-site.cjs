@@ -11,7 +11,7 @@ const BUILD_DIR = 'static-site';
 const SOURCE_DIRS = {
   uploads: 'backend/uploads',
   flightMaps: 'backend/flight-maps',
-  tmnpBoundaryPrimary: '../static-site/tmnp.kml',
+  tmnpBoundaryPrimary: 'static-site/tmnp.kml',
   tmnpBoundaryFallback: 'static-site/tmnp.kml'
 };
 
@@ -21,13 +21,10 @@ if (!fs.existsSync(BUILD_DIR)) {
 }
 console.log('🧹 Cleaning build subdirectories (preserving kml-optimised)...');
 // Remove generated subdirs but keep kml-optimised
-const KML_DIR = path.join(BUILD_DIR, 'kml');
 const FLIGHT_MAPS_DIR = path.join(BUILD_DIR, 'flight-maps');
-if (fs.existsSync(KML_DIR)) fs.rmSync(KML_DIR, { recursive: true });
 if (fs.existsSync(FLIGHT_MAPS_DIR)) fs.rmSync(FLIGHT_MAPS_DIR, { recursive: true });
 
-// Create subdirectories
-fs.mkdirSync(KML_DIR, { recursive: true });
+// Create subdirectories (no KML dir needed - KMLs stay in uploads)
 fs.mkdirSync(FLIGHT_MAPS_DIR, { recursive: true });
 // Ensure optimized folder exists (do not delete contents)
 fs.mkdirSync(path.join(BUILD_DIR, 'kml-optimised'), { recursive: true });
@@ -71,37 +68,15 @@ pdfFiles.forEach(pdfFile => {
   }
 });
 
-// Copy optimized KML files (prefer optimized versions over original)
-const optimizedDir = path.join(BUILD_DIR, 'kml-optimised');
-let copiedCount = 0;
-let skippedCount = 0;
+// Note: Full-sized KMLs stay in backend/uploads/ and are never copied to static-site
+// Only optimized KMLs (created separately) go to static-site/kml-optimised/
+console.log('📁 KML files remain in backend/uploads/ (not copied to static-site)');
+console.log('🔧 Optimized KMLs are managed separately in static-site/kml-optimised/');
 
-if (fs.existsSync(SOURCE_DIRS.uploads)) {
-  const kmlFiles = fs.readdirSync(SOURCE_DIRS.uploads).filter(f => f.endsWith('.kml'));
-  console.log(`📁 Processing ${kmlFiles.length} KML files...`);
-  
-  kmlFiles.forEach(file => {
-    const baseName = file.replace('.kml', '');
-    const optimizedFile = `${baseName}-opt.kml`;
-    const optimizedSourcePath = path.join(optimizedDir, optimizedFile);
-    const originalSourcePath = path.join(SOURCE_DIRS.uploads, file);
-    const destPath = path.join(BUILD_DIR, 'kml', file);
-    
-    // Prefer optimized version if it exists
-    if (fs.existsSync(optimizedSourcePath)) {
-      fs.copyFileSync(optimizedSourcePath, destPath);
-      copiedCount++;
-    } else {
-      // Fall back to original file
-      fs.copyFileSync(originalSourcePath, destPath);
-      skippedCount++;
-      console.log(`⚠️  No optimized version for ${file}, using original`);
-    }
-  });
-  console.log(`✅ Copied ${copiedCount} optimized KML files, ${skippedCount} original files`);
-} else {
-  console.log('⚠️  Uploads directory not found');
-}
+// Ensure optimized KML directory exists (optimized files are created by separate process)
+const optimizedDir = path.join(BUILD_DIR, 'kml-optimised');
+fs.mkdirSync(optimizedDir, { recursive: true });
+console.log('✅ Optimized KML directory ready');
 
 // PNG files are now served from GitHub LFS - no need to copy locally
 console.log('📸 PNG files will be served from GitHub LFS');
@@ -145,6 +120,34 @@ try {
         flight && flight.filename && flight.registration
       );
     }
+    
+    // Remove duplicate entries - prefer full renamed filenames over short hash filenames
+    const seenFlights = new Map();
+    const filteredFlights = [];
+    
+    for (const flight of flightData) {
+      // Extract the hash from the filename (last part before .kml)
+      const hash = flight.filename.replace('.kml', '').split('-').pop();
+      const key = `${flight.registration}-${flight.date}-${flight.time}-${hash}`;
+      
+      if (seenFlights.has(key)) {
+        // This is a duplicate - prefer the full filename over short filename
+        const existingFlight = seenFlights.get(key);
+        if (flight.filename.length > existingFlight.filename.length) {
+          // Replace with the longer (full) filename
+          const index = filteredFlights.indexOf(existingFlight);
+          filteredFlights[index] = flight;
+          seenFlights.set(key, flight);
+        }
+        // Otherwise, keep the existing flight (ignore the shorter filename)
+      } else {
+        // New flight - add it
+        filteredFlights.push(flight);
+        seenFlights.set(key, flight);
+      }
+    }
+    
+    flightData = filteredFlights;
   } else if (fs.existsSync('backend/server/kml-metadata-cache.json')) {
     const cacheMetadata = JSON.parse(fs.readFileSync('backend/server/kml-metadata-cache.json', 'utf8'));
     console.log('✅ Loaded cache metadata');
@@ -1153,21 +1156,22 @@ const htmlContent = `<!DOCTYPE html>
              loadingDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 30px; border-radius: 10px; z-index: 1000; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
              map.getContainer().appendChild(loadingDiv);
             
-            // Try local KML first, fallback to GitHub
-            const localUrl = './kml/' + filename;
+            // Try optimized KML first, fallback to GitHub
+            const optimizedFilename = filename.replace('.kml', '-opt.kml');
+            const optimizedUrl = './kml-optimised/' + optimizedFilename;
             const githubUrl = 'https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/' + filename;
             
-            console.log('📍 Checking local KML first:', localUrl);
+            console.log('📍 Checking optimized KML first:', optimizedUrl);
             
             const downloadStartTime = performance.now();
             
-            // Try to load from local copy first (much faster if available)
-            currentFlightLayer = omnivore.kml(localUrl)
+            // Try to load from optimized KML first (much faster and smaller)
+            currentFlightLayer = omnivore.kml(optimizedUrl)
                 .on('ready', function() {
                     const downloadTime = performance.now() - downloadStartTime;
                     const totalTime = performance.now() - startTime;
                     
-                    console.log('✅ Local KML loaded successfully!');
+                    console.log('✅ Optimized KML loaded successfully!');
                     console.log('⚡ Performance:', {
                         downloadTime: (downloadTime / 1000).toFixed(2) + 's',
                         totalTime: (totalTime / 1000).toFixed(2) + 's',
@@ -1195,8 +1199,8 @@ const htmlContent = `<!DOCTYPE html>
                     }
                 })
                 .on('error', function(error) {
-                    console.log('⚠️ Local KML failed, trying GitHub URL...');
-                    console.log('❌ Local error:', error);
+                    console.log('⚠️ Optimized KML failed, trying GitHub URL...');
+                    console.log('❌ Optimized KML error:', error);
                     
                     // Fallback to GitHub URL
                     const githubStartTime = performance.now();
@@ -1745,7 +1749,7 @@ console.log('📊 Total flights:', flightData.length);
 console.log('📄 Files generated:');
 console.log('   • index.html (main website)');
 console.log('   • README.md (deployment guide)');
-console.log(`   • kml/ (${fs.readdirSync(path.join(BUILD_DIR, 'kml')).length} KML files)`);
+console.log(`   • kml-optimised/ (${fs.readdirSync(path.join(BUILD_DIR, 'kml-optimised')).length} optimized KML files)`);
 console.log(`   • flight-maps/ (served from GitHub LFS)`);
 console.log('   • tmnp.kml (boundary file)');
 

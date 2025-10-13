@@ -189,6 +189,31 @@
         .result-filename {
             font-weight: bold;
         }
+        .file-detail {
+            margin-left: 20px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .success-badge {
+            background: #28a745;
+            color: white;
+        }
+        .warning-badge {
+            background: #ffc107;
+            color: #212529;
+        }
+        .error-badge {
+            background: #dc3545;
+            color: white;
+        }
         .result-details {
             font-size: 12px;
             color: #666;
@@ -773,7 +798,8 @@
             <button id="optimizeBtn" onclick="optimizeKMLs()" class="action-button" style="background: #ffc107;">Optimize KML Files</button>
             <button id="generateBtn" onclick="generateMissingPNGs()" class="action-button" style="background: #28a745;">Generate Missing PNGs</button>
             <button id="processNewBtn" onclick="processNewKMLs()" class="action-button" style="background: #6c757d;">Process New KMLs</button>
-            <button id="refreshBtn" onclick="refreshMetadata()" class="action-button" style="background: #17a2b8;">Refresh Metadata</button>
+            <button id="addMissingBtn" onclick="addMissingMetadata()" class="action-button" style="background: #20c997;">Add Missing to Metadata</button>
+            <button id="refreshBtn" onclick="refreshMetadata()" class="action-button" style="background: #17a2b8;">Refresh Metadata (Full)</button>
             <button id="buildSiteBtn" onclick="buildStaticSite()" class="action-button" style="background: #dc3545;">Build Static Site</button>
             <button id="deployBtn" onclick="deployToGitHub()" class="action-button" style="background: #28a745;">🚀 Deploy to GitHub</button>
             <button onclick="viewUploads()" class="action-button" style="background: #6f42c1;">View Uploads</button>
@@ -1023,17 +1049,32 @@
                 
                 updateProgress(80, 'Processing files...');
                 
-                const result = await response.json();
+                // Handle different response types gracefully
+                let result;
+                try {
+                    result = await response.json();
+                } catch (jsonError) {
+                    // If JSON parsing fails, try to get text response
+                    const textResponse = await response.text();
+                    throw new Error(`Server response error: ${textResponse || response.statusText || 'Unknown error'}`);
+                }
                 
                 // Debug: Log result to console
                 console.log('📤 Upload result received:', result);
                 console.log('🔍 Smart Manager:', result.smartManager);
                 
                 // Show appropriate completion message based on results
-                let completionMessage = 'Upload completed!';
-                if (result.smartManager && result.smartManager.duplicates > 0) {
-                    completionMessage = `Upload completed! (${result.smartManager.duplicates} duplicate(s) detected)`;
-                    console.log('⚠️ Duplicate detected in progress message');
+                let completionMessage = 'Processing completed!';
+                if (result.processed === 0) {
+                    if (result.duplicates > 0 && result.rejections > 0) {
+                        completionMessage = `Processing completed - ${result.duplicates} duplicate(s), ${result.rejections} rejected`;
+                    } else if (result.duplicates > 0) {
+                        completionMessage = `Processing completed - ${result.duplicates} duplicate(s) rejected`;
+                    } else if (result.rejections > 0) {
+                        completionMessage = `Processing completed - ${result.rejections} file(s) rejected`;
+                    }
+                } else {
+                    completionMessage = `Upload completed - ${result.processed} file(s) processed`;
                 }
                 updateProgress(100, completionMessage);
                 
@@ -1062,39 +1103,129 @@
             
             if (result.success) {
                 console.log('✅ Checking duplicates:', result.smartManager?.duplicates);
-                if (result.smartManager && result.smartManager.duplicates > 0) {
-                    html += '<div class="result-item warning">' +
-                        '<span>⚠️ Duplicate Files Detected:</span>' +
-                        '<div class="result-details">Found ' + result.smartManager.duplicates + ' duplicate file(s) - rejected and deleted (already exist in system)</div>' +
-                    '</div>';
-                }
+                console.log('🔍 Full result object:', result);
                 
-                if (result.smartManager && result.smartManager.processed > 0) {
-                    html += '<div class="result-item info">' +
-                        '<span>📋 File Processing Summary:</span>' +
-                        '<div class="result-details">' +
-                            '📁 Processed: ' + result.smartManager.processed + ' files | ' +
-                            '📝 Renamed: ' + result.smartManager.renamed + ' files | ' +
-                            '🔄 Duplicates: ' + result.smartManager.duplicates + ' files' +
-                        '</div>' +
-                    '</div>';
-                }
+                // Calculate totals - SmartKMLManager provides the final truth
+                // If SmartKMLManager found duplicates, those files were NOT successfully processed
+                const smartProcessed = result.smartManager?.processed || 0;
+                const smartDuplicates = result.smartManager?.duplicates || 0;
+                const mainProcessed = result.processed || 0;
+                const mainDuplicates = result.duplicates || 0;
+                const rejections = result.rejections || 0;
+                const total = result.totalFiles || 0;
                 
-                html += '<div class="result-item success">' +
-                    '<span>✅ Upload completed: ' + result.processed + ' of ' + result.totalFiles + ' files processed</span>' +
-                    '<div class="result-details">Results will remain visible for review. Files will be cleared automatically in 10 seconds, or use the "Clear" button.</div>' +
+                console.log('📊 Counts - Smart:', { processed: smartProcessed, duplicates: smartDuplicates });
+                console.log('📊 Counts - Main:', { processed: mainProcessed, duplicates: mainDuplicates });
+                
+                // Final counts: SmartKMLManager duplicates override main processed count
+                const processed = smartDuplicates > 0 ? Math.max(0, mainProcessed - smartDuplicates) : smartProcessed;
+                const duplicates = smartDuplicates > 0 ? smartDuplicates : mainDuplicates;
+                
+                console.log('📊 Final counts:', { processed, duplicates, rejections, total });
+                
+                // Enhanced Summary
+                html += '<div class="result-item info">' +
+                    '<span>📊 Upload Summary:</span>' +
+                    '<div class="result-details">' +
+                        total + ' files uploaded → ' +
+                        processed + ' processed, ' +
+                        duplicates + ' duplicate(s), ' +
+                        rejections + ' rejected' +
+                    '</div>' +
                 '</div>';
                 
-                // Show successful uploads
-                if (result.results && result.results.length > 0) {
-                    result.results.forEach(file => {
-                        html += '<div class="result-item success">' +
+                // Group 1: Successfully Processed Files
+                const successfulFiles = result.results ? result.results.filter(file => file.status === 'success') : [];
+                if (processed > 0) {
+                    html += '<div class="result-item success">' +
+                        '<span>✅ Successfully Processed (' + processed + ' files):</span>' +
+                    '</div>';
+                    
+                    // Show individual files if we have them, otherwise show summary
+                    if (successfulFiles.length > 0) {
+                        successfulFiles.forEach(file => {
+                            html += '<div class="result-item success file-detail">' +
+                                '<div>' +
+                                    '<span class="result-filename">' + file.filename + '</span>' +
+                                    '<div class="result-details">' +
+                                        '<span class="status-badge success-badge">✅ Processed & Renamed</span>' +
+                                        (file.registration ? ' | Registration: ' + file.registration : '') +
+                                        (file.date ? ' | Date: ' + file.date : '') +
+                                        (file.time ? ' | Time: ' + file.time : '') +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                    } else {
+                        // Show summary if we don't have individual file details
+                        html += '<div class="result-item success file-detail">' +
+                            '<div>' +
+                                '<span class="result-filename">' + processed + ' file(s) processed</span>' +
+                                '<div class="result-details">' +
+                                    '<span class="status-badge success-badge">✅ Processed & Renamed</span>' +
+                                    ' | Files moved to /uploads folder' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+                    }
+                }
+                
+                // Group 2: Duplicate Files (if any)
+                const duplicateFiles = result.results ? result.results.filter(file => file.status === 'DUPLICATE_SKIPPED') : [];
+                if (duplicates > 0) {
+                    html += '<div class="result-item warning">' +
+                        '<span>⚠️ Duplicates Detected (' + duplicates + ' files):</span>' +
+                        '<div class="result-details">Files deleted (already exist in system)</div>' +
+                    '</div>';
+                    
+                    // Show individual duplicate files if we have them
+                    if (duplicateFiles.length > 0) {
+                        duplicateFiles.forEach(file => {
+                            html += '<div class="result-item warning file-detail">' +
+                                '<div>' +
+                                    '<span class="result-filename">' + file.filename + '</span>' +
+                                    '<div class="result-details">' +
+                                        '<span class="status-badge warning-badge">⚠️ Duplicate - Deleted</span>' +
+                                        (file.registration ? ' | Registration: ' + file.registration : '') +
+                                        (file.date ? ' | Date: ' + file.date : '') +
+                                        (file.time ? ' | Time: ' + file.time : '') +
+                                        (file.existingFile ? ' | Duplicate of: ' + file.existingFile : '') +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                    } else {
+                        // Show summary if we don't have individual file details (SmartKMLManager deleted them)
+                        html += '<div class="result-item warning file-detail">' +
+                            '<div>' +
+                                '<span class="result-filename">' + duplicates + ' duplicate file(s)</span>' +
+                                '<div class="result-details">' +
+                                    '<span class="status-badge warning-badge">⚠️ Duplicate - Deleted</span>' +
+                                    ' | Files deleted (already exist in system)' +
+                                '</div>' +
+                            '</div>' +
+                        '</div>';
+                    }
+                }
+                
+                // Group 3: Rejected Files (if any)
+                const rejectedFiles = result.results ? result.results.filter(file => file.status === 'NO_VIOLATION_REJECTED') : [];
+                if (rejectedFiles.length > 0) {
+                    html += '<div class="result-item error">' +
+                        '<span>❌ Rejected Files (' + rejectedFiles.length + ' files):</span>' +
+                        '<div class="result-details">Files deleted - no TMNP airspace violations detected</div>' +
+                    '</div>';
+                    
+                    rejectedFiles.forEach(file => {
+                        html += '<div class="result-item error file-detail">' +
                             '<div>' +
                                 '<span class="result-filename">' + file.filename + '</span>' +
                                 '<div class="result-details">' +
-                                    (file.registration ? 'Registration: ' + file.registration : '') +
+                                    '<span class="status-badge error-badge">❌ Rejected - No TMNP violations</span>' +
+                                    (file.registration ? ' | Registration: ' + file.registration : '') +
                                     (file.date ? ' | Date: ' + file.date : '') +
                                     (file.time ? ' | Time: ' + file.time : '') +
+                                    ' | Files deleted (outside restricted airspace)' +
                                 '</div>' +
                             '</div>' +
                         '</div>';
@@ -1103,21 +1234,28 @@
                 
                 // Show errors if any
                 if (result.errors && result.errors.length > 0) {
+                    html += '<div class="result-item error">' +
+                        '<span>❌ Processing Errors (' + result.errors.length + ' files):</span>' +
+                    '</div>';
+                    
                     result.errors.forEach(error => {
-                        html += '<div class="result-item error">' +
+                        html += '<div class="result-item error file-detail">' +
                             '<div>' +
                                 '<span class="result-filename">' + error.filename + '</span>' +
-                                '<div class="result-details">Error: ' + error.error + '</div>' +
+                                '<div class="result-details">' +
+                                    '<span class="status-badge error-badge">❌ Processing Error</span>' +
+                                    ' | Error: ' + error.error +
+                                '</div>' +
                             '</div>' +
                         '</div>';
                     });
                 }
                 
-                // Clear selected files after successful upload (increased timeout for better UX)
+                // Only clear selected files if files were actually processed
                 if (result.processed > 0) {
                     setTimeout(() => {
                         clearAllFiles();
-                    }, 10000); // Increased to 10 seconds
+                    }, 5000);
                 }
             } else {
                 html = '<div class="result-item error">' +
@@ -1486,18 +1624,46 @@
             }
         }
 
-        // Enhanced Refresh Metadata Function
+        // Fast Add Missing Files to Metadata Function
+        async function addMissingMetadata() {
+            const button = document.getElementById('addMissingBtn');
+            try {
+                setButtonLoading(button);
+                showActionStatus('🔍 Scanning for missing files in metadata...');
+                
+                const response = await fetch('http://localhost:4000/add-missing-metadata', { method: 'POST' });
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.added > 0) {
+                        showActionStatus(`✅ Added ${result.added} missing file(s) to metadata! Total: ${result.total}`, 'success');
+                    } else {
+                        showActionStatus('✅ All files already in metadata - no missing files found!', 'success');
+                    }
+                    // Auto-refresh validation after adding
+                    setTimeout(() => validateFiles(), 2000);
+                } else {
+                    showActionStatus('❌ Adding missing metadata failed: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                showActionStatus('❌ Network error: ' + error.message, 'error');
+            } finally {
+                setButtonNormal(button);
+            }
+        }
+
+        // Enhanced Refresh Metadata Function (FULL RESCAN - slow)
         async function refreshMetadata() {
             const button = document.getElementById('refreshBtn');
             try {
                 setButtonLoading(button);
-                showActionStatus('🔄 Refreshing metadata and file counts...');
+                showActionStatus('🔄 Full metadata refresh (slow) - scanning all files...');
                 
                 const response = await fetch('http://localhost:4000/refresh-metadata', { method: 'POST' });
                 const result = await response.json();
                 
                 if (result.success) {
-                    showActionStatus('✅ Metadata refreshed successfully!', 'success');
+                    showActionStatus('✅ Full metadata refresh completed!', 'success');
                     // Auto-refresh validation after metadata refresh
                     setTimeout(() => validateFiles(), 2000);
                 } else {

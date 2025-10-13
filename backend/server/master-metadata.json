@@ -1,8 +1,118 @@
 {
-  "generated": "2025-10-06T17:35:05.514Z",
-  "totalFiles": 667,
-  "validFlights": 667,
+  "generated": "2025-10-07T20:00:05.876Z",
+  "totalFiles": 780,
+  "validFlights": 780,
   "flights": [
+    {
+      "filename": "2025-10-03-ZT-RMS-3c7def3a.kml",
+      "registration": "ZT-RMS",
+      "date": "2025-10-03",
+      "time": "06:28",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/6/1266217_1691655199_tb.jpg?v=0",
+      "fileSizeMB": 1.26
+    },
+    {
+      "filename": "2025-10-02-ZT-RNW-3c79d7be.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-10-02",
+      "time": "07:28",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 6.97
+    },
+    {
+      "filename": "2025-10-02-ZS-HMB-3c79d71a.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-10-02",
+      "time": "07:27",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 5.98
+    },
+    {
+      "filename": "2025-10-01-ZS-HMB-3c75ba34.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-10-01",
+      "time": "07:10",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.88
+    },
+    {
+      "filename": "2025-09-30-ZS-HIE-3c72622e.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-30",
+      "time": "11:36",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.76
+    },
+    {
+      "filename": "2025-09-30-ZS-HMB-3c7230ba.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-30",
+      "time": "10:33",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.75
+    },
+    {
+      "filename": "2025-09-30-ZT-REG-3c721dd2.kml",
+      "registration": "ZT-REG",
+      "date": "2025-09-30",
+      "time": "10:00",
+      "owner": "NAC",
+      "contact": "National Airways Corporation (NAC)\nPhone: +27 11 961 1700\nEmail: info@nac.co.za\nWebsite: www.nac.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/6/58588_1562879091_tb.jpg?v=0",
+      "fileSizeMB": 0.67
+    },
+    {
+      "filename": "2025-09-30-ZS-HIE-3c71f467.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-30",
+      "time": "08:56",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.74
+    },
+    {
+      "filename": "2025-09-30-ZT-HOT-3c71d9dc.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-30",
+      "time": "08:13",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.72
+    },
+    {
+      "filename": "2025-09-30-ZS-HBO-3c71d8b0.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-30",
+      "time": "08:12",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 4.1
+    },
+    {
+      "filename": "2025-09-30-ZT-RNW-3c71c829.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-30",
+      "time": "07:41",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.54
+    },
     {
       "filename": "2025-09-30-ZS-HMB-EGM96.kml",
       "registration": "ZS-HMB",
@@ -12,6 +122,36 @@
       "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
       "imageUrl": "",
       "fileSizeMB": 0.03
+    },
+    {
+      "filename": "2025-09-29-ZS-HMB-3c6db9cf.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-29",
+      "time": "08:29",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.43
+    },
+    {
+      "filename": "2025-09-29-ZT-RNW-3c6db190.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-29",
+      "time": "08:13",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 6.54
+    },
+    {
+      "filename": "2025-09-29-ZT-HOT-3c6daa29.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-29",
+      "time": "07:56",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.95
     },
     {
       "filename": "2025-09-29-ZS-HMB-4c20703e.kml",
@@ -44,6 +184,86 @@
       "fileSizeMB": 0.02
     },
     {
+      "filename": "2025-09-28-ZT-RNW-3c69ea19.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-28",
+      "time": "09:22",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.19
+    },
+    {
+      "filename": "2025-09-27-ZS-HIE-3c66530a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-27",
+      "time": "09:22",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.07
+    },
+    {
+      "filename": "2025-09-27-ZS-HMB-3c66408f.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-27",
+      "time": "08:56",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.93
+    },
+    {
+      "filename": "2025-09-27-ZS-HIE-3c662a3a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-27",
+      "time": "08:15",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.03
+    },
+    {
+      "filename": "2025-09-26-ZS-HMB-3c636679.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-26",
+      "time": "14:57",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.32
+    },
+    {
+      "filename": "2025-09-26-ZT-HOT-3c623672.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-26",
+      "time": "08:54",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 3.3
+    },
+    {
+      "filename": "2025-09-26-ZS-HIE-3c6224f0.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-26",
+      "time": "08:21",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.65
+    },
+    {
+      "filename": "2025-09-26-ZT-RNW-3c6213a6.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-26",
+      "time": "07:53",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 7.37
+    },
+    {
       "filename": "2025-09-26-ZS-HMB-b699bf40.kml",
       "registration": "ZS-HMB",
       "date": "2025-09-26",
@@ -52,6 +272,216 @@
       "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
       "imageUrl": "",
       "fileSizeMB": 0.05
+    },
+    {
+      "filename": "2025-09-25-ZS-HIE-3c5f309a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-25",
+      "time": "14:26",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.52
+    },
+    {
+      "filename": "2025-09-25-ZS-HIE-3c5edc0a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-25",
+      "time": "13:08",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.74
+    },
+    {
+      "filename": "2025-09-25-ZS-HIE-3c5e7e6e.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-25",
+      "time": "11:19",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.63
+    },
+    {
+      "filename": "2025-09-25-ZT-HOT-3c5e33f0.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-25",
+      "time": "09:28",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 3.32
+    },
+    {
+      "filename": "2025-09-25-ZS-HIE-3c5e175f.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-25",
+      "time": "08:42",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.49
+    },
+    {
+      "filename": "2025-09-25-ZT-RNW-3c5df4bf.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-25",
+      "time": "07:44",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 6.95
+    },
+    {
+      "filename": "2025-09-25-ZS-HIE-3c5dd658.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-25",
+      "time": "06:46",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.29
+    },
+    {
+      "filename": "2025-09-24-ZT-HOT-3c5a0ef4.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-24",
+      "time": "07:58",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.11
+    },
+    {
+      "filename": "2025-09-24-ZT-RNW-3c5a0408.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-24",
+      "time": "07:48",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 5.39
+    },
+    {
+      "filename": "2025-09-22-ZS-HIE-3c532f3e.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-22",
+      "time": "12:25",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 2.17
+    },
+    {
+      "filename": "2025-09-22-ZS-HIE-3c52925d.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-22",
+      "time": "08:21",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.92
+    },
+    {
+      "filename": "2025-09-22-ZT-HOT-3c528d2c.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-22",
+      "time": "08:10",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.48
+    },
+    {
+      "filename": "2025-09-22-ZT-RNW-3c527d88.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-22",
+      "time": "07:44",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.39
+    },
+    {
+      "filename": "2025-09-22-ZS-HBO-3c527059.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-22",
+      "time": "07:16",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 3.15
+    },
+    {
+      "filename": "2025-09-21-ZT-HOT-3c4eebc7.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-21",
+      "time": "07:53",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.01
+    },
+    {
+      "filename": "2025-09-21-ZS-HBO-3c4edf28.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-21",
+      "time": "07:32",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.6
+    },
+    {
+      "filename": "2025-09-20-ZS-HIE-3c4c525a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-20",
+      "time": "14:08",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.93
+    },
+    {
+      "filename": "2025-09-20-ZT-RNW-3c4b1228.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-20",
+      "time": "06:48",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.14
+    },
+    {
+      "filename": "2025-09-19-ZS-HIE-3c478dd3.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-19",
+      "time": "10:52",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.67
+    },
+    {
+      "filename": "2025-09-19-ZS-HMB-3c473cbf.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-19",
+      "time": "08:57",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.01
+    },
+    {
+      "filename": "2025-09-19-ZS-HBO-3c471a06.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-19",
+      "time": "08:02",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 1.73
     },
     {
       "filename": "2025-09-19-ZS-HMB-3240c4fe.kml",
@@ -64,6 +494,186 @@
       "fileSizeMB": 0.02
     },
     {
+      "filename": "2025-09-18-ZT-HOT-3c43ec94.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-18",
+      "time": "13:34",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.15
+    },
+    {
+      "filename": "2025-09-18-ZS-HIE-3c43c340.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-18",
+      "time": "12:53",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.31
+    },
+    {
+      "filename": "2025-09-18-ZS-HBO-3c42f87a.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-18",
+      "time": "08:14",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 0.51
+    },
+    {
+      "filename": "2025-09-18-ZS-HIE-3c42d13d.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-18",
+      "time": "07:07",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.62
+    },
+    {
+      "filename": "2025-09-18-ZS-HMB-3c42bb56.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-18",
+      "time": "06:27",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 3.24
+    },
+    {
+      "filename": "2025-09-17-ZT-HOT-3c3f91a5.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-17",
+      "time": "12:12",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.81
+    },
+    {
+      "filename": "2025-09-17-ZS-HIE-3c3f58ed.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-17",
+      "time": "10:58",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.88
+    },
+    {
+      "filename": "2025-09-17-ZS-HBO-3c3ee3cb.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-17",
+      "time": "07:45",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.49
+    },
+    {
+      "filename": "2025-09-17-ZT-RNW-3c3ed0da.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-17",
+      "time": "07:12",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 3.16
+    },
+    {
+      "filename": "2025-09-16-ZT-RNW-3c3b683e.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-16",
+      "time": "11:40",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 0.66
+    },
+    {
+      "filename": "2025-09-15-ZS-HMB-3c370e93.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-15",
+      "time": "09:44",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.92
+    },
+    {
+      "filename": "2025-09-15-ZT-RNW-3c36e862.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-15",
+      "time": "08:34",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 3.05
+    },
+    {
+      "filename": "2025-09-14-ZS-HIE-3c33b882.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-14",
+      "time": "11:55",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 3.53
+    },
+    {
+      "filename": "2025-09-14-ZS-HMB-3c33a91d.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-14",
+      "time": "11:38",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.53
+    },
+    {
+      "filename": "2025-09-14-ZS-HIE-3c332b0f.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-14",
+      "time": "08:03",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.97
+    },
+    {
+      "filename": "2025-09-14-ZT-HOT-3c332700.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-14",
+      "time": "07:55",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.9
+    },
+    {
+      "filename": "2025-09-14-ZS-HBO-3c330add.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-14",
+      "time": "07:03",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 3.82
+    },
+    {
+      "filename": "2025-09-14-ZT-RNW-3c330a75.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-14",
+      "time": "06:59",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 3.55
+    },
+    {
       "filename": "2025-09-14-ZS-HMB-e4f2a9ff.kml",
       "registration": "ZS-HMB",
       "date": "2025-09-14",
@@ -74,6 +684,496 @@
       "fileSizeMB": 0.05
     },
     {
+      "filename": "2025-09-13-ZS-HMB-3c305f9a.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-13",
+      "time": "13:06",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 0.66
+    },
+    {
+      "filename": "2025-09-13-ZT-RNW-3c2f6578.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-13",
+      "time": "06:25",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 3.76
+    },
+    {
+      "filename": "2025-09-12-ZS-HMB-3c2be7f6.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-12",
+      "time": "10:40",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 0.96
+    },
+    {
+      "filename": "2025-09-12-ZT-RNW-3c2bbeab.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-12",
+      "time": "09:37",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 5.02
+    },
+    {
+      "filename": "2025-09-12-ZS-HBO-3c2b9b5f.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-12",
+      "time": "08:39",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.93
+    },
+    {
+      "filename": "2025-09-12-ZT-HOT-3c2b6f3b.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-12",
+      "time": "07:27",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.04
+    },
+    {
+      "filename": "2025-09-11-ZT-HOT-3c28300f.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-11",
+      "time": "13:03",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.67
+    },
+    {
+      "filename": "2025-09-08-ZS-HIE-3c1c6eb3.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-09-08",
+      "time": "13:36",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.77
+    },
+    {
+      "filename": "2025-09-08-ZT-HOT-3c1b473b.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-08",
+      "time": "07:10",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.77
+    },
+    {
+      "filename": "2025-09-08-ZS-HBO-3c1b3ee6.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-08",
+      "time": "06:51",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 0.49
+    },
+    {
+      "filename": "2025-09-07-ZT-HOT-3c18fdd8.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-07",
+      "time": "15:26",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 0.76
+    },
+    {
+      "filename": "2025-09-07-ZS-HMB-3c1878e3.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-07",
+      "time": "12:55",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 0.75
+    },
+    {
+      "filename": "2025-09-07-ZS-HBO-3c17bc13.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-07",
+      "time": "08:22",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.76
+    },
+    {
+      "filename": "2025-09-07-ZT-HOT-3c17bad8.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-07",
+      "time": "08:20",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.9
+    },
+    {
+      "filename": "2025-09-07-ZT-RNW-3c1781eb.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-07",
+      "time": "06:30",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.3
+    },
+    {
+      "filename": "2025-09-06-ZT-HOT-3c14178b.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-06",
+      "time": "07:58",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 0.59
+    },
+    {
+      "filename": "2025-09-06-ZT-RNW-3c1408cb.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-06",
+      "time": "07:32",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.21
+    },
+    {
+      "filename": "2025-09-05-ZS-HMB-3c11277a.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-05",
+      "time": "13:30",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 0.73
+    },
+    {
+      "filename": "2025-09-05-ZT-RNW-3c10111a.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-09-05",
+      "time": "07:06",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.11
+    },
+    {
+      "filename": "2025-09-05-ZS-HBO-3c10057e.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-05",
+      "time": "06:46",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.26
+    },
+    {
+      "filename": "2025-09-04-ZS-HBO-3c0bf893.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-09-04",
+      "time": "06:33",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 1.39
+    },
+    {
+      "filename": "2025-09-03-ZT-HOT-3c0814b7.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-09-03",
+      "time": "07:13",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.16
+    },
+    {
+      "filename": "2025-09-02-ZS-HMB-3c045477.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-02",
+      "time": "08:43",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.61
+    },
+    {
+      "filename": "2025-09-01-ZS-HMB-3c017d6d.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-09-01",
+      "time": "13:59",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.68
+    },
+    {
+      "filename": "2025-08-31-ZS-HIE-3bfdba0f.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-31",
+      "time": "12:17",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.41
+    },
+    {
+      "filename": "2025-08-31-ZS-HIE-3bfd81ed.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-31",
+      "time": "10:55",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.17
+    },
+    {
+      "filename": "2025-08-31-ZS-HMB-3bfd6e92.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-08-31",
+      "time": "10:25",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.86
+    },
+    {
+      "filename": "2025-08-31-ZS-HBO-3bfd4fe8.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-08-31",
+      "time": "09:37",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 1.82
+    },
+    {
+      "filename": "2025-08-31-ZT-HOT-3bfd2106.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-08-31",
+      "time": "08:17",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.31
+    },
+    {
+      "filename": "2025-08-31-ZS-HIE-3bfcf7e1.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-31",
+      "time": "07:03",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.02
+    },
+    {
+      "filename": "2025-08-31-ZT-RNW-3bfcf4a2.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-08-31",
+      "time": "06:59",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.99
+    },
+    {
+      "filename": "2025-08-30-ZS-HIE-3bf9e299.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-30",
+      "time": "10:21",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 4.31
+    },
+    {
+      "filename": "2025-08-30-ZT-HOT-3bf9b894.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-08-30",
+      "time": "09:12",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.92
+    },
+    {
+      "filename": "2025-08-30-ZT-RNW-3bf9a479.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-08-30",
+      "time": "08:41",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.72
+    },
+    {
+      "filename": "2025-08-30-ZS-HBO-3bf98fbe.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-08-30",
+      "time": "08:00",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 0.82
+    },
+    {
+      "filename": "2025-08-29-ZS-HIE-3bf62089.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-29",
+      "time": "10:59",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.35
+    },
+    {
+      "filename": "2025-08-29-ZS-KUI-3bf5e549.kml",
+      "registration": "ZS-KUI",
+      "date": "2025-08-29",
+      "time": "09:22",
+      "owner": "",
+      "contact": "",
+      "imageUrl": "",
+      "fileSizeMB": 2.61
+    },
+    {
+      "filename": "2025-08-29-ZS-HBO-3bf5d222.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-08-29",
+      "time": "08:49",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 0.93
+    },
+    {
+      "filename": "2025-08-28-ZS-HBO-3bf2c4d9.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-08-28",
+      "time": "14:14",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 0.79
+    },
+    {
+      "filename": "2025-08-28-ZT-HOT-3bf28ac9.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-08-28",
+      "time": "13:13",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.05
+    },
+    {
+      "filename": "2025-08-28-ZT-RNW-3bf23b2e.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-08-28",
+      "time": "11:46",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.13
+    },
+    {
+      "filename": "2025-08-28-ZS-HMB-3bf1daee.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-08-28",
+      "time": "09:19",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.26
+    },
+    {
+      "filename": "2025-08-28-ZS-HIE-3bf1d511.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-28",
+      "time": "09:05",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 0.68
+    },
+    {
+      "filename": "2025-08-27-ZS-HMB-3bedefab.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-08-27",
+      "time": "10:35",
+      "owner": "Sport Helicopters",
+      "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 4.59
+    },
+    {
+      "filename": "2025-08-27-ZS-HBO-3bedd050.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-08-27",
+      "time": "09:45",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.75
+    },
+    {
+      "filename": "2025-08-27-ZS-HIE-3bedbb09.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-27",
+      "time": "09:09",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.27
+    },
+    {
+      "filename": "2025-08-27-ZT-RNW-3bedaa38.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-08-27",
+      "time": "08:42",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 2.92
+    },
+    {
+      "filename": "2025-08-26-ZS-HIE-3bea99bd.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-26",
+      "time": "13:59",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.63
+    },
+    {
+      "filename": "2025-08-26-ZS-HIE-3be96295.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-08-26",
+      "time": "07:15",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 3.06
+    },
+    {
       "filename": "2025-08-25-ZS-HMB-3be6c880.kml",
       "registration": "ZS-HMB",
       "date": "2025-08-25",
@@ -82,6 +1182,16 @@
       "contact": "Sport Helicopters\nPhone: +27 21 425 3868\nEmail: info@sporthelicopters.co.za\nWebsite: www.sporthelicopters.co.za",
       "imageUrl": "",
       "fileSizeMB": 1.06
+    },
+    {
+      "filename": "2025-08-25-ZS-HBO-3be59872.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-08-25",
+      "time": "08:54",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.47
     },
     {
       "filename": "2025-08-24-ZS-HMB-f2bb1fab.kml",
@@ -112,6 +1222,16 @@
       "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
       "imageUrl": "",
       "fileSizeMB": 2.3
+    },
+    {
+      "filename": "2025-08-24-ZS-RTG-3be1939b.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-08-24",
+      "time": "06:50",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/541479_1728643363_tb.jpg?v=0",
+      "fileSizeMB": 5.82
     },
     {
       "filename": "2025-08-23-ZS-HMB-a46594df.kml",
@@ -202,6 +1322,16 @@
       "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
       "imageUrl": "https://cdn.jetphotos.com/200/5/541479_1728643363_tb.jpg?v=0",
       "fileSizeMB": 6.18
+    },
+    {
+      "filename": "2025-08-19-ZT-RNW-3bcf1cd5.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-08-19",
+      "time": "14:41",
+      "owner": "Cape Town Helicopters",
+      "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
+      "imageUrl": "",
+      "fileSizeMB": 1.25
     },
     {
       "filename": "2025-08-19-ZT-HOT-082f2723.kml",
