@@ -106,7 +106,7 @@ class FrontendParser {
      */
     async getBackendFlightCount() {
         try {
-            const masterMetadataPath = path.join(this.projectRoot, 'backend', 'server', 'master-metadata.json');
+            const masterMetadataPath = path.join(this.projectRoot, 'backend', 'scripts', 'master-metadata.json');
             
             if (!fs.existsSync(masterMetadataPath)) {
                 return {
