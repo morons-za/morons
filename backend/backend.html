@@ -1311,40 +1311,6 @@
         document.addEventListener('dragover', (e) => e.preventDefault());
         document.addEventListener('drop', (e) => e.preventDefault());
         
-        async function refreshMetadata() {
-            const statusDiv = document.getElementById('actionsStatus');
-            try {
-                setButtonLoading(document.querySelector('button[onclick="refreshMetadata()"]'));
-                showActionStatus('🔄 Refreshing metadata and file counts...');
-                
-                const response = await fetch('http://localhost:4000/refresh-metadata', { method: 'POST' });
-                const result = await response.json();
-                
-                if (response.ok) {
-                    showActionStatus('✅ Metadata refreshed! Updating file counts...');
-                    
-                    // After metadata refresh, also refresh the validation to update counts
-                    setTimeout(async () => {
-                        try {
-                            await validateFiles();
-                            showActionStatus('✅ Metadata refreshed and file counts updated');
-                            setTimeout(() => hideActionStatus(), 3000);
-                        } catch (validateError) {
-                            showActionStatus('⚠️ Metadata refreshed but validation update failed: ' + validateError.message);
-                            setTimeout(() => hideActionStatus(), 5000);
-                        }
-                    }, 1000);
-                } else {
-                    showActionStatus('❌ Metadata refresh failed: ' + result.error);
-                    setTimeout(() => hideActionStatus(), 5000);
-                }
-            } catch (error) {
-                showActionStatus('❌ Error refreshing metadata: ' + error.message);
-                setTimeout(() => hideActionStatus(), 5000);
-            } finally {
-                setButtonNormal(document.querySelector('button[onclick="refreshMetadata()"]'));
-            }
-        }
         
         function viewUploads() {
             window.open('http://localhost:4000/uploads', '_blank');
@@ -1659,9 +1625,10 @@
 
         // Enhanced Refresh Metadata Function (FULL RESCAN - slow)
         async function refreshMetadata() {
-            const button = document.getElementById('refreshBtn');
+            // Try to find the button - could be from health check or main action buttons
+            const button = document.getElementById('refreshBtn') || document.querySelector('button[onclick="refreshMetadata()"]');
             try {
-                setButtonLoading(button);
+                if (button) setButtonLoading(button);
                 showActionStatus('🔄 Full metadata refresh (slow) - scanning all files...');
                 
                 const response = await fetch('http://localhost:4000/refresh-metadata', { method: 'POST' });
@@ -1669,15 +1636,26 @@
                 
                 if (result.success) {
                     showActionStatus('✅ Full metadata refresh completed!', 'success');
-                    // Auto-refresh validation after metadata refresh
-                    setTimeout(() => validateFiles(), 2000);
+                    // Auto-refresh validation after metadata refresh to update counts
+                    setTimeout(async () => {
+                        try {
+                            await validateFiles();
+                            showActionStatus('✅ Metadata refreshed and file counts updated');
+                            setTimeout(() => hideActionStatus(), 3000);
+                        } catch (validateError) {
+                            showActionStatus('⚠️ Metadata refreshed but validation update failed: ' + validateError.message);
+                            setTimeout(() => hideActionStatus(), 5000);
+                        }
+                    }, 1000);
                 } else {
                     showActionStatus('❌ Metadata refresh failed: ' + (result.error || 'Unknown error'), 'error');
+                    setTimeout(() => hideActionStatus(), 5000);
                 }
             } catch (error) {
                 showActionStatus('❌ Network error: ' + error.message, 'error');
+                setTimeout(() => hideActionStatus(), 5000);
             } finally {
-                setButtonNormal(button);
+                if (button) setButtonNormal(button);
             }
         }
 
