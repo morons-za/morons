@@ -861,6 +861,7 @@ const htmlContent = `<!DOCTYPE html>
 <body>
     <div class="header">
         <button onclick="showHome()">Home</button>
+        <button onclick="showContact()">Contact</button>
         <button onclick="showFAQ()">FAQ</button>
     </div>
 
@@ -1030,6 +1031,47 @@ const htmlContent = `<!DOCTYPE html>
             <h1 style="text-align: center; color: #2c3e50; margin-bottom: 40px; font-size: 2.5rem; font-weight: 700;">Frequently Asked Questions</h1>
             <div id="faqContent">
                 <!-- FAQ items will be populated by JavaScript -->
+            </div>
+            <div style="text-align: center; margin-top: 40px;">
+                <button onclick="showHome()" class="faq-back-button">
+                    ← Back to Home
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Page -->
+    <div id="contactPage" style="display: none; min-height: 100vh; padding-top: 70px;">
+        <div class="faq-container">
+            <h1 style="text-align: center; color: #2c3e50; margin-bottom: 40px; font-size: 2.5rem; font-weight: 700;">Contact</h1>
+            <div style="max-width: 800px; margin: 0 auto; padding: 0 20px;">
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+                    <h2 style="color: #2c3e50; margin-bottom: 20px;">Get in Touch</h2>
+                    <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
+                        For questions about helicopter tracking data, airspace violations, or technical issues with this site, please contact us.
+                    </p>
+                    <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff;">
+                        <h3 style="color: #2c3e50; margin-bottom: 15px;">Contact Information</h3>
+                        <p style="color: #555; margin-bottom: 10px;"><strong>Email:</strong> contact@tmnp-helicopters.org</p>
+                        <p style="color: #555; margin-bottom: 10px;"><strong>Subject:</strong> TMNP Helicopter Tracking Inquiry</p>
+                        <p style="color: #555; margin-bottom: 15px;"><strong>Response Time:</strong> Within 48 hours</p>
+                        <p style="color: #666; font-size: 14px;">
+                            Please include relevant flight details (registration, date, time) when reporting specific violations or requesting data.
+                        </p>
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
+                    <h2 style="color: #2c3e50; margin-bottom: 20px;">Report Violations</h2>
+                    <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
+                        If you witness helicopter activity in restricted areas or have additional flight data to contribute, please report it.
+                    </p>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border: 1px solid #ffeaa7;">
+                        <p style="color: #856404; margin: 0; font-weight: 600;">
+                            📧 Email violations to: violations@tmnp-helicopters.org
+                        </p>
+                    </div>
+                </div>
             </div>
             <div style="text-align: center; margin-top: 40px;">
                 <button onclick="showHome()" class="faq-back-button">
@@ -1874,16 +1916,25 @@ const htmlContent = `<!DOCTYPE html>
             }
         }
         
-        // Home and FAQ functions
+        // Home, Contact, and FAQ functions
         function showHome() {
-            // Hide FAQ page and show main content
+            // Hide all pages and show main content
+            document.getElementById('contactPage').style.display = 'none';
             document.getElementById('faqPage').style.display = 'none';
             document.querySelector('.main-content').style.display = 'block';
         }
         
-        function showFAQ() {
-            // Hide main content and show FAQ page
+        function showContact() {
+            // Hide main content and FAQ page, show contact page
             document.querySelector('.main-content').style.display = 'none';
+            document.getElementById('faqPage').style.display = 'none';
+            document.getElementById('contactPage').style.display = 'flex';
+        }
+        
+        function showFAQ() {
+            // Hide main content and contact page, show FAQ page
+            document.querySelector('.main-content').style.display = 'none';
+            document.getElementById('contactPage').style.display = 'none';
             document.getElementById('faqPage').style.display = 'flex';
             
             // Populate FAQ content
