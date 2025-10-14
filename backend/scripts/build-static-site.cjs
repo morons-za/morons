@@ -1052,23 +1052,16 @@ const htmlContent = `<!DOCTYPE html>
                     </p>
                     <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #007bff;">
                         <h3 style="color: #2c3e50; margin-bottom: 15px;">Contact Information</h3>
-                        <p style="color: #555; margin-bottom: 10px;"><strong>Email:</strong> contact@tmnp-helicopters.org</p>
-                        <p style="color: #555; margin-bottom: 10px;"><strong>Subject:</strong> TMNP Helicopter Tracking Inquiry</p>
-                        <p style="color: #555; margin-bottom: 15px;"><strong>Response Time:</strong> Within 48 hours</p>
+                        <div id="emailContainer" style="margin-bottom: 10px;">
+                            <button id="emailButton" onclick="revealEmail()" style="background: #007bff; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; transition: all 0.3s ease;">
+                                Click to show email address
+                            </button>
+                            <div id="emailAddress" style="display: none; opacity: 0; transition: opacity 0.5s ease; color: #555; font-weight: 600;">
+                                admin@morons.org.za
+                            </div>
+                        </div>
                         <p style="color: #666; font-size: 14px;">
                             Please include relevant flight details (registration, date, time) when reporting specific violations or requesting data.
-                        </p>
-                    </div>
-                </div>
-                
-                <div style="background: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-                    <h2 style="color: #2c3e50; margin-bottom: 20px;">Report Violations</h2>
-                    <p style="color: #555; line-height: 1.6; margin-bottom: 20px;">
-                        If you witness helicopter activity in restricted areas or have additional flight data to contribute, please report it.
-                    </p>
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 6px; border: 1px solid #ffeaa7;">
-                        <p style="color: #856404; margin: 0; font-weight: 600;">
-                            📧 Email violations to: violations@tmnp-helicopters.org
                         </p>
                     </div>
                 </div>
@@ -1929,6 +1922,26 @@ const htmlContent = `<!DOCTYPE html>
             document.querySelector('.main-content').style.display = 'none';
             document.getElementById('faqPage').style.display = 'none';
             document.getElementById('contactPage').style.display = 'flex';
+        }
+        
+        function revealEmail() {
+            const button = document.getElementById('emailButton');
+            const emailDiv = document.getElementById('emailAddress');
+            
+            // Animate button disappearing
+            button.style.opacity = '0';
+            button.style.transform = 'scale(0.8)';
+            
+            // After button animation, show email
+            setTimeout(() => {
+                button.style.display = 'none';
+                emailDiv.style.display = 'block';
+                
+                // Animate email appearing
+                setTimeout(() => {
+                    emailDiv.style.opacity = '1';
+                }, 50);
+            }, 300);
         }
         
         function showFAQ() {
