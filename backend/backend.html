@@ -1518,10 +1518,16 @@
         }
 
         function showActionStatus(message, type = 'success') {
+            console.log('showActionStatus called:', message, type); // Debug log
             const statusDiv = document.getElementById('actionsStatus');
+            if (!statusDiv) {
+                console.error('actionsStatus div not found!');
+                return;
+            }
             statusDiv.textContent = message;
             statusDiv.className = 'status-feedback ' + type;
             statusDiv.style.display = 'block';
+            console.log('Status div updated:', statusDiv.textContent, statusDiv.className, statusDiv.style.display);
         }
 
         function hideActionStatus() {
@@ -1597,7 +1603,9 @@
 
         // Fast Add Missing Files to Metadata Function
         async function addMissingMetadata() {
+            console.log('addMissingMetadata function called'); // Debug log
             const button = document.getElementById('addMissingBtn');
+            console.log('Button found:', button); // Debug log
             try {
                 setButtonLoading(button);
                 showActionStatus('🔍 Scanning for missing files in metadata...');
