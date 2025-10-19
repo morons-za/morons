@@ -43,6 +43,7 @@ This project is split into two main components designed for different purposes:
   - Optimized KML files (smaller, processed versions)
   - Flight statistics and analytics
   - Search and filtering capabilities
+  - **Aircraft images** (`/aircraft-images/`) - Local helicopter photos for fast loading
 - **Does NOT contain**: Original full-sized KML files or PNG violation screenshots
 - **Hosting**: Designed for static hosting (GitHub Pages, Netlify, Vercel, etc.)
 
@@ -130,6 +131,35 @@ The backend system is where the **data processing magic happens**, designed to r
 5. **Refresh**: Update metadata to include new flights in the system
 6. **Build**: Generate optimized static site with new flight data
 7. **Deploy**: Push optimized data to static site repository
+
+## 📸 Aircraft Images Management
+
+The system maintains a local collection of helicopter images for fast, reliable loading on the static site.
+
+### **Image Storage Location**
+- **Path**: `/static-site/aircraft-images/`
+- **Format**: JPEG files named by registration (e.g., `ZS-HBO.jpg`)
+- **Purpose**: Fast loading without external dependencies
+
+### **Current Images (12 helicopters)**
+All tracked helicopters have local images:
+- **ZS-HBO**, **ZS-HIE**, **ZS-HIM**, **ZS-RTG**, **ZT-REG**, **ZT-RMS** (Cape Town Helicopters)
+- **ZS-HGD**, **ZS-HMB** (Sport Helicopters)  
+- **ZS-RLC**, **ZT-RPG** (NAC)
+- **ZT-HOT**, **ZT-RNW** (Cape Town Helicopters)
+
+### **Image Management**
+- **Source**: Images are manually curated and stored locally
+- **Updates**: Add new images to `/static-site/aircraft-images/` with exact registration filename
+- **Configuration**: Image paths are defined in `/backend/scripts/helicopters.json`
+- **Performance**: Local images load instantly without external API calls
+
+### **For Developers & AI Agents**
+- **Always use local paths**: `./aircraft-images/[REGISTRATION].jpg`
+- **Never use external URLs**: Avoid JetPhotos, PlaneSpotters, etc. for reliability
+- **File naming**: Must match helicopter registration exactly (e.g., `ZS-HBO.jpg`)
+- **Format**: JPEG preferred for web compatibility
+- **Size**: Optimize for web (recommended max 500KB per image)
 
 ## 🚀 Quick Start
 
@@ -664,6 +694,13 @@ This is a **Node.js helicopter tracking system** that:
 - Files: `master-metadata.json`, `helicopters.json`, `processed-files.json`
 - Also includes: `duplicates/`, `images/`, `hot-reload.sh`
 - **Note**: `/backend/server/` folder is deprecated - everything moved to `/backend/scripts/`
+
+#### Aircraft Images → `/static-site/aircraft-images/`
+- **Purpose**: Local helicopter photos for fast loading
+- **Format**: JPEG files named by registration (e.g., `ZS-HBO.jpg`)
+- **Configuration**: Image paths defined in `/backend/scripts/helicopters.json`
+- **Rule**: Always use local paths (`./aircraft-images/[REGISTRATION].jpg`)
+- **Never use**: External URLs (JetPhotos, PlaneSpotters, etc.)
 
 #### Log Files → `/backend/logs/`
 - All `.log` files go here (auto-generated, gitignored)
