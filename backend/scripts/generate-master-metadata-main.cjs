@@ -216,6 +216,8 @@ async function generateMasterMetadata() {
   
   // Process all files
   const allFlights = [];
+  const excludedFiles = [];
+  
   files.forEach((filename, idx) => {
     if (idx % 50 === 0) {
       console.log(`Processing file ${idx + 1}/${files.length}...`);
@@ -243,6 +245,13 @@ async function generateMasterMetadata() {
         imageUrl: heliData.imageUrl || '',
         fileSizeMB: fileSizeMB
       });
+    } else {
+      // Track excluded files for debugging
+      excludedFiles.push({
+        filename: filename,
+        reason: 'No registration extracted',
+        meta: meta
+      });
     }
   });
   
@@ -269,6 +278,17 @@ async function generateMasterMetadata() {
   console.log(`   • Total KML files: ${files.length}`);
   console.log(`   • Valid flights: ${allFlights.length}`);
   console.log(`   • Excluded files: ${files.length - allFlights.length} (missing registration)`);
+  
+  // Debug: Show excluded files
+  if (excludedFiles.length > 0) {
+    console.log(`\n🔍 Debug - Excluded files (${excludedFiles.length}):`);
+    excludedFiles.slice(0, 10).forEach(file => {
+      console.log(`   • ${file.filename} - ${file.reason}`);
+    });
+    if (excludedFiles.length > 10) {
+      console.log(`   • ... and ${excludedFiles.length - 10} more files`);
+    }
+  }
   
   // Calculate total file size
   const totalSizeMB = allFlights.reduce((sum, flight) => sum + flight.fileSizeMB, 0);

@@ -1732,7 +1732,7 @@ app.post('/build-static-site', async (req, res) => {
     nodeProcess.on('close', (code) => {
       if (code === 0) {
         // Parse the output to extract processed count
-        const processedMatch = stdout.match(/Loaded (\d+) flights/);
+        const processedMatch = stdout.match(/📊 Loaded (\d+) flights/);
         const generatedMatch = stdout.match(/Copied (\d+) optimized KML files/);
         const processed = processedMatch ? parseInt(processedMatch[1]) : 0;
         const generated = generatedMatch ? parseInt(generatedMatch[1]) : 0;
