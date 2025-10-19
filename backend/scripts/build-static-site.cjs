@@ -893,8 +893,18 @@ const htmlContent = `<!DOCTYPE html>
                 display: none;
             }
             
+            th:nth-child(6), td:nth-child(6) { /* KML */
+                display: none;
+            }
+            
             th:nth-child(7), td:nth-child(7) { /* Size */
                 display: none;
+            }
+            
+            /* Allow Owner column to wrap on mobile */
+            td:nth-child(4) { /* Owner column */
+                white-space: normal;
+                min-width: unset;
             }
         }
     </style>
