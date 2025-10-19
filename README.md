@@ -89,6 +89,53 @@ The static site is the **public face** of the project, designed to be hosted on 
 - **Flight Statistics**: Analytics dashboard with violation patterns
 - **Search & Filter**: Find specific flights by date, aircraft, or operator
 - **Responsive Design**: Works on desktop, tablet, and mobile devices
+- **📊 Enhanced Table Display**: Clean, professional data presentation with mobile optimization
+
+### 📊 Table Display Features
+
+The static site includes a comprehensive flight data table with the following features:
+
+#### **Desktop Experience**
+- **Clean Date Formatting**: Dates display on single lines (no stacking)
+- **Owner Information**: Company names display fully without truncation
+- **Column Organization**: 
+  - Date
+  - Takeoff time (SA) - South African time zone
+  - Registration - Aircraft registration numbers
+  - Owner - Helicopter company/operator
+  - Filename - Technical file reference (smaller font)
+  - KML - Download link for flight data
+  - Size - File size information
+  - View Flight - Interactive map viewing
+  - Take action - Report violations
+
+#### **Mobile Optimization**
+- **Responsive Design**: Automatically adapts to mobile screens
+- **Hidden Columns**: Less critical columns hidden on mobile (≤768px):
+  - Takeoff time (SA)
+  - Filename
+  - KML download
+  - Size
+- **Essential Data**: Mobile shows only core information:
+  - Date
+  - Registration
+  - Owner (with text wrapping for long names)
+  - View Flight
+  - Take action
+- **Smaller Font**: 12px font size for better mobile fit
+- **No Horizontal Scrolling**: All content fits within screen width
+
+#### **Data Export**
+- **CSV Export**: Complete data export including both UTC and SA times
+- **Filtered Export**: Export only currently filtered/visible flights
+- **Comprehensive Data**: Includes all columns for analysis purposes
+
+#### **User Experience**
+- **Click-to-View**: Click any flight row to view detailed information
+- **Interactive Map**: View flight paths on interactive map
+- **Filtering**: Filter by date range, aircraft registration, or owner
+- **Search**: Quick search and filter capabilities
+- **Responsive**: Seamless experience across all device sizes
 
 ### 🚫 What's NOT Included
 - **Original Full KML Files**: Too large for static hosting
@@ -1047,6 +1094,19 @@ When working on this project, remember:
 - Verify KML downloads work from GitHub URLs
 - Check PNG previews load correctly in "Take Action" modals
 - Debug scripts are available in `/backend/scripts/tests/`
+
+**Table Display Modifications:**
+- **File**: `/backend/scripts/build-static-site.cjs`
+- **Desktop Table**: Full column display with proper formatting
+- **Mobile Table**: Responsive design with hidden columns (≤768px)
+- **Key CSS Rules**:
+  - `white-space: nowrap` for Date column (prevents stacking)
+  - `white-space: nowrap` for Owner column (desktop only)
+  - `white-space: normal` for Owner column (mobile - allows wrapping)
+  - `font-size: 12px` for Filename column (reduces clutter)
+  - `@media (max-width: 768px)` hides: Takeoff time, Filename, KML, Size
+- **Testing**: Always test on both desktop and mobile viewports
+- **CSV Export**: Includes all columns (UTC Time, SA Time) regardless of table display
 
 ## 🤝 Contributing
 
