@@ -1,29 +1,35 @@
 {
   "rejected": [
     {
-      "file": "3c76001a.kml",
-      "duplicateOf": "2025-10-01-ZS-HIE-3c76001a.kml",
+      "file": "3ca0359b.kml",
+      "duplicateOf": "2025-10-12-ZS-HMB-3ca0359b.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-13T08:46:13.419Z"
+      "timestamp": "2025-10-19T07:24:13.409Z"
     },
     {
-      "file": "3c7e57c7.kml",
-      "duplicateOf": "2025-10-03-ZS-HIE-3c7e57c7.kml",
+      "file": "3ca3615c.kml",
+      "duplicateOf": "2025-10-13-ZS-HBO-3ca3615c.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-13T08:46:13.419Z"
+      "timestamp": "2025-10-19T07:24:13.409Z"
     },
     {
-      "file": "3c7ea7bd.kml",
-      "duplicateOf": "2025-10-03-ZS-HIE-3c7ea7bd.kml",
+      "file": "3ca44540.kml",
+      "duplicateOf": "2025-10-13-ZT-HOT-3ca44540.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-13T08:46:13.419Z"
+      "timestamp": "2025-10-19T07:24:13.409Z"
     },
     {
-      "file": "3c823374.kml",
-      "duplicateOf": "2025-10-04-ZS-HIE-3c823374.kml",
+      "file": "3ca445d8.kml",
+      "duplicateOf": "2025-10-13-ZT-RNW-3ca445d8.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-13T08:46:13.419Z"
+      "timestamp": "2025-10-19T07:24:13.409Z"
+    },
+    {
+      "file": "3ca710fd.kml",
+      "duplicateOf": "2025-10-14-ZT-HOT-3ca710fd.kml",
+      "action": "DELETED",
+      "timestamp": "2025-10-19T07:24:13.409Z"
     }
   ],
-  "summary": "4 duplicate files rejected and deleted"
+  "summary": "5 duplicate files rejected and deleted"
 }
