@@ -1,8 +1,188 @@
 {
-  "generated": "2025-10-13T11:27:21.768Z",
-  "totalFiles": 828,
-  "validFlights": 828,
+  "generated": "2025-10-19T07:54:04.143Z",
+  "totalFiles": 854,
+  "validFlights": 854,
   "flights": [
+    {
+      "filename": "2025-10-18-ZS-HIM-3cb81026.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-10-18",
+      "time": "12:16",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
+      "fileSizeMB": 1.76
+    },
+    {
+      "filename": "2025-10-18-ZS-HGD-3cb7e720.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-18",
+      "time": "11:28",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 4.73
+    },
+    {
+      "filename": "2025-10-18-ZS-HBO-3cb7aac9.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-10-18",
+      "time": "10:02",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 2.2
+    },
+    {
+      "filename": "2025-10-18-ZS-HBO-96e2a113.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-10-18",
+      "time": "10:02",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 3.2
+    },
+    {
+      "filename": "2025-10-18-ZS-HIM-3cb7a1ea.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-10-18",
+      "time": "09:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
+      "fileSizeMB": 3.32
+    },
+    {
+      "filename": "2025-10-18-ZS-HMB-3cb748f7.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-10-18",
+      "time": "07:19",
+      "owner": "Sport Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 1.58
+    },
+    {
+      "filename": "2025-10-17-ZS-HBO-3cb399aa.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-10-17",
+      "time": "10:33",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 0.94
+    },
+    {
+      "filename": "2025-10-17-ZS-HGD-3cb31fe5.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-17",
+      "time": "07:17",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 2.97
+    },
+    {
+      "filename": "2025-10-15-ZS-HIM-3cab229e.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-10-15",
+      "time": "08:54",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
+      "fileSizeMB": 0.55
+    },
+    {
+      "filename": "2025-10-15-ZT-RNW-3cab0a01.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-10-15",
+      "time": "08:12",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 5.39
+    },
+    {
+      "filename": "2025-10-15-ZS-HIM-3caae298.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-10-15",
+      "time": "07:00",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
+      "fileSizeMB": 0.59
+    },
+    {
+      "filename": "2025-10-15-ZS-HIM-6b5bb0d3.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-10-15",
+      "time": "07:00",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
+      "fileSizeMB": 0.59
+    },
+    {
+      "filename": "2025-10-14-ZS-HMB-3ca7a27a.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-10-14",
+      "time": "11:20",
+      "owner": "Sport Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 1.78
+    },
+    {
+      "filename": "2025-10-14-ZS-HGD-3ca783ea.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-14",
+      "time": "10:40",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 4.04
+    },
+    {
+      "filename": "2025-10-14-ZS-HIE-3ca71d63.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-10-14",
+      "time": "07:31",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/796157_1728637746_tb.jpg?v=0",
+      "fileSizeMB": 1.34
+    },
+    {
+      "filename": "2025-10-14-ZT-RNW-3ca715dd.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-10-14",
+      "time": "07:19",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 7.01
+    },
+    {
+      "filename": "2025-10-14-ZT-HOT-3ca710fd.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-10-14",
+      "time": "07:06",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 1.9
+    },
+    {
+      "filename": "2025-10-13-ZT-HOT-3ca44540.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-10-13",
+      "time": "12:39",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 1.77
+    },
+    {
+      "filename": "2025-10-13-ZT-RNW-3ca445d8.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-10-13",
+      "time": "12:37",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "",
+      "fileSizeMB": 1.76
+    },
+    {
+      "filename": "2025-10-13-ZS-HBO-3ca3615c.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-10-13",
+      "time": "06:12",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
+      "fileSizeMB": 1.61
+    },
     {
       "filename": "2025-10-12-ZS-HIM-3ca122ec.kml",
       "registration": "ZS-HIM",
@@ -11,6 +191,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
       "fileSizeMB": 0.85
+    },
+    {
+      "filename": "2025-10-12-ZS-HGD-3ca057a5.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-12",
+      "time": "09:02",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 4.04
     },
     {
       "filename": "2025-10-12-ZS-HIM-3ca053bb.kml",
@@ -139,6 +328,15 @@
       "fileSizeMB": 2.84
     },
     {
+      "filename": "2025-10-10-ZS-HGD-3c98d498.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-10",
+      "time": "07:14",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 4.48
+    },
+    {
       "filename": "2025-10-10-ZS-HIM-3c98cf3c.kml",
       "registration": "ZS-HIM",
       "date": "2025-10-10",
@@ -173,6 +371,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
       "fileSizeMB": 1.2
+    },
+    {
+      "filename": "2025-10-09-ZS-HGD-3c94d641.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-09",
+      "time": "08:11",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 5.55
     },
     {
       "filename": "2025-10-09-ZS-HBO-3c94b8c8.kml",
@@ -238,6 +445,15 @@
       "fileSizeMB": 3.86
     },
     {
+      "filename": "2025-10-08-ZS-HGD-3c90f11b.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-08",
+      "time": "09:18",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 4.4
+    },
+    {
       "filename": "2025-10-08-ZS-HBO-3c90c0cc.kml",
       "registration": "ZS-HBO",
       "date": "2025-10-08",
@@ -263,6 +479,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "https://cdn.jetphotos.com/200/5/1061147_1677582480_tb.jpg?v=0",
       "fileSizeMB": 3.94
+    },
+    {
+      "filename": "2025-10-07-ZS-HGD-3c8cd2c4.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-07",
+      "time": "07:21",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 6.8
     },
     {
       "filename": "2025-10-07-ZS-HMB-3c8cc8af.kml",
@@ -308,6 +533,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0",
       "fileSizeMB": 0.45
+    },
+    {
+      "filename": "2025-10-05-ZS-HGD-3c85f8af.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-05",
+      "time": "10:37",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 1.48
     },
     {
       "filename": "2025-10-05-ZS-HMB-3c85c54b.kml",
@@ -400,6 +634,15 @@
       "fileSizeMB": 4.57
     },
     {
+      "filename": "2025-10-03-ZS-HGD-3c7e1359.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-10-03",
+      "time": "09:40",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 7
+    },
+    {
       "filename": "2025-10-03-ZS-HIE-3c7e57c7.kml",
       "registration": "ZS-HIE",
       "date": "2025-10-03",
@@ -472,15 +715,6 @@
       "fileSizeMB": 5.98
     },
     {
-      "filename": "3c79d71a.kml",
-      "registration": "ZS-HMB",
-      "date": "2025-10-02",
-      "time": "07:27",
-      "owner": "Sport Helicopters",
-      "imageUrl": "",
-      "fileSizeMB": 6
-    },
-    {
       "filename": "2025-10-01-ZS-HIE-3c76001a.kml",
       "registration": "ZS-HIE",
       "date": "2025-10-01",
@@ -491,15 +725,6 @@
     },
     {
       "filename": "2025-10-01-ZS-HMB-3c75ba34.kml",
-      "registration": "ZS-HMB",
-      "date": "2025-10-01",
-      "time": "07:10",
-      "owner": "Sport Helicopters",
-      "imageUrl": "",
-      "fileSizeMB": 1.88
-    },
-    {
-      "filename": "3c75ba34.kml",
       "registration": "ZS-HMB",
       "date": "2025-10-01",
       "time": "07:10",
@@ -596,6 +821,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "",
       "fileSizeMB": 0.02
+    },
+    {
+      "filename": "2025-09-29-ZS-HGD-3c6defc3.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-09-29",
+      "time": "09:59",
+      "owner": "Private owner",
+      "imageUrl": "",
+      "fileSizeMB": 1.87
     },
     {
       "filename": "2025-09-29-ZS-HMB-3c6db9cf.kml",

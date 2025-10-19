@@ -8120,26 +8120,6 @@
         "time": "08:10"
       }
     },
-    "3c75ba34.kml": {
-      "originalName": "3c75ba34.kml",
-      "processedAt": "2025-10-13T08:46:10.557Z",
-      "contentHash": "e83901ecf9795ab0e9621a31a0733c4d",
-      "metadata": {
-        "registration": "ZS-HMB",
-        "date": "2025-10-01",
-        "time": "07:10"
-      }
-    },
-    "3c79d71a.kml": {
-      "originalName": "3c79d71a.kml",
-      "processedAt": "2025-10-13T08:46:10.784Z",
-      "contentHash": "2fafc878615b6e3ee7b8146889c3b075",
-      "metadata": {
-        "registration": "ZS-HMB",
-        "date": "2025-10-02",
-        "time": "07:27"
-      }
-    },
     "2025-10-02-ZS-HBO-3c7a36e0.kml": {
       "originalName": "3c7a36e0.kml",
       "processedAt": "2025-10-13T08:46:10.802Z",
@@ -8359,7 +8339,287 @@
         "date": "2025-10-12",
         "time": "07:59"
       }
+    },
+    "2025-10-13-ZS-HBO-3ca3615c.kml": {
+      "originalName": "3ca3615c.kml",
+      "processedAt": "2025-10-14T18:56:21.830Z",
+      "contentHash": "1e1b63927fb328b68e8323ab8918d1d3",
+      "metadata": {
+        "registration": "ZS-HBO",
+        "date": "2025-10-13",
+        "time": "06:12"
+      }
+    },
+    "2025-10-13-ZT-HOT-3ca44540.kml": {
+      "originalName": "3ca44540.kml",
+      "processedAt": "2025-10-14T18:56:21.897Z",
+      "contentHash": "1cc22ec5084d294e9d335c0351de166e",
+      "metadata": {
+        "registration": "ZT-HOT",
+        "date": "2025-10-13",
+        "time": "12:39"
+      }
+    },
+    "2025-10-13-ZT-RNW-3ca445d8.kml": {
+      "originalName": "3ca445d8.kml",
+      "processedAt": "2025-10-14T18:56:21.958Z",
+      "contentHash": "902527f66f1e07a97cb7e6047d2f9598",
+      "metadata": {
+        "registration": "ZT-RNW",
+        "date": "2025-10-13",
+        "time": "12:37"
+      }
+    },
+    "2025-10-14-ZT-HOT-3ca710fd.kml": {
+      "originalName": "3ca710fd.kml",
+      "processedAt": "2025-10-14T18:56:22.030Z",
+      "contentHash": "db0b098af5b4cef4b717da1f2a3b7d92",
+      "metadata": {
+        "registration": "ZT-HOT",
+        "date": "2025-10-14",
+        "time": "07:06"
+      }
+    },
+    "2025-10-14-ZT-RNW-3ca715dd.kml": {
+      "originalName": "3ca715dd.kml",
+      "processedAt": "2025-10-14T18:56:22.318Z",
+      "contentHash": "694548a51c3279b13ce652cc6af91ce9",
+      "metadata": {
+        "registration": "ZT-RNW",
+        "date": "2025-10-14",
+        "time": "07:19"
+      }
+    },
+    "2025-10-14-ZS-HIE-3ca71d63.kml": {
+      "originalName": "3ca71d63.kml",
+      "processedAt": "2025-10-14T18:56:22.366Z",
+      "contentHash": "239f977b3d618f74e66ff77608673966",
+      "metadata": {
+        "registration": "ZS-HIE",
+        "date": "2025-10-14",
+        "time": "07:31"
+      }
+    },
+    "2025-10-14-ZS-HMB-3ca7a27a.kml": {
+      "originalName": "3ca7a27a.kml",
+      "processedAt": "2025-10-14T18:56:22.430Z",
+      "contentHash": "c6a2a4a0fe645e50fdfb956278b2e071",
+      "metadata": {
+        "registration": "ZS-HMB",
+        "date": "2025-10-14",
+        "time": "11:20"
+      }
+    },
+    "2025-09-29-ZS-HGD-3c6defc3.kml": {
+      "originalName": "3c6defc3.kml",
+      "processedAt": "2025-10-19T07:24:10.446Z",
+      "contentHash": "4d14efbe85a929b17263481bb434c56c",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-09-29",
+        "time": "09:59"
+      }
+    },
+    "2025-10-03-ZS-HGD-3c7e1359.kml": {
+      "originalName": "3c7e1359.kml",
+      "processedAt": "2025-10-19T07:24:10.726Z",
+      "contentHash": "0fef00f4ea7fe679745725728dd3ba8e",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-03",
+        "time": "09:40"
+      }
+    },
+    "2025-10-05-ZS-HGD-3c85f8af.kml": {
+      "originalName": "3c85f8af.kml",
+      "processedAt": "2025-10-19T07:24:10.777Z",
+      "contentHash": "99c5d0dbc9f8d3aa2e3f0bcde530ea4b",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-05",
+        "time": "10:37"
+      }
+    },
+    "2025-10-07-ZS-HGD-3c8cd2c4.kml": {
+      "originalName": "3c8cd2c4.kml",
+      "processedAt": "2025-10-19T07:24:11.028Z",
+      "contentHash": "ad30420720dd0e2db27ed8ef60fa4b92",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-07",
+        "time": "07:21"
+      }
+    },
+    "2025-10-08-ZS-HGD-3c90f11b.kml": {
+      "originalName": "3c90f11b.kml",
+      "processedAt": "2025-10-19T07:24:11.191Z",
+      "contentHash": "13ca7959937df579bf63b1a22d42995a",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-08",
+        "time": "09:18"
+      }
+    },
+    "2025-10-09-ZS-HGD-3c94d641.kml": {
+      "originalName": "3c94d641.kml",
+      "processedAt": "2025-10-19T07:24:11.393Z",
+      "contentHash": "2969515213944195c3eb2a5be3632967",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-09",
+        "time": "08:11"
+      }
+    },
+    "2025-10-10-ZS-HGD-3c98d498.kml": {
+      "originalName": "3c98d498.kml",
+      "processedAt": "2025-10-19T07:24:11.554Z",
+      "contentHash": "8e36abcb5b5511dfd28df163d398e7d8",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-10",
+        "time": "07:14"
+      }
+    },
+    "2025-10-12-ZS-HGD-3ca057a5.kml": {
+      "originalName": "3ca057a5.kml",
+      "processedAt": "2025-10-19T07:24:11.853Z",
+      "contentHash": "e111dd7ff9be837bdac4bd61eff85ace",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-12",
+        "time": "09:02"
+      }
+    },
+    "2025-10-14-ZS-HGD-3ca783ea.kml": {
+      "originalName": "3ca783ea.kml",
+      "processedAt": "2025-10-19T07:24:12.310Z",
+      "contentHash": "d2731b6e1b071d745cc40f143bb74234",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-14",
+        "time": "10:40"
+      }
+    },
+    "2025-10-15-ZS-HIM-6b5bb0d3.kml": {
+      "originalName": "3caae298-2.kml",
+      "processedAt": "2025-10-19T07:24:12.402Z",
+      "contentHash": "596ad5182fddc94e833544b33ebdcede",
+      "metadata": {
+        "registration": "ZS-HIM",
+        "date": "2025-10-15",
+        "time": "07:00"
+      }
+    },
+    "2025-10-15-ZS-HIM-3caae298.kml": {
+      "originalName": "3caae298.kml",
+      "processedAt": "2025-10-19T07:24:12.424Z",
+      "contentHash": "3ac56a063dcce72b6763dd166481a5aa",
+      "metadata": {
+        "registration": "ZS-HIM",
+        "date": "2025-10-15",
+        "time": "07:00"
+      }
+    },
+    "2025-10-15-ZT-RNW-3cab0a01.kml": {
+      "originalName": "3cab0a01.kml",
+      "processedAt": "2025-10-19T07:24:12.617Z",
+      "contentHash": "bf2bff81949802bb15ab226b79f197d6",
+      "metadata": {
+        "registration": "ZT-RNW",
+        "date": "2025-10-15",
+        "time": "08:12"
+      }
+    },
+    "2025-10-15-ZS-HIM-3cab229e.kml": {
+      "originalName": "3cab229e.kml",
+      "processedAt": "2025-10-19T07:24:12.639Z",
+      "contentHash": "3f4d676cd27efe7d113dc8d5c443580c",
+      "metadata": {
+        "registration": "ZS-HIM",
+        "date": "2025-10-15",
+        "time": "08:54"
+      }
+    },
+    "2025-10-17-ZS-HGD-3cb31fe5.kml": {
+      "originalName": "3cb31fe5.kml",
+      "processedAt": "2025-10-19T07:24:12.742Z",
+      "contentHash": "c682936fcafc25c5ea20fd1d642d94a0",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-17",
+        "time": "07:17"
+      }
+    },
+    "2025-10-17-ZS-HBO-3cb399aa.kml": {
+      "originalName": "3cb399aa.kml",
+      "processedAt": "2025-10-19T07:24:12.776Z",
+      "contentHash": "a0ca79613739e7631a114aa23283abf2",
+      "metadata": {
+        "registration": "ZS-HBO",
+        "date": "2025-10-17",
+        "time": "10:33"
+      }
+    },
+    "2025-10-18-ZS-HMB-3cb748f7.kml": {
+      "originalName": "3cb748f7.kml",
+      "processedAt": "2025-10-19T07:24:12.830Z",
+      "contentHash": "694eff5801d5e4be4da6f2d49e317111",
+      "metadata": {
+        "registration": "ZS-HMB",
+        "date": "2025-10-18",
+        "time": "07:19"
+      }
+    },
+    "2025-10-18-ZS-HIM-3cb7a1ea.kml": {
+      "originalName": "3cb7a1ea.kml",
+      "processedAt": "2025-10-19T07:24:12.952Z",
+      "contentHash": "e334c1d26a453f58dbf9eb6118d2abb5",
+      "metadata": {
+        "registration": "ZS-HIM",
+        "date": "2025-10-18",
+        "time": "09:51"
+      }
+    },
+    "2025-10-18-ZS-HBO-96e2a113.kml": {
+      "originalName": "3cb7aac9-2.kml",
+      "processedAt": "2025-10-19T07:24:13.082Z",
+      "contentHash": "e74c79b98481e6911f61cce086acb138",
+      "metadata": {
+        "registration": "ZS-HBO",
+        "date": "2025-10-18",
+        "time": "10:02"
+      }
+    },
+    "2025-10-18-ZS-HBO-3cb7aac9.kml": {
+      "originalName": "3cb7aac9.kml",
+      "processedAt": "2025-10-19T07:24:13.167Z",
+      "contentHash": "d1f1ffe56d2c0d11fd732f05abbb38a0",
+      "metadata": {
+        "registration": "ZS-HBO",
+        "date": "2025-10-18",
+        "time": "10:02"
+      }
+    },
+    "2025-10-18-ZS-HGD-3cb7e720.kml": {
+      "originalName": "3cb7e720.kml",
+      "processedAt": "2025-10-19T07:24:13.348Z",
+      "contentHash": "37f953eeb9197486baa1630e1ed7978d",
+      "metadata": {
+        "registration": "ZS-HGD",
+        "date": "2025-10-18",
+        "time": "11:28"
+      }
+    },
+    "2025-10-18-ZS-HIM-3cb81026.kml": {
+      "originalName": "3cb81026.kml",
+      "processedAt": "2025-10-19T07:24:13.407Z",
+      "contentHash": "f35426f46a8f138074585e42deaf9167",
+      "metadata": {
+        "registration": "ZS-HIM",
+        "date": "2025-10-18",
+        "time": "12:16"
+      }
     }
   },
-  "lastScan": "2025-10-13T08:46:13.417Z"
+  "lastScan": "2025-10-19T07:54:04.155Z"
 }
