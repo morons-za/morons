@@ -474,6 +474,12 @@ const htmlContent = `<!DOCTYPE html>
             text-align: left;
         }
         
+        /* Ensure date column doesn't wrap */
+        td:first-child {
+            white-space: nowrap !important;
+            min-width: 100px;
+        }
+        
         th {
             background: #f0f0f0;
             font-weight: 600;
@@ -867,6 +873,30 @@ const htmlContent = `<!DOCTYPE html>
                 margin-top: 20px;
             }
         }
+        
+        /* Mobile Table Styles */
+        @media (max-width: 768px) {
+            table {
+                font-size: 12px;
+            }
+            
+            th, td {
+                padding: 6px 4px;
+            }
+            
+            /* Hide columns on mobile */
+            th:nth-child(2), td:nth-child(2) { /* Takeoff time (SA) */
+                display: none;
+            }
+            
+            th:nth-child(5), td:nth-child(5) { /* Filename */
+                display: none;
+            }
+            
+            th:nth-child(7), td:nth-child(7) { /* Size */
+                display: none;
+            }
+        }
     </style>
 </head>
 <body>
@@ -893,7 +923,6 @@ const htmlContent = `<!DOCTYPE html>
                     <thead>
                         <tr style="background: #f8f9fa; border-bottom: 1px solid #dee2e6;">
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Date</th>
-                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">UTC Time</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">SA Time</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Registration</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Owner</th>
@@ -906,7 +935,6 @@ const htmlContent = `<!DOCTYPE html>
                     <tbody>
                         <tr style="border-bottom: 1px solid #dee2e6;">
                             <td id="viewingFlightDate" style="padding: 8px 12px;">-</td>
-                            <td id="viewingFlightUTC" style="padding: 8px 12px;">-</td>
                             <td id="viewingFlightSA" style="padding: 8px 12px;">-</td>
                             <td id="viewingFlightReg" style="padding: 8px 12px;">-</td>
                             <td id="viewingFlightOwner" style="padding: 8px 12px;">-</td>
@@ -990,8 +1018,7 @@ const htmlContent = `<!DOCTYPE html>
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>UTC Time</th>
-                        <th>SA Time</th>
+                        <th>Takeoff time (SA)</th>
                         <th>Registration</th>
                         <th>Owner</th>
                         <th>Filename</th>
@@ -1005,11 +1032,10 @@ const htmlContent = `<!DOCTYPE html>
                     ${flightData.sort((a, b) => new Date(b.date) - new Date(a.date)).map(flight => `
                         <tr class="flight-row">
                             <td>${flight.date || '-'}</td>
-                            <td>${flight.time || '-'}</td>
                             <td>${utcToSaTime(flight.date, flight.time)}</td>
                             <td>${flight.registration || '-'}</td>
-                            <td>${flight.owner || '-'}</td>
-                            <td>${flight.filename || '-'}</td>
+                            <td style="white-space: nowrap; min-width: 150px;">${flight.owner || '-'}</td>
+                            <td style="font-size: 12px;">${flight.filename || '-'}</td>
                             <td style="text-align: center;">
                                 <a href="https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
                             </td>
@@ -1462,8 +1488,7 @@ const htmlContent = `<!DOCTYPE html>
                     <thead>
                         <tr>
                             <th>Date</th>
-                            <th>UTC Time</th>
-                            <th>SA Time</th>
+                            <th>Takeoff time (SA)</th>
                             <th>Registration</th>
                             <th>Owner</th>
                             <th>Filename</th>
@@ -1476,12 +1501,11 @@ const htmlContent = `<!DOCTYPE html>
                     <tbody>
                         \${sortedData.map(flight => \`
                             <tr id="flight-\${flight.filename}" class="flight-row" onclick="viewFlight('\${flight.filename}')" style="\${lastViewedFilename === flight.filename ? 'background: #e6f7ff;' : ''}">
-                                <td>\${flight.date || '-'}</td>
-                                <td>\${flight.time || '-'}</td>
+                                <td style="white-space: nowrap; min-width: 100px; width: 100px;">\${flight.date || '-'}</td>
                                 <td>\${utcToSaTime(flight.date, flight.time)}</td>
                                 <td>\${flight.registration || '-'}</td>
-                                <td>\${flight.owner || '-'}</td>
-                                <td>\${flight.filename || '-'}</td>
+                                <td style="white-space: nowrap; min-width: 150px;">\${flight.owner || '-'}</td>
+                                <td style="font-size: 12px;">\${flight.filename || '-'}</td>
                                 <td style="text-align: center;">
                                     <a href="https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/\${flight.filename}" download="\${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('\${flight.filename}'); return false;">⬇️</a>
                                 </td>
@@ -1830,12 +1854,13 @@ const htmlContent = `<!DOCTYPE html>
         }
         
         function exportCSV() {
-            const headers = ['Date', 'Time', 'Registration', 'Owner', 'Filename', 'Size (MB)'];
+            const headers = ['Date', 'UTC Time', 'SA Time', 'Registration', 'Owner', 'Filename', 'Size (MB)'];
             const csvContent = [
                 headers.join(','),
                 ...filteredData.map(flight => [
                     flight.date || '',
                     flight.time || '',
+                    utcToSaTime(flight.date, flight.time),
                     flight.registration || '',
                     flight.owner || '',
                     flight.filename || '',
@@ -2035,7 +2060,6 @@ const htmlContent = `<!DOCTYPE html>
             const box = document.getElementById('viewingFlightBox');
             const title = document.getElementById('viewingFlightTitle');
             const date = document.getElementById('viewingFlightDate');
-            const utc = document.getElementById('viewingFlightUTC');
             const sa = document.getElementById('viewingFlightSA');
             const reg = document.getElementById('viewingFlightReg');
             const filename = document.getElementById('viewingFlightFilename');
@@ -2048,7 +2072,6 @@ const htmlContent = `<!DOCTYPE html>
             // Populate flight information
             title.textContent = 'Viewing Flight: ' + (flight.registration || 'Unknown');
             date.textContent = flight.date || '-';
-            utc.textContent = flight.time || '-';
             sa.textContent = utcToSaTime(flight.date, flight.time);
             reg.textContent = flight.registration || '-';
             document.getElementById('viewingFlightOwner').textContent = flight.owner || '-';
