@@ -895,10 +895,12 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
     }
   }
   
-  // Auto-trigger Smart KML Manager for new uploads
+  // Auto-trigger Smart KML Manager for new uploads (with delay to avoid race conditions)
   let smartManagerResults = null;
   try {
     console.log('🧠 Auto-processing uploads with Smart KML Manager...');
+    // Add small delay to ensure all files are fully written before processing
+    await new Promise(resolve => setTimeout(resolve, 1000));
     const manager = new SmartKMLManager();
     smartManagerResults = await manager.processNewFiles();
     if (smartManagerResults.processed > 0) {

@@ -258,9 +258,13 @@ class SmartKMLManager {
           console.log(`🔄 Duplicate detected: ${filename} matches ${existingFile} - rejecting duplicate`);
           duplicates.push({ file: filename, duplicateOf: existingFile });
           
-          // Simply delete the duplicate file instead of storing it
-          fs.unlinkSync(filePath);
-          console.log(`🗑️ Deleted duplicate file: ${filename}`);
+          // Delete the duplicate file and skip processing
+          try {
+            fs.unlinkSync(filePath);
+            console.log(`🗑️ Deleted duplicate file: ${filename}`);
+          } catch (deleteError) {
+            console.log(`⚠️ Could not delete duplicate file ${filename}: ${deleteError.message}`);
+          }
           continue;
         }
         

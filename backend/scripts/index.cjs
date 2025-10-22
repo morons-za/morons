@@ -1161,90 +1161,70 @@ app.post('/api/validate-kml',
         if (hasViolations) {
           console.log(`🚁 Processing violating flight: ${file.originalname}`);
           
-          // Save violating flight with original name first
-          const savedPath = path.join(uploadsDir, file.originalname);
-          console.log(`📁 Attempting to save to: ${savedPath}`);
+          // Generate proper filename (YYYY-MM-DD-REGISTRATION-HASH.kml) FIRST
+          const hash = require('crypto').createHash('md5').update(file.originalname).digest('hex').slice(0, 8);
+          const newFilename = `${kmlInfo.date}-${kmlInfo.registration}-${hash}.kml`;
+          const newFilePath = path.join(uploadsDir, newFilename);
+          
+          console.log(`🔄 Will save directly as: ${newFilename}`);
           
           try {
-            fs.copyFileSync(file.path, savedPath);
-            console.log(`✅ File copied successfully to: ${savedPath}`);
+            // Save directly with proper filename (atomic operation)
+            fs.copyFileSync(file.path, newFilePath);
+            console.log(`✅ File saved directly with proper name: ${newFilename}`);
             
             // Verify file exists
-            if (fs.existsSync(savedPath)) {
-              console.log(`✅ File exists after copy: ${savedPath}`);
-              const stats = fs.statSync(savedPath);
+            if (fs.existsSync(newFilePath)) {
+              console.log(`✅ File exists: ${newFilePath}`);
+              const stats = fs.statSync(newFilePath);
               console.log(`📊 File size: ${stats.size} bytes`);
             } else {
-              console.log(`❌ File does not exist after copy: ${savedPath}`);
+              console.log(`❌ File does not exist after save: ${newFilePath}`);
             }
+              
+            // Generate PNG flight map (this will run in parallel with other files)
+            console.log(`🖼️ Starting PNG generation for: ${newFilename}`);
+            const pngResult = await generateFlightMap(newFilename);
+            console.log(`🖼️ PNG generation result: ${pngResult ? 'SUCCESS' : 'FAILED'}`);
             
-            // Generate proper filename (YYYY-MM-DD-REGISTRATION-HASH.kml)
-            const hash = require('crypto').createHash('md5').update(file.originalname).digest('hex').slice(0, 8);
-            const newFilename = `${kmlInfo.date}-${kmlInfo.registration}-${hash}.kml`;
-            const newFilePath = path.join(uploadsDir, newFilename);
+            // Add to metadata with new filename
+            const flightData = {
+              filename: newFilename,
+              registration: kmlInfo.registration,
+              date: kmlInfo.date,
+              time: kmlInfo.time,
+              owner: kmlInfo.owner || 'Unknown',
+              fileSizeMB: (file.size / (1024 * 1024)).toFixed(2)
+            };
             
-            console.log(`🔄 Attempting to rename to: ${newFilename}`);
+            kmlMetadata.push(flightData);
+            console.log(`📝 Added to metadata: ${JSON.stringify(flightData)}`);
             
+            // Clean up temporary file NOW (after we're done with it)
             try {
-              // Rename to proper format
-              fs.renameSync(savedPath, newFilePath);
-              console.log(`📝 Successfully renamed to: ${newFilename}`);
-              
-              // Verify renamed file exists
-              if (fs.existsSync(newFilePath)) {
-                console.log(`✅ Renamed file exists: ${newFilePath}`);
-              } else {
-                console.log(`❌ Renamed file does not exist: ${newFilePath}`);
+              if (fs.existsSync(file.path)) {
+                fs.unlinkSync(file.path);
+                console.log(`🗑️ Cleaned up temp file: ${file.path}`);
               }
-              
-              // Generate PNG flight map (this will run in parallel with other files)
-              console.log(`🖼️ Starting PNG generation for: ${newFilename}`);
-              const pngResult = await generateFlightMap(newFilename);
-              console.log(`🖼️ PNG generation result: ${pngResult ? 'SUCCESS' : 'FAILED'}`);
-              
-              // Add to metadata with new filename
-              const flightData = {
-                filename: newFilename,
-                registration: kmlInfo.registration,
-                date: kmlInfo.date,
-                time: kmlInfo.time,
-                owner: kmlInfo.owner || 'Unknown',
-                fileSizeMB: (file.size / (1024 * 1024)).toFixed(2)
-              };
-              
-              kmlMetadata.push(flightData);
-              console.log(`📝 Added to metadata: ${JSON.stringify(flightData)}`);
-              
-              // Clean up temporary file NOW (after we're done with it)
-              try {
-                if (fs.existsSync(file.path)) {
-                  fs.unlinkSync(file.path);
-                  console.log(`🗑️ Cleaned up temp file: ${file.path}`);
-                }
-              } catch (cleanupError) {
-                console.log(`⚠️ Could not clean up temp file: ${cleanupError.message}`);
-              }
-              
-              return {
-                filename: file.originalname,
-                newFilename: newFilename,
-                status: 'VIOLATION_DETECTED',
-                registration: kmlInfo.registration,
-                date: kmlInfo.date,
-                time: kmlInfo.time,
-                violations: hasViolations,
-                saved: true,
-                pngGenerated: pngResult
-              };
-              
-            } catch (renameError) {
-              console.error(`❌ Error during rename/PNG generation:`, renameError.message);
-              throw renameError;
+            } catch (cleanupError) {
+              console.log(`⚠️ Could not clean up temp file: ${cleanupError.message}`);
             }
             
-          } catch (copyError) {
-            console.error(`❌ Error during file copy:`, copyError.message);
-            throw copyError;
+            return {
+              filename: file.originalname,
+              newFilename: newFilename,
+              status: 'VIOLATION_DETECTED',
+              registration: kmlInfo.registration,
+              date: kmlInfo.date,
+              time: kmlInfo.time,
+              violations: hasViolations,
+              saved: true,
+              pngGenerated: pngResult
+            };
+            
+          } catch (saveError) {
+            console.error(`❌ Error saving violating flight:`, saveError.message);
+            throw saveError;
           }
           
         } else {
