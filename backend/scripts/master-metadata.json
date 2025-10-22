@@ -1,17 +1,8 @@
 {
-  "generated": "2025-10-22T14:03:48.441Z",
-  "totalFiles": 869,
-  "validFlights": 869,
+  "generated": "2025-10-22T19:15:49.343Z",
+  "totalFiles": 868,
+  "validFlights": 868,
   "flights": [
-    {
-      "filename": "2025-10-22-ZS-HIE-3cc6084f.kml",
-      "registration": "ZS-HIE",
-      "date": "2025-10-22",
-      "time": "08:50",
-      "owner": "Cape Town Helicopters",
-      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
-      "fileSizeMB": 3.14
-    },
     {
       "filename": "2025-10-22-ZT-HOT-3cc5d0dc.kml",
       "registration": "ZT-HOT",

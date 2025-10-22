@@ -75,23 +75,8 @@ console.log('✅ Optimized KML directory ready');
 // PNG files are now served from GitHub LFS - no need to copy locally
 console.log('📸 PNG files will be served from GitHub LFS');
 
-// Load TMNP boundary KML content for direct embedding
-console.log('\n📄 Loading TMNP boundary KML...');
-let tmnpKmlContent = '';
-try {
-  if (fs.existsSync('../static-site/tmnp.kml')) {
-    tmnpKmlContent = fs.readFileSync('../static-site/tmnp.kml', 'utf8');
-  } else if (fs.existsSync(path.join(BUILD_DIR, 'tmnp.kml'))) {
-    tmnpKmlContent = fs.readFileSync(path.join(BUILD_DIR, 'tmnp.kml'), 'utf8');
-  }
-  if (tmnpKmlContent) {
-    console.log('✅ Loaded TMNP boundary KML content');
-  } else {
-    console.log('⚠️  TMNP boundary KML not found, map will work without boundary overlay');
-  }
-} catch (error) {
-  console.log('⚠️  TMNP boundary KML not found, map will work without boundary overlay');
-}
+// TMNP boundary KML is now loaded externally from ./tmnp.kml
+console.log('\n📄 TMNP boundary KML will be loaded externally from ./tmnp.kml');
 
 // Load flight metadata
 console.log('\n📊 Loading flight metadata...');
@@ -1126,9 +1111,6 @@ const htmlContent = `<!DOCTYPE html>
         window.buildTimestamp = ${JSON.stringify(buildTimestamp)};
         window.latestFlightDate = ${JSON.stringify(latestFlightDate)};
         window.embeddedFlightData = ${JSON.stringify(flightData)};
-    </script>
-    <script id="tmnp-kml-script">
-        window.embeddedTmnpKml = ${JSON.stringify(tmnpKmlContent)};
     </script>
     <script src="./js/app.js"></script>
 </body>
