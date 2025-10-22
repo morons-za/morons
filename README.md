@@ -698,7 +698,7 @@ Below is a list of helicopters for which we have found flight tracks. There are 
 - **Sport Helicopters**: 1 aircraft (ZS-HMB) - 88 flights (~243 MB)
 - **NAC**: 1 aircraft (ZT-REG) - 67 flights (~59 MB)
 
-**Total Dataset**: 828 valid flights, ~2,079 MB, average 2.51 MB per file
+**Total Dataset**: 868 valid flights, ~2,079 MB, average 2.51 MB per file
 
 *Note: This represents only helicopters with recorded airspace violations. Many more helicopters operate legally in the Cape Town area without entering restricted airspace.*
 
@@ -783,6 +783,18 @@ This is a **Node.js helicopter tracking system** that:
 - Third: Empty/Unknown
 - Always prioritize manual research over automatic extraction
 
+**4. TMNP Boundary Loading (October 2025)**
+- **External KML Loading**: Use `loadTmnpBoundary()` function to fetch `tmnp.kml` externally
+- **File:// Protocol Fallback**: Implement `showFileProtocolFallback()` for offline users
+- **Never embed KML**: External loading provides better performance and maintainability
+- **Cache-busting**: Always add version parameters (`?v=YYYYMMDD-NN`) to JavaScript includes
+- **Global Variables**: Keep `filteredData`, `map`, `currentFlightLayer` in global scope to avoid `ReferenceError`
+
+**5. Embedded Data Compatibility**
+- **Check embedded data first**: `loadFlightData()` should check `window.embeddedFlightData` before fetching
+- **Build process**: `build-static-site.cjs` embeds flight data in `index.html` for offline compatibility
+- **Both protocols**: Ensure site works on both `http://localhost:8080` and `file://` protocols
+
 ### Common AI Agent Tasks
 
 **Adding a New Helicopter to Database:**
@@ -815,6 +827,15 @@ node backend/scripts/build-static-site.cjs
 - Create debug scripts in `/backend/tests/debug/`
 - Check logs in `/backend/logs/server.log`
 - Use console.log with `[DEBUG]` prefix for traceability
+
+**Debugging TMNP Boundary & Data Loading Issues (October 2025):**
+- **TMNP boundary not showing**: Check console for `loadTmnpBoundary()` errors, verify `tmnp.kml` exists in `/static-site/`
+- **File:// protocol not working**: Ensure `window.embeddedFlightData` is embedded in `index.html` by `build-static-site.cjs`
+- **ReferenceError: filteredData**: Move variables to global scope, check JavaScript scope issues
+- **CORS errors on file://**: Implement embedded data fallback in `loadFlightData()` function
+- **Cache issues**: Update version parameter in `index.html` script tag (`?v=YYYYMMDD-NN`)
+- **Map not initializing**: Check for duplicate `initializeMap()` calls, use `window.mapInitialized` flag
+- **Table not loading**: Verify `renderTable()` has access to global `filteredData` variable
 
 ### Port Configuration
 - **Backend Admin**: Port 4000 (http://localhost:4000)
@@ -972,6 +993,18 @@ git push origin main
 ## 📝 Development Notes
 
 ### ✅ Recent Major Changes (October 2025)
+
+**TMNP Boundary Loading & Embedded Data Fixes (October 22, 2025):**
+- **Fixed TMNP boundary not loading**: Switched from embedded KML to external file loading via `loadTmnpBoundary()` function
+- **Added fallback for file:// protocol**: `showFileProtocolFallback()` displays helpful message with download link for offline users
+- **Fixed embedded flight data loading**: `loadFlightData()` now checks for `window.embeddedFlightData` first, enabling `file://` protocol compatibility
+- **Resolved JavaScript scope issues**: Moved global variables (`filteredData`, `map`, etc.) to proper scope to fix `ReferenceError` issues
+- **Updated build process**: Modified `build-static-site.cjs` to embed flight data directly in `index.html` for offline use
+- **Removed duplicate flight**: Deleted `2025-10-22-ZS-HIE-3cc6084f` (KML, PNG, metadata) - flight count now 868 (down from 869)
+- **Added cache-busting**: Implemented version parameters (`?v=20251022-15`) to force browser reloads of updated JavaScript
+- **Both protocols working**: Site now functions correctly on both `http://localhost:8080` and `file://` protocols
+- **TMNP boundary display**: Park boundary shows as red outline on map when accessible via web server
+- **Architecture improvement**: External KML loading provides better performance and maintainability than embedded approach
 
 **Unified Launcher Created (October 9, 2025):**
 - Created `/launch.sh` in project root - **ONE command to start everything**
