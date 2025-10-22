@@ -795,6 +795,15 @@ This is a **Node.js helicopter tracking system** that:
 - **Build process**: `build-static-site.cjs` embeds flight data in `index.html` for offline compatibility
 - **Both protocols**: Ensure site works on both `http://localhost:8080` and `file://` protocols
 
+**6. Site Update Notification Feature**
+- **Always include notification**: Bottom-right corner must show "Site updated X days ago • Flight data up to XXX date"
+- **Required HTML elements**: `<div id="lastUpdatedTimestamp" class="last-updated-timestamp">` with `<span id="siteUpdateTime">` and `<span id="flightDataTime">`
+- **Required CSS**: `.last-updated-timestamp` with Gmail-like styling, backdrop blur, mobile responsive
+- **Required JavaScript**: `formatRelativeTime()` and `formatFlightDate()` functions for timestamp formatting
+- **Data sources**: Uses `window.buildTimestamp` and `window.latestFlightDate` from embedded data
+- **Non-interactive**: `pointer-events: none` - purely informational display
+- **Never remove**: This feature was lost in previous builds - must be preserved in all future updates
+
 ### Common AI Agent Tasks
 
 **Adding a New Helicopter to Database:**
@@ -1005,6 +1014,15 @@ git push origin main
 - **Both protocols working**: Site now functions correctly on both `http://localhost:8080` and `file://` protocols
 - **TMNP boundary display**: Park boundary shows as red outline on map when accessible via web server
 - **Architecture improvement**: External KML loading provides better performance and maintainability than embedded approach
+
+**Site Update Notification Feature (October 22, 2025):**
+- **Restored missing notification**: Added bottom-right corner notification showing "Site updated X days ago • Flight data up to XXX date"
+- **Gmail-like styling**: Implemented clean, unobtrusive notification with proper backdrop blur and mobile responsiveness
+- **Automatic timestamp formatting**: Added `formatRelativeTime()` and `formatFlightDate()` functions for user-friendly date display
+- **Build timestamp integration**: Uses `window.buildTimestamp` and `window.latestFlightDate` from embedded data
+- **Mobile responsive**: Notification scales appropriately on smaller screens
+- **Non-interactive design**: Notification is purely informational with `pointer-events: none`
+- **Future-proof**: Feature is documented in README to prevent loss during future builds
 
 **Unified Launcher Created (October 9, 2025):**
 - Created `/launch.sh` in project root - **ONE command to start everything**
