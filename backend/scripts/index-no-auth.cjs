@@ -586,8 +586,13 @@ function loadExistingFileHashes() {
     for (const flight of kmlMetadata) {
       const existingFilePath = path.join(uploadsDir, flight.filename);
       if (fs.existsSync(existingFilePath)) {
-        const existingContent = fs.readFileSync(existingFilePath);
-        const existingHash = require('crypto').createHash('md5').update(existingContent).digest('hex');
+        const existingContent = fs.readFileSync(existingFilePath, 'utf8');
+        // Normalize content (remove timestamps and dynamic content) to match SmartKMLManager
+        const normalizedContent = existingContent
+          .replace(/<when>[^<]*<\/when>/g, '') // Remove timestamp elements
+          .replace(/\s+/g, ' ') // Normalize whitespace
+          .trim();
+        const existingHash = require('crypto').createHash('md5').update(normalizedContent).digest('hex');
         existingFileHashes.set(existingHash, flight.filename);
       }
     }
@@ -627,8 +632,13 @@ function isDuplicateFlight(kmlInfo, filePath) {
     
     // Check 2: Content hash (OPTIMIZED - uses pre-loaded hashes)
     try {
-      const fileContent = fs.readFileSync(filePath);
-      const contentHash = require('crypto').createHash('md5').update(fileContent).digest('hex');
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      // Normalize content (remove timestamps and dynamic content) to match SmartKMLManager
+      const normalizedContent = fileContent
+        .replace(/<when>[^<]*<\/when>/g, '') // Remove timestamp elements
+        .replace(/\s+/g, ' ') // Normalize whitespace
+        .trim();
+      const contentHash = require('crypto').createHash('md5').update(normalizedContent).digest('hex');
       
       // Use pre-loaded hashes instead of reading all files again
       const existingFileHashes = loadExistingFileHashes();
@@ -850,45 +860,22 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
         meta.imageUrl = await cacheImage(meta.imageUrl, meta.registration);
       }
       
-      // Generate proper filename that SmartKMLManager will use (YYYY-MM-DD-REGISTRATION-HASH.kml)
-      const hash = require('crypto').createHash('md5').update(file.originalname).digest('hex').slice(0, 8);
-      const organizedFilename = `${meta.date}-${meta.registration}-${hash}.kml`;
-      const organizedFilePath = path.join(uploadsDir, organizedFilename);
-      
-      // Only rename if filename is different and target doesn't exist
-      let finalFilename = file.originalname;
-      if (file.originalname !== organizedFilename && !fs.existsSync(organizedFilePath)) {
-        try {
-          fs.renameSync(file.path, organizedFilePath);
-          console.log(`📝 Renamed file: ${file.originalname} → ${organizedFilename}`);
-          finalFilename = organizedFilename;
-        } catch (renameError) {
-          console.log(`⚠️ Could not rename file: ${renameError.message}, using original name`);
-        }
-      } else if (file.originalname === organizedFilename) {
-        // Already properly named
-        finalFilename = file.originalname;
-      } else {
-        console.log(`⚠️ Target file already exists: ${organizedFilename}, keeping original name`);
-        finalFilename = file.originalname;
-      }
-      
-      // Add to current metadata with the final filename
+      // Add to current metadata immediately if valid
       if (meta.registration) {
         kmlMetadata.push({
-          filename: finalFilename,
+          filename: meta.filename,
           registration: meta.registration,
           date: meta.date,
           time: meta.time
         });
-        console.log(`✅ Added ${meta.registration} to metadata with filename: ${finalFilename}`);
+        console.log(`✅ Added ${meta.registration} to metadata`);
       }
       
-      // Add to results with the final filename (not original name)
+      // Add to results
       results.push({
-        filename: finalFilename,
+        filename: file.originalname,
         originalname: file.originalname,
-        url: `/uploads/${finalFilename}`,
+        url: `/uploads/${file.originalname}`,
         imageUrl: meta.imageUrl || '',
         owner: meta.owner || '',
         registration: meta.registration || '',
@@ -916,6 +903,22 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
     } catch (e) {
       console.log(`❌ Error deleting cache: ${e.message}`);
     }
+  }
+  
+  // Auto-trigger Smart KML Manager for new uploads (with delay to avoid race conditions)
+  let smartManagerResults = null;
+  try {
+    console.log('🧠 Auto-processing uploads with Smart KML Manager...');
+    // Add small delay to ensure all files are fully written before processing
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const manager = new SmartKMLManager();
+    smartManagerResults = await manager.processNewFiles();
+    if (smartManagerResults.processed > 0) {
+      console.log(`✨ Smart Manager processed ${smartManagerResults.processed} new files, renamed ${smartManagerResults.renamed}`);
+    }
+  } catch (error) {
+    console.log(`⚠️ Smart Manager auto-processing error: ${error.message}`);
+    smartManagerResults = { processed: 0, renamed: 0, duplicates: 0, error: error.message };
   }
   
   // Generate PNG flight maps for all uploaded files
@@ -951,73 +954,6 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
   const duplicates = results.filter(r => r.status === 'DUPLICATE_SKIPPED').length;
   const rejections = results.filter(r => r.status === 'NO_VIOLATION_REJECTED').length;
   
-  // 🚀 AUTOMATED WORKFLOW: Generate optimized KMLs and update metadata
-  if (successfullyProcessed > 0) {
-    console.log('🚀 Starting automated workflow for new uploads...');
-    
-    // Step 1: Generate optimized KML files
-    try {
-      console.log('⚡ Step 1/3: Generating optimized KML files...');
-      await optimizeKMLFiles();
-      console.log('✅ Optimized KML files generated');
-    } catch (error) {
-      console.log(`⚠️ KML optimization failed: ${error.message}`);
-    }
-    
-    // Step 2: Regenerate master metadata with new flights
-    try {
-      console.log('📊 Step 2/3: Regenerating master metadata...');
-      const { spawn } = require('child_process');
-      const scriptPath = path.join(__dirname, 'generate-master-metadata-main.cjs');
-      
-      await new Promise((resolve, reject) => {
-        const child = spawn('node', [scriptPath], {
-          cwd: __dirname,
-          stdio: ['inherit', 'pipe', 'pipe']
-        });
-        
-        let stdout = '';
-        let stderr = '';
-        
-        child.stdout.on('data', (data) => {
-          const text = data.toString();
-          stdout += text;
-          console.log('📊 Metadata:', text.trim());
-        });
-        
-        child.stderr.on('data', (data) => {
-          const text = data.toString();
-          stderr += text;
-          console.log('⚠️ Metadata error:', text.trim());
-        });
-        
-        child.on('close', (code) => {
-          if (code === 0) {
-            console.log('✅ Master metadata regenerated');
-            resolve();
-          } else {
-            console.log(`⚠️ Metadata regeneration failed (code ${code})`);
-            reject(new Error(`Metadata regeneration failed: ${stderr}`));
-          }
-        });
-        
-        child.on('error', (error) => {
-          console.log(`⚠️ Failed to start metadata script: ${error.message}`);
-          reject(error);
-        });
-      });
-      
-      console.log('✅ Master metadata updated');
-    } catch (error) {
-      console.log(`⚠️ Metadata regeneration failed: ${error.message}`);
-    }
-    
-    console.log('✅ Automated workflow complete - files ready for static site build!');
-  }
-  
-  // We don't run Smart KML Manager anymore since we handle renaming inline
-  const smartManagerResults = null;
-  
   // Log what we're sending to frontend
   console.log('📤 Sending response to frontend:', {
     processed: successfullyProcessed,
@@ -1033,7 +969,7 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
     processed: successfullyProcessed,
     duplicates: duplicates,
     rejections: rejections,
-    errorCount: errors.length,
+    errors: errors.length,
     results: results,
     errors: errors,
     smartManager: smartManagerResults || null

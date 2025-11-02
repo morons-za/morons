@@ -7,10 +7,10 @@
 // - window.latestFlightDate  
 // - window.embeddedTmnpKml
 
-// Flight data loaded from external JSON file
+// Flight data loaded from embedded HTML data
 let flightData = [];
 
-// Global variables
+// Global variables for application state
 let map;
 let currentFlightLayer = null;
 let filteredData = [];
@@ -23,39 +23,24 @@ function utcToSaTime(date, time) {
     // date: '2025-05-03', time: '07:31'
     const utc = new Date(`${date}T${time}:00Z`);
     // South Africa is UTC+2
-    const saTime = new Date(utc.getTime() + (2 * 60 * 60 * 1000));
-    return saTime.toLocaleTimeString('en-ZA', { 
-        hour: '2-digit', 
-        minute: '2-digit',
-        hour12: false 
-    });
+    const sa = new Date(utc.getTime() + 2 * 60 * 60 * 1000);
+    return sa.toISOString().slice(11, 16); // 'HH:MM'
 }
 
-// Load flight data from external JSON file
-async function loadFlightData() {
+// Load flight data from embedded data in HTML
+function loadFlightData() {
     console.log('🚀 Starting to load flight data...');
-    
-    // First, check if we have embedded flight data (for file:// protocol)
-    if (window.embeddedFlightData && Array.isArray(window.embeddedFlightData)) {
-        console.log('📊 Using embedded flight data');
-        flightData = window.embeddedFlightData;
-        console.log('📊 Loaded', flightData.length, 'flights from embedded data');
-        
-        // Initialize the application with embedded data
-        console.log('🎯 Calling initializeApp() with embedded data...');
-        initializeApp();
-        return;
-    }
-    
     try {
-        console.log('📡 Fetching /master-metadata.json...');
-        const response = await fetch('/master-metadata.json');
-        if (!response.ok) {
-            throw new Error('Failed to load flight data');
+        console.log('📡 Reading embedded flight data...');
+        
+        // Check if embedded flight data exists
+        if (typeof window.embeddedFlightData !== 'undefined' && Array.isArray(window.embeddedFlightData)) {
+            flightData = window.embeddedFlightData;
+            console.log('📊 Loaded', flightData.length, 'flights from embedded data');
+        } else {
+            console.error('❌ No embedded flight data found');
+            throw new Error('No flight data available');
         }
-        const data = await response.json();
-        flightData = data.flights || data; // Handle both {flights: [...]} and [...] formats
-        console.log('📊 Loaded', flightData.length, 'flights from external JSON');
         
         // Initialize the application after data is loaded
         console.log('🎯 Calling initializeApp()...');
@@ -69,9 +54,12 @@ async function loadFlightData() {
 // Initialize application with loaded data
 function initializeApp() {
     console.log('🎯 initializeApp() called with', flightData.length, 'flights');
-    
-    // Initialize filtered data
+    // Initialize global variables
+    map = null;
+    currentFlightLayer = null;
     filteredData = Array.isArray(flightData) ? [...flightData] : [];
+    showFilters = false;
+    lastViewedFilename = null;
     
     // Actually call the initialization functions
     initializeMap();
@@ -129,9 +117,60 @@ function initializeMap() {
     }).addTo(map);
     console.log('Tile layer added to map');
     
-    // Load TMNP boundary from external KML file
-    console.log('Loading TMNP boundary from external file...');
-    loadTmnpBoundary();
+    // Add TMNP boundary from embedded KML content (works with file:// protocol)
+    console.log('Loading TMNP boundary from embedded data...');
+    
+    if (window.embeddedTmnpKml) {
+        // Parse the embedded KML and create layers directly
+        const parser = new DOMParser();
+        const kmlDoc = parser.parseFromString(window.embeddedTmnpKml, 'text/xml');
+        
+        // Create a layer group for the TMNP boundary
+        const tmnpLayerGroup = L.layerGroup().addTo(map);
+        
+        // Parse KML features and add to map
+        const polygons = kmlDoc.querySelectorAll('Polygon');
+        let bounds = null;
+        
+        polygons.forEach(polygon => {
+            const outerBoundary = polygon.querySelector('outerBoundaryIs LinearRing coordinates');
+            if (outerBoundary) {
+                const coordsText = outerBoundary.textContent.trim();
+                const coords = coordsText.split(/\\s+/).map(coord => {
+                    const [lon, lat] = coord.split(',').map(parseFloat);
+                    return [lat, lon];
+                }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
+                
+                if (coords.length > 0) {
+                    const poly = L.polygon(coords, {
+                        color: '#ff0000',
+                        weight: 3,
+                        opacity: 0.7,
+                        fillColor: '#ff0000',
+                        fillOpacity: 0.25
+                    });
+                    tmnpLayerGroup.addLayer(poly);
+                    
+                    // Calculate bounds for the whole park
+                    const polyBounds = L.latLngBounds(coords);
+                    if (!bounds) {
+                        bounds = polyBounds;
+                    } else {
+                        bounds.extend(polyBounds);
+                    }
+                }
+            }
+        });
+        
+        if (bounds) {
+            console.log('TMNP boundary loaded successfully from embedded data');
+            map.fitBounds(bounds, { padding: [20, 20] });
+        } else {
+            console.log('No valid polygon data found in TMNP KML');
+        }
+    } else {
+        console.log('No embedded TMNP KML data found');
+    }
     
     // Show initial instruction overlay
     const instructionDiv = document.createElement('div');
@@ -1022,115 +1061,3 @@ document.addEventListener('DOMContentLoaded', function() {
     // Load flight data and initialize the app
     loadFlightData();
 });
-
-// Load TMNP boundary from external KML file
-async function loadTmnpBoundary() {
-    try {
-        console.log('Attempting to load TMNP boundary from external file...');
-        const response = await fetch('./tmnp.kml');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const kmlText = await response.text();
-        console.log('TMNP KML file loaded successfully');
-        
-        // Parse the KML and create layers
-        const parser = new DOMParser();
-        const kmlDoc = parser.parseFromString(kmlText, 'text/xml');
-        
-        // Create a layer group for the TMNP boundary
-        const tmnpLayerGroup = L.layerGroup().addTo(map);
-        
-        // Parse KML features and add to map
-        const polygons = kmlDoc.querySelectorAll('Polygon');
-        let bounds = null;
-        
-        polygons.forEach(polygon => {
-            const outerBoundary = polygon.querySelector('outerBoundaryIs LinearRing coordinates');
-            if (outerBoundary) {
-                const coordsText = outerBoundary.textContent.trim();
-                const coords = coordsText.split(/\s+/).map(coord => {
-                    const [lon, lat] = coord.split(',').map(parseFloat);
-                    return [lat, lon];
-                }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
-                
-                if (coords.length > 0) {
-                    const poly = L.polygon(coords, {
-                        color: '#ff0000',
-                        weight: 3,
-                        opacity: 0.7,
-                        fillColor: '#ff0000',
-                        fillOpacity: 0.25
-                    });
-                    tmnpLayerGroup.addLayer(poly);
-                    
-                    // Calculate bounds for the whole park
-                    const polyBounds = L.latLngBounds(coords);
-                    if (!bounds) {
-                        bounds = polyBounds;
-                    } else {
-                        bounds.extend(polyBounds);
-                    }
-                }
-            }
-        });
-        
-        if (bounds) {
-            console.log('TMNP boundary loaded successfully from external file');
-            map.fitBounds(bounds, { padding: [20, 20] });
-        } else {
-            console.log('No valid polygon data found in TMNP KML');
-        }
-        
-    } catch (error) {
-        console.log('Failed to load TMNP boundary from external file:', error.message);
-        
-        // Check if we're running on file:// protocol
-        if (window.location.protocol === 'file:') {
-            showFileProtocolFallback();
-        } else {
-            console.log('TMNP boundary not available - map will work without boundary overlay');
-        }
-    }
-}
-
-// Show fallback message for file:// protocol users
-function showFileProtocolFallback() {
-    console.log('Showing file:// protocol fallback message');
-    
-    // Create a subtle notification overlay
-    const fallbackDiv = document.createElement('div');
-    fallbackDiv.id = 'tmnpFallback';
-    fallbackDiv.innerHTML = `
-        <div style="background: rgba(255, 193, 7, 0.9); color: #856404; padding: 12px 16px; border-radius: 8px; margin: 10px; font-size: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
-            <div style="display: flex; align-items: center; gap: 8px;">
-                <span style="font-size: 18px;">⚠️</span>
-                <div>
-                    <strong>Park Boundary Not Available</strong><br>
-                    <span style="font-size: 12px;">The Table Mountain National Park boundary requires a web server to load. 
-                    <a href="https://raw.githubusercontent.com/werneravr/heli-map/main/static-site/tmnp.kml" target="_blank" style="color: #856404; text-decoration: underline;">Download KML file</a> 
-                    or access via <code>http://localhost:8080</code></span>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Position it at the top of the map
-    const mapContainer = map.getContainer();
-    mapContainer.appendChild(fallbackDiv);
-    
-    // Auto-hide after 10 seconds
-    setTimeout(() => {
-        if (fallbackDiv.parentNode) {
-            fallbackDiv.style.transition = 'opacity 0.5s ease-out';
-            fallbackDiv.style.opacity = '0';
-            setTimeout(() => {
-                if (fallbackDiv.parentNode) {
-                    fallbackDiv.parentNode.removeChild(fallbackDiv);
-                }
-            }, 500);
-        }
-    }, 10000);
-}

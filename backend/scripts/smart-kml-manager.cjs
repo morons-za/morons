@@ -224,12 +224,22 @@ class SmartKMLManager {
     
     const processed = this.loadProcessedFiles();
     const allFiles = fs.readdirSync(this.uploadsDir).filter(f => f.toLowerCase().endsWith('.kml'));
-    const newFiles = allFiles.filter(f => !processed.files[f]);
     
-    console.log(`📁 Found ${allFiles.length} total KML files, ${newFiles.length} new files to process`);
+    // Check if files need renaming (improperly named files)
+    const improperlyNamedFiles = allFiles.filter(f => {
+      // Check if filename matches expected format
+      const properPattern = /^\d{4}-\d{2}-\d{2}-[A-Z]{2}-[A-Z0-9]{3}-[a-f0-9]{8}\.kml$/;
+      const specialPattern = /^\d{4}-\d{2}-\d{2}-(UNKNOWN|ZS-[A-Z0-9]{3}-[A-Z0-9]+)\.kml$/;
+      return !properPattern.test(f) && !specialPattern.test(f);
+    });
+    
+    // Use improperly named files as the "new" files to process
+    const newFiles = improperlyNamedFiles;
+    
+    console.log(`📁 Found ${allFiles.length} total KML files, ${newFiles.length} improperly named files to process`);
     
     if (newFiles.length === 0) {
-      console.log('✅ No new files to process');
+      console.log('✅ No improperly named files to process');
       return { processed: 0, renamed: 0, duplicates: 0 };
     }
 
@@ -275,8 +285,42 @@ class SmartKMLManager {
         const newFilename = this.createOrganizedFilename(metadata, filename);
         const newPath = path.join(this.uploadsDir, newFilename);
         
-        // Rename if needed and target doesn't exist
-        if (filename !== newFilename && !fs.existsSync(newPath)) {
+        // Check if target file already exists
+        if (fs.existsSync(newPath)) {
+          // Target exists - check if it's actually a duplicate
+          console.log(`⚠️ Target file ${newFilename} already exists - checking if duplicate...`);
+          
+          // Generate hash of existing file to confirm it's a duplicate
+          const existingHash = this.generateContentHash(newPath);
+          
+          if (existingHash === contentHash) {
+            // Confirmed duplicate - delete the uploaded file
+            console.log(`🔄 Confirmed duplicate: ${filename} is identical to ${newFilename} - rejecting duplicate`);
+            duplicates.push({ file: filename, duplicateOf: newFilename });
+            
+            try {
+              fs.unlinkSync(filePath);
+              console.log(`🗑️ Deleted duplicate file: ${filename}`);
+            } catch (deleteError) {
+              console.log(`⚠️ Could not delete duplicate file ${filename}: ${deleteError.message}`);
+            }
+          } else {
+            // Different content but same filename would be generated - this shouldn't happen!
+            // If we're trying to rename to a filename that already exists with different content,
+            // it means there's already a file for this flight, and this is likely a duplicate
+            // Delete the new file - it's a duplicate of an existing flight
+            console.log(`🔄 Filename collision: ${newFilename} exists with different content - treating as duplicate and rejecting`);
+            duplicates.push({ file: filename, duplicateOf: newFilename });
+            
+            try {
+              fs.unlinkSync(filePath);
+              console.log(`🗑️ Deleted duplicate file: ${filename}`);
+            } catch (deleteError) {
+              console.log(`⚠️ Could not delete duplicate file ${filename}: ${deleteError.message}`);
+            }
+          }
+        } else if (filename !== newFilename) {
+          // Target doesn't exist and needs renaming
           fs.renameSync(filePath, newPath);
           console.log(`📝 Renamed: ${filename} → ${newFilename}`);
           renamed++;
@@ -292,7 +336,7 @@ class SmartKMLManager {
           // Store hash for future duplicate detection
           contentHashes.set(contentHash, newFilename);
         } else {
-          // File doesn't need renaming or target exists
+          // File doesn't need renaming
           processed.files[filename] = {
             originalName: filename,
             processedAt: new Date().toISOString(),

@@ -1113,6 +1113,13 @@ const htmlContent = `<!DOCTYPE html>
         window.embeddedFlightData = ${JSON.stringify(flightData)};
     </script>
     <script src="./js/app.js"></script>
+
+    <!-- Last Updated Timestamp -->
+    <div id="lastUpdatedTimestamp" class="last-updated-timestamp">
+        <span id="siteUpdateTime"></span>
+        <span id="flightDataTime"></span>
+    </div>
+
 </body>
 </html>`;
 

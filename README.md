@@ -386,12 +386,6 @@ This is the **complete admin workflow** for processing new helicopter flight dat
 
 ### ⚠️ Recent Changes & Fixes (October 2025)
 
-**🚀 Automated Upload Workflow (NEW!):**
-- **Upload completes everything**: Files renamed, PNGs generated, KMLs optimized, and metadata updated automatically
-- **No manual processing needed**: Simply upload KML files and click "Build Static Site"
-- **Streamlined workflow**: 6 steps reduced to 3 clicks (Upload → Build → Deploy)
-- All optimization, duplicate detection, and metadata regeneration happens during upload
-
 **File Path Restructuring:**
 - All server files moved from `/backend/server/` to `/backend/` root directory
 - PNG flight maps now in `/backend/flight-maps/` (was `/backend/server/flight-maps/`)
@@ -437,27 +431,44 @@ Open `http://localhost:4000` for the admin interface.
 - Only flights that actually entered restricted airspace proceed to next steps
 - Non-violating flights are rejected with explanation to admin
 
-### Step 4: Automated File Processing (🚀 NEW!)
-**System automatically completes all processing steps:**
-- **Rename files**: Automatically renames files to proper format (YYYY-MM-DD-REGISTRATION-HASH.kml)
-- **Generate PNG maps**: Creates detailed violation screenshots for each flight
-- **Optimize KML files**: Generates web-friendly optimized versions in `static-site/kml-optimised/`
-- **Update metadata**: Regenerates `master-metadata.json` with all flight information
-- **No manual steps required**: Everything happens automatically during upload!
+### Step 4: File Renaming and Organization
+**If flight is a valid violation, system automatically:**
+- Renames KML file to standardized format: `[AIRCRAFT-REG]_[DATE]_violation.kml`
+- Places renamed file in appropriate subfolder: `/backend/uploads/[AIRCRAFT-REGISTRATION]/`
+- Organizes files by aircraft registration (e.g., `ZS-HBO`, `ZT-REG`, etc.)
+- Updates file metadata and tracking information
 
-**Admin action**: After upload completes successfully, the system is ready for static site build.
+### Step 5: Optimized KML Generation
+**System automatically creates web-optimized version:**
+- Generates compressed/optimized KML for better web performance
+- Removes unnecessary data points while preserving violation evidence
+- Saves optimized file to `/static-site/kml-optimised/` folder
+- These optimized files are used by the public website for fast loading
 
-### Step 5: Build Static Site
-**Admin builds the static site:**
-- Click "Build Static Site" button in admin interface
-- System compiles all processed data into deployable static site
-- Ready for deployment to public hosting
+### Step 6: PNG Violation Map Generation
+**System automatically generates violation screenshot:**
+- Creates detailed PNG image showing:
+  - Flight path overlaid on OpenStreetMap background
+  - TMNP boundary lines clearly marked
+  - Specific violation points highlighted with markers
+  - Aircraft registration and violation timestamp
+- Saves PNG to `/backend/flight-maps/[AIRCRAFT-REGISTRATION]/` folder
+- These detailed images remain private (backend only, not served on public site)
 
-### Step 6: Deploy to Public Site
-**Admin deploys updated site:**
-- Option A: Click "Deploy to GitHub" button for automated GitHub push
-- Option B: Manually upload `static-site/` contents to Netlify via drag-and-drop
-- Public website automatically updates with new flight data
+### Step 7: Git Deployment
+**Admin manually commits and pushes to GitHub:**
+```bash
+# Add new KML files and PNG images to Git
+git add backend/uploads/ backend/flight-maps/ static-site/kml-optimised/
+git commit -m "Add new helicopter violations: [aircraft-registrations]"
+git push origin main
+```
+
+### Step 8: Static Site Deployment
+**Upload new static-site files to internet:**
+- Deployment to GitHub Pages happens automatically after Git push
+- Public website will now display new violations with optimized KML files
+- Use the backend admin interface "Deploy to GitHub" button for automated deployment
 
 ## ⚠️ Critical Architecture Principle
 
@@ -845,15 +856,16 @@ node backend/scripts/build-static-site.cjs
 - **Static Site Testing**: Port 8080 (http://localhost:8080)
 - Both ports managed by `./launch.sh` unified launcher
 
-### Data Processing Flow (🚀 Automated!)
-1. **Upload** → KML files via admin interface (drag & drop)
-2. **Detect** → Automatic duplicate checking (flight path analysis)
-3. **Validate** → TMNP violation boundary analysis
-4. **Process** → Automatic renaming, PNG generation, KML optimization, and metadata updates
-5. **Build** → Generate static site (one click)
-6. **Deploy** → Push to GitHub or upload to Netlify
-
-**All processing happens automatically during upload - no manual steps needed!**
+### Data Processing Flow
+1. Upload → KML files via admin interface
+2. Detect → Automatic duplicate checking (flight path analysis)
+3. Validate → TMNP violation boundary analysis
+4. Process → File renaming and organization
+5. Optimize → Create web-friendly KML versions
+6. Generate → PNG violation screenshots
+7. Metadata → Update master-metadata.json
+8. Build → Generate static site
+9. Deploy → Push to GitHub via admin interface
 
 ### Terminal Commands Reference
 
