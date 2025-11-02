@@ -386,6 +386,12 @@ This is the **complete admin workflow** for processing new helicopter flight dat
 
 ### ⚠️ Recent Changes & Fixes (October 2025)
 
+**🚀 Automated Upload Workflow (NEW!):**
+- **Upload completes everything**: Files renamed, PNGs generated, KMLs optimized, and metadata updated automatically
+- **No manual processing needed**: Simply upload KML files and click "Build Static Site"
+- **Streamlined workflow**: 6 steps reduced to 3 clicks (Upload → Build → Deploy)
+- All optimization, duplicate detection, and metadata regeneration happens during upload
+
 **File Path Restructuring:**
 - All server files moved from `/backend/server/` to `/backend/` root directory
 - PNG flight maps now in `/backend/flight-maps/` (was `/backend/server/flight-maps/`)
@@ -431,44 +437,27 @@ Open `http://localhost:4000` for the admin interface.
 - Only flights that actually entered restricted airspace proceed to next steps
 - Non-violating flights are rejected with explanation to admin
 
-### Step 4: File Renaming and Organization
-**If flight is a valid violation, system automatically:**
-- Renames KML file to standardized format: `[AIRCRAFT-REG]_[DATE]_violation.kml`
-- Places renamed file in appropriate subfolder: `/backend/uploads/[AIRCRAFT-REGISTRATION]/`
-- Organizes files by aircraft registration (e.g., `ZS-HBO`, `ZT-REG`, etc.)
-- Updates file metadata and tracking information
+### Step 4: Automated File Processing (🚀 NEW!)
+**System automatically completes all processing steps:**
+- **Rename files**: Automatically renames files to proper format (YYYY-MM-DD-REGISTRATION-HASH.kml)
+- **Generate PNG maps**: Creates detailed violation screenshots for each flight
+- **Optimize KML files**: Generates web-friendly optimized versions in `static-site/kml-optimised/`
+- **Update metadata**: Regenerates `master-metadata.json` with all flight information
+- **No manual steps required**: Everything happens automatically during upload!
 
-### Step 5: Optimized KML Generation
-**System automatically creates web-optimized version:**
-- Generates compressed/optimized KML for better web performance
-- Removes unnecessary data points while preserving violation evidence
-- Saves optimized file to `/static-site/kml-optimised/` folder
-- These optimized files are used by the public website for fast loading
+**Admin action**: After upload completes successfully, the system is ready for static site build.
 
-### Step 6: PNG Violation Map Generation
-**System automatically generates violation screenshot:**
-- Creates detailed PNG image showing:
-  - Flight path overlaid on OpenStreetMap background
-  - TMNP boundary lines clearly marked
-  - Specific violation points highlighted with markers
-  - Aircraft registration and violation timestamp
-- Saves PNG to `/backend/flight-maps/[AIRCRAFT-REGISTRATION]/` folder
-- These detailed images remain private (backend only, not served on public site)
+### Step 5: Build Static Site
+**Admin builds the static site:**
+- Click "Build Static Site" button in admin interface
+- System compiles all processed data into deployable static site
+- Ready for deployment to public hosting
 
-### Step 7: Git Deployment
-**Admin manually commits and pushes to GitHub:**
-```bash
-# Add new KML files and PNG images to Git
-git add backend/uploads/ backend/flight-maps/ static-site/kml-optimised/
-git commit -m "Add new helicopter violations: [aircraft-registrations]"
-git push origin main
-```
-
-### Step 8: Static Site Deployment
-**Upload new static-site files to internet:**
-- Deployment to GitHub Pages happens automatically after Git push
-- Public website will now display new violations with optimized KML files
-- Use the backend admin interface "Deploy to GitHub" button for automated deployment
+### Step 6: Deploy to Public Site
+**Admin deploys updated site:**
+- Option A: Click "Deploy to GitHub" button for automated GitHub push
+- Option B: Manually upload `static-site/` contents to Netlify via drag-and-drop
+- Public website automatically updates with new flight data
 
 ## ⚠️ Critical Architecture Principle
 
@@ -795,13 +784,18 @@ This is a **Node.js helicopter tracking system** that:
 - **Build process**: `build-static-site.cjs` embeds flight data in `index.html` for offline compatibility
 - **Both protocols**: Ensure site works on both `http://localhost:8080` and `file://` protocols
 
-**6. Site Update Notification Feature**
+**6. Site Update Notification Feature (CRITICAL - DO NOT OMIT)**
 - **Always include notification**: Bottom-right corner must show "Site updated X days ago • Flight data up to XXX date"
-- **Required HTML elements**: `<div id="lastUpdatedTimestamp" class="last-updated-timestamp">` with `<span id="siteUpdateTime">` and `<span id="flightDataTime">`
-- **Required CSS**: `.last-updated-timestamp` with Gmail-like styling, backdrop blur, mobile responsive
+- **Required HTML elements**: `<div id="lastUpdatedTimestamp" class="last-updated-timestamp">` with `<span id="siteUpdateTime">` and `<span id="flightDataTime">` placed just before `</body>` tag
+- **Required CSS**: `.last-updated-timestamp` with Gmail-like styling (position: fixed, bottom: 8px, right: 8px, backdrop blur, mobile responsive)
 - **Required JavaScript**: `formatRelativeTime()` and `formatFlightDate()` functions for timestamp formatting
 - **Data sources**: Uses `window.buildTimestamp` and `window.latestFlightDate` from embedded data
 - **Non-interactive**: `pointer-events: none` - purely informational display
+- **CRITICAL WARNING**: This feature was lost during a static site rebuild. During ANY rebuild or template modification, you MUST preserve these elements in `/backend/scripts/build-static-site.cjs`:
+  - The HTML div structure just before `</body>` 
+  - The CSS styling (lines 672-702)
+  - Ensure they are NOT removed or moved
+- **Build script check**: When modifying `build-static-site.cjs`, verify the timestamp elements are output just before `</body>` at line ~1118-1121
 - **Never remove**: This feature was lost in previous builds - must be preserved in all future updates
 
 ### Common AI Agent Tasks
@@ -851,16 +845,15 @@ node backend/scripts/build-static-site.cjs
 - **Static Site Testing**: Port 8080 (http://localhost:8080)
 - Both ports managed by `./launch.sh` unified launcher
 
-### Data Processing Flow
-1. Upload → KML files via admin interface
-2. Detect → Automatic duplicate checking (flight path analysis)
-3. Validate → TMNP violation boundary analysis
-4. Process → File renaming and organization
-5. Optimize → Create web-friendly KML versions
-6. Generate → PNG violation screenshots
-7. Metadata → Update master-metadata.json
-8. Build → Generate static site
-9. Deploy → Push to GitHub via admin interface
+### Data Processing Flow (🚀 Automated!)
+1. **Upload** → KML files via admin interface (drag & drop)
+2. **Detect** → Automatic duplicate checking (flight path analysis)
+3. **Validate** → TMNP violation boundary analysis
+4. **Process** → Automatic renaming, PNG generation, KML optimization, and metadata updates
+5. **Build** → Generate static site (one click)
+6. **Deploy** → Push to GitHub or upload to Netlify
+
+**All processing happens automatically during upload - no manual steps needed!**
 
 ### Terminal Commands Reference
 
@@ -1022,7 +1015,10 @@ git push origin main
 - **Build timestamp integration**: Uses `window.buildTimestamp` and `window.latestFlightDate` from embedded data
 - **Mobile responsive**: Notification scales appropriately on smaller screens
 - **Non-interactive design**: Notification is purely informational with `pointer-events: none`
-- **Future-proof**: Feature is documented in README to prevent loss during future builds
+- **CRITICAL**: Fixed by adding HTML elements (lines 1118-1121) to `build-static-site.cjs` template just before `</body>` tag
+- **CSS Location**: Styling at lines 672-702 in `build-static-site.cjs` (Gmail-like with backdrop blur)
+- **AI Agent Warning**: ANY modification to the static site template MUST preserve these elements - they were previously lost during a rebuild
+- **Verification**: After building, check that `static-site/index.html` contains the `lastUpdatedTimestamp` div structure
 
 **Unified Launcher Created (October 9, 2025):**
 - Created `/launch.sh` in project root - **ONE command to start everything**
