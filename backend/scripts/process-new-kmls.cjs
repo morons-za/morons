@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const crypto = require('crypto');
 const { XMLParser } = require('fast-xml-parser');
 const { generateMasterMetadata } = require('./generate-master-metadata.cjs');
 
@@ -203,9 +204,20 @@ async function processNewKMLs() {
       continue;
     }
     
-    // Extract hash from current filename (should be the part before .kml)
+    // Extract hash from current filename or generate one
     const hashMatch = filename.match(/([a-f0-9]{8})\.kml$/);
-    const hash = hashMatch ? hashMatch[1] : filename.replace('.kml', '');
+    let hash;
+    
+    if (hashMatch) {
+      // Use existing valid hash
+      hash = hashMatch[1];
+    } else {
+      // Generate new 8-character hash from file content
+      const fileContent = fs.readFileSync(filePath, 'utf8');
+      const fullHash = crypto.createHash('md5').update(fileContent).digest('hex');
+      hash = fullHash.substring(0, 8);
+      console.log(`📝 Generated hash: ${hash}`);
+    }
     
     // Generate new filename
     const newFilename = `${metadata.date}-${metadata.registration}-${hash}.kml`;
