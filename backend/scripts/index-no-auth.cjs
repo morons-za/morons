@@ -214,11 +214,11 @@ function extractKmlInfoFromFile(filePath, filename) {
       }
       
       // Fallback: try to extract from KML content
-      if (!registration) {
+      if (!registration || !date || !time) {
         const firstPlacemark = findFirstPlacemark(kmlRoot);
         if (firstPlacemark) {
-          // Try name field
-          if (firstPlacemark.name) {
+          // Try name field for registration
+          if (!registration && firstPlacemark.name) {
             const regMatch = firstPlacemark.name.match(/([A-Z]{2}-[A-Z0-9]{3})/);
             if (regMatch) {
               registration = regMatch[1];
@@ -226,12 +226,27 @@ function extractKmlInfoFromFile(filePath, filename) {
             }
           }
           
-          // Try description field
+          // Try description field for registration
           if (!registration && firstPlacemark.description) {
             const regMatch = firstPlacemark.description.match(/([A-Z]{2}-[A-Z0-9]{3})/);
             if (regMatch) {
               registration = regMatch[1];
               console.log(`[KML DESC] Found registration in placemark description: ${registration}`);
+            }
+          }
+          
+          // Extract date/time from gx:Track when elements (ADS-B Exchange)
+          if ((!date || !time) && firstPlacemark['gx:Track'] && firstPlacemark['gx:Track'].when) {
+            const whenElements = Array.isArray(firstPlacemark['gx:Track'].when) ? 
+              firstPlacemark['gx:Track'].when : [firstPlacemark['gx:Track'].when];
+            if (whenElements.length > 0) {
+              const firstWhen = whenElements[0];
+              const whenMatch = firstWhen.match(/(\d{4}-\d{2}-\d{2})T(\d{2}:\d{2})/);
+              if (whenMatch) {
+                date = whenMatch[1];
+                time = whenMatch[2];
+                console.log(`[GX:TRACK] Extracted from when element: ${date} ${time}`);
+              }
             }
           }
         }
