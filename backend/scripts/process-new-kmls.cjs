@@ -225,6 +225,14 @@ async function processNewKMLs() {
     
     console.log(`📝 ${metadata.registration} on ${metadata.date} -> ${newFilename}`);
     
+    // Check if target file already exists (duplicate detection)
+    if (fs.existsSync(newFilePath)) {
+      console.log(`⚠️  Duplicate detected: ${newFilename} already exists`);
+      console.log(`🗑️  Removing duplicate upload: ${filename}`);
+      fs.unlinkSync(filePath);
+      continue;
+    }
+    
     // Rename the file
     try {
       fs.renameSync(filePath, newFilePath);
