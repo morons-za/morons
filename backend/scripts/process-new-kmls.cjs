@@ -36,6 +36,11 @@ function extractRegistrationFromKML(kmlPath) {
     function findPlacemarkName(obj) {
       if (!obj || typeof obj !== 'object') return null;
       if (obj.name && typeof obj.name === 'string') {
+        // ADS-B Exchange format: "ZS-HMB track" or "ZT-RPG track"
+        const trackMatch = obj.name.match(/^([A-Z]{2}-[A-Z0-9]{3})\s+track$/i);
+        if (trackMatch) {
+          return trackMatch[1];
+        }
         // 6-char hex or alphanum registration
         const regMatch = obj.name.match(/^([A-Z0-9]{6})$/);
         if (regMatch) {
@@ -102,6 +107,11 @@ function extractKMLMetadata(kmlPath) {
     function findPlacemarkName(obj) {
       if (!obj || typeof obj !== 'object') return null;
       if (obj.name && typeof obj.name === 'string') {
+        // ADS-B Exchange format: "ZS-HMB track" or "ZT-RPG track"
+        const trackMatch = obj.name.match(/^([A-Z]{2}-[A-Z0-9]{3})\s+track$/i);
+        if (trackMatch) {
+          return trackMatch[1];
+        }
         // 6-char hex or alphanum registration
         const regMatch = obj.name.match(/^([A-Z0-9]{6})$/);
         if (regMatch) {
