@@ -10,9 +10,30 @@
 // Flight data loaded from external JSON file
 let flightData = [];
 
+// Global variables for app state
+let map = null;
+let currentFlightLayer = null;
+let filteredData = [];
+let showFilters = false;
+let lastViewedFilename = null;
+
 // Load flight data from external JSON file
 async function loadFlightData() {
     console.log('🚀 Starting to load flight data...');
+    
+    // Check for embedded flight data first (for file:// protocol compatibility)
+    if (window.embeddedFlightData && Array.isArray(window.embeddedFlightData)) {
+        console.log('📊 Using embedded flight data');
+        flightData = window.embeddedFlightData;
+        console.log('📊 Loaded', flightData.length, 'flights from embedded data');
+        
+        // Initialize the application after data is loaded
+        console.log('🎯 Calling initializeApp() with embedded data...');
+        initializeApp();
+        return;
+    }
+    
+    // Try to load from external JSON file
     try {
         console.log('📡 Fetching /master-metadata.json...');
         const response = await fetch('/master-metadata.json');
@@ -24,33 +45,34 @@ async function loadFlightData() {
         console.log('📊 Loaded', flightData.length, 'flights from external JSON');
         
         // Initialize the application after data is loaded
-        console.log('🎯 Calling initializeApp()...');
+        console.log('🎯 Calling initializeApp() with real data...');
         initializeApp();
     } catch (error) {
         console.error('Error loading flight data:', error);
-        document.body.innerHTML = '<div style="padding: 20px; text-align: center;"><h2>Error Loading Data</h2><p>Unable to load flight data. Please refresh the page.</p></div>';
+        // Use empty dataset and still initialize for graceful degradation
+        console.log('Could not load external data, using empty dataset for local viewing');
+        flightData = [];
+        console.log('🎯 Calling initializeApp() with empty data...');
+        initializeApp();
     }
+}
+
+// UTC to South Africa time conversion
+function utcToSaTime(date, time) {
+    if (!date || !time) return '-';
+    // date: '2025-05-03', time: '07:31'
+    const utc = new Date(`${date}T${time}:00Z`);
+    // South Africa is UTC+2
+    const sa = new Date(utc.getTime() + 2 * 60 * 60 * 1000);
+    return sa.toISOString().slice(11, 16); // 'HH:MM'
 }
 
 // Initialize application with loaded data
 function initializeApp() {
     console.log('🎯 initializeApp() called with', flightData.length, 'flights');
-    // Global variables
-    let map;
-    let currentFlightLayer = null;
-    let filteredData = Array.isArray(flightData) ? [...flightData] : [];
-    let showFilters = false;
-    let lastViewedFilename = null;
     
-    // UTC to South Africa time conversion
-    function utcToSaTime(date, time) {
-        if (!date || !time) return '-';
-        // date: '2025-05-03', time: '07:31'
-        const utc = new Date(`${date}T${time}:00Z`);
-        // South Africa is UTC+2
-        const sa = new Date(utc.getTime() + 2 * 60 * 60 * 1000);
-        return sa.toISOString().slice(11, 16); // 'HH:MM'
-    }
+    // Initialize global variables
+    filteredData = Array.isArray(flightData) ? [...flightData] : [];
     
     // Actually call the initialization functions
     initializeMap();
@@ -78,6 +100,44 @@ function showConnectionError() {
             </button>
         </div>
     `;
+}
+
+// Load TMNP boundary from external KML file
+function loadTmnpBoundary() {
+    if (typeof omnivore === 'undefined') {
+        console.error('❌ Omnivore not available, cannot load TMNP boundary');
+        return;
+    }
+    
+    console.log('📄 Loading TMNP boundary from ./tmnp.kml...');
+    
+    try {
+        window.tmnpLayer = omnivore.kml('./tmnp.kml', null, L.geoJson(null, {
+            style: function(feature) {
+                return {
+                    color: '#ff0000',
+                    weight: 3,
+                    opacity: 0.7,
+                    fillColor: '#ff0000',
+                    fillOpacity: 0.25
+                };
+            }
+        })).addTo(map);
+        
+        window.tmnpLayer.on('ready', function() {
+            console.log('✅ TMNP boundary loaded successfully from external file');
+            // Fit map to show TMNP boundary if no flights are loaded yet
+            if (filteredData.length === 0) {
+                map.fitBounds(window.tmnpLayer.getBounds(), { padding: [20, 20] });
+            }
+        });
+        
+        window.tmnpLayer.on('error', function(e) {
+            console.error('❌ Error loading TMNP boundary:', e);
+        });
+    } catch (error) {
+        console.error('❌ Failed to load TMNP boundary:', error);
+    }
 }
 
 function initializeMap() {
@@ -109,30 +169,38 @@ function initializeMap() {
     console.log('Tile layer added to map');
     
     // Add TMNP boundary from embedded KML content (works with file:// protocol)
-    console.log('Loading TMNP boundary from embedded data...');
+    console.log('🔍 Checking for embedded TMNP KML...');
+    console.log('window.embeddedTmnpKml exists:', !!window.embeddedTmnpKml);
+    console.log('window.embeddedTmnpKml length:', window.embeddedTmnpKml ? window.embeddedTmnpKml.length : 0);
     
     if (window.embeddedTmnpKml) {
+        console.log('✅ Embedded TMNP KML found, parsing...');
         // Parse the embedded KML and create layers directly
         const parser = new DOMParser();
         const kmlDoc = parser.parseFromString(window.embeddedTmnpKml, 'text/xml');
         
         // Create a layer group for the TMNP boundary
-        const tmnpLayerGroup = L.layerGroup().addTo(map);
+        window.tmnpLayer = L.layerGroup().addTo(map);
         
         // Parse KML features and add to map
         const polygons = kmlDoc.querySelectorAll('Polygon');
+        console.log('🔍 Found', polygons.length, 'polygons in TMNP KML');
         let bounds = null;
         
-        polygons.forEach(polygon => {
+        polygons.forEach((polygon, idx) => {
+            console.log('🔍 Processing polygon', idx + 1, 'of', polygons.length);
             const outerBoundary = polygon.querySelector('outerBoundaryIs LinearRing coordinates');
             if (outerBoundary) {
                 const coordsText = outerBoundary.textContent.trim();
-                const coords = coordsText.split(/\\s+/).map(coord => {
+                console.log('🔍 Coordinate text length:', coordsText.length);
+                // Split by any whitespace (space, tab, newline)
+                const coords = coordsText.split(/\s+/).map(coord => {
                     const [lon, lat] = coord.split(',').map(parseFloat);
                     return [lat, lon];
                 }).filter(coord => !isNaN(coord[0]) && !isNaN(coord[1]));
                 
                 if (coords.length > 0) {
+                    console.log('✅ Creating polygon with', coords.length, 'coordinates');
                     const poly = L.polygon(coords, {
                         color: '#ff0000',
                         weight: 3,
@@ -140,7 +208,8 @@ function initializeMap() {
                         fillColor: '#ff0000',
                         fillOpacity: 0.25
                     });
-                    tmnpLayerGroup.addLayer(poly);
+                    window.tmnpLayer.addLayer(poly);
+                    console.log('✅ Polygon added to map');
                     
                     // Calculate bounds for the whole park
                     const polyBounds = L.latLngBounds(coords);
@@ -160,7 +229,9 @@ function initializeMap() {
             console.log('No valid polygon data found in TMNP KML');
         }
     } else {
-        console.log('No embedded TMNP KML data found');
+        console.log('No embedded TMNP KML data found, loading externally...');
+        // Fallback: Load TMNP boundary from external KML file
+        loadTmnpBoundary();
     }
     
     // Show initial instruction overlay
@@ -423,10 +494,10 @@ function loadFlightOnMap(filename) {
      loadingDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px 30px; border-radius: 10px; z-index: 1000; font-size: 16px; font-weight: bold; box-shadow: 0 4px 12px rgba(0,0,0,0.3);';
      map.getContainer().appendChild(loadingDiv);
     
-    // Try optimized KML first, fallback to GitHub
+    // Try optimized KML first, fallback to original KML from GitHub
     const optimizedFilename = filename.replace('.kml', '-opt.kml');
     const optimizedUrl = './kml-optimised/' + optimizedFilename;
-    const githubUrl = 'https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/' + filename;
+    const originalUrl = 'https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/' + filename;
     
     console.log('📍 Checking optimized KML first:', optimizedUrl);
     
@@ -458,31 +529,31 @@ function loadFlightOnMap(filename) {
             }));
             
             // Fit bounds to both TMNP and the new KML if both are present
-            if (tmnpLayer) {
-                const group = L.featureGroup([tmnpLayer, this]);
+            if (window.tmnpLayer) {
+                const group = L.featureGroup([window.tmnpLayer, this]);
                 map.fitBounds(group.getBounds(), { padding: [20, 20] });
             } else {
                 map.fitBounds(this.getBounds(), { padding: [20, 20] });
             }
         })
         .on('error', function(error) {
-            console.log('⚠️ Optimized KML failed, trying GitHub URL...');
+            console.log('⚠️ Optimized KML failed, trying original KML...');
             console.log('❌ Optimized KML error:', error);
             
-            // Fallback to GitHub URL
-            const githubStartTime = performance.now();
+            // Fallback to original KML
+            const originalStartTime = performance.now();
             
-            omnivore.kml(githubUrl)
+            omnivore.kml(originalUrl)
                 .on('ready', function() {
-                    const githubDownloadTime = performance.now() - githubStartTime;
+                    const originalDownloadTime = performance.now() - originalStartTime;
                     const totalTime = performance.now() - startTime;
                     
-                    console.log('✅ GitHub KML loaded successfully!');
+                    console.log('✅ Original KML loaded successfully!');
                     console.log('⚡ Performance:', {
-                        githubDownloadTime: (githubDownloadTime / 1000).toFixed(2) + 's',
+                        originalDownloadTime: (originalDownloadTime / 1000).toFixed(2) + 's',
                         totalTime: (totalTime / 1000).toFixed(2) + 's',
                         fileSize: flight.fileSizeMB + 'MB',
-                        githubSpeed: (flight.fileSizeMB / (githubDownloadTime / 1000)).toFixed(2) + 'MB/s'
+                        originalSpeed: (flight.fileSizeMB / (originalDownloadTime / 1000)).toFixed(2) + 'MB/s'
                     });
                     
                     // Remove loading indicator
@@ -499,18 +570,18 @@ function loadFlightOnMap(filename) {
                     }));
                     
                     // Fit bounds to both TMNP and the new KML if both are present
-                    if (tmnpLayer) {
-                        const group = L.featureGroup([tmnpLayer, this]);
+                    if (window.tmnpLayer) {
+                        const group = L.featureGroup([window.tmnpLayer, this]);
                         map.fitBounds(group.getBounds(), { padding: [20, 20] });
                     } else {
                         map.fitBounds(this.getBounds(), { padding: [20, 20] });
                     }
                 })
-                .on('error', function(githubError) {
+                .on('error', function(originalError) {
                     const totalTime = performance.now() - startTime;
-                    console.error('❌ Both local and GitHub KML load failed:', {
-                        localError: error,
-                        githubError: githubError,
+                    console.error('❌ Both optimized and original KML load failed:', {
+                        optimizedError: error,
+                        originalError: originalError,
                         totalTime: (totalTime / 1000).toFixed(2) + 's'
                     });
                     
@@ -520,7 +591,7 @@ function loadFlightOnMap(filename) {
                     
                     // Show error message in map
                     const errorDiv = document.createElement('div');
-                    errorDiv.innerHTML = '<div style="text-align: center; color: #dc3545; padding: 20px; font-size: 14px;"><strong>⚠️ Unable to load flight path</strong><br>Both local and GitHub sources failed.<br>Total time: ' + (totalTime / 1000).toFixed(2) + 's</div>';
+                    errorDiv.innerHTML = '<div style="text-align: center; color: #dc3545; padding: 20px; font-size: 14px;"><strong>⚠️ Unable to load flight path</strong><br>Both optimized and original KML sources failed.<br>Total time: ' + (totalTime / 1000).toFixed(2) + 's</div>';
                     errorDiv.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(255,255,255,0.9); border-radius: 8px; z-index: 1000;';
                     map.getContainer().appendChild(errorDiv);
                     setTimeout(() => {
