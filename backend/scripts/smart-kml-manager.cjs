@@ -181,31 +181,36 @@ class SmartKMLManager {
   }
 
   // Create organized filename
-  createOrganizedFilename(metadata, originalFilename) {
+  createOrganizedFilename(metadata, originalFilename, filePath) {
     const { registration, date } = metadata;
     
     // Extract or generate unique ID
     let uniqueId = '';
     
-    // Try to extract existing ID from various patterns
+    // Try to extract existing ID from various patterns (must be valid hex)
     const patterns = [
       /([a-f0-9]{8})\.kml$/i, // 8-char hex
-      /([a-f0-9]{6,})\.kml$/i, // 6+ char hex
-      /track-(\w+)\.kml$/i, // track-ID pattern
-      /-(\w{3,})\.kml$/i, // ending with dash-ID
     ];
     
     for (const pattern of patterns) {
       const match = originalFilename.match(pattern);
-      if (match && !match[1].includes('copy') && !match[1].match(/^\d+$/)) {
+      if (match && /^[a-f0-9]{8}$/i.test(match[1])) {
         uniqueId = match[1];
         break;
       }
     }
     
-    // Generate new ID if none found
+    // Generate MD5 hash-based ID if none found or invalid
     if (!uniqueId) {
-      uniqueId = this.generateUniqueId();
+      // Generate hash from file content for consistent IDs
+      try {
+        const content = fs.readFileSync(filePath, 'utf8');
+        const fullHash = crypto.createHash('md5').update(content).digest('hex');
+        uniqueId = fullHash.substring(0, 8);
+      } catch (error) {
+        // Fallback to random ID if file read fails
+        uniqueId = this.generateUniqueId();
+      }
     }
     
     // Clean registration
@@ -282,7 +287,7 @@ class SmartKMLManager {
         const metadata = this.extractKmlMetadata(filePath, filename);
         
         // Create organized filename
-        const newFilename = this.createOrganizedFilename(metadata, filename);
+        const newFilename = this.createOrganizedFilename(metadata, filename, filePath);
         const newPath = path.join(this.uploadsDir, newFilename);
         
         // Check if target file already exists
