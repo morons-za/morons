@@ -7,12 +7,11 @@ const { execSync } = require('child_process');
 console.log('🚀 Building Static Site for TMNP Helicopter Tracking...\n');
 
 // Configuration
-const BUILD_DIR = 'static-site';
+const PROJECT_ROOT = path.join(__dirname, '..', '..');
+const BUILD_DIR = path.join(PROJECT_ROOT, 'static-site');
 const SOURCE_DIRS = {
-  uploads: 'backend/uploads',
-  flightMaps: 'backend/flight-maps',
-  tmnpBoundaryPrimary: 'static-site/tmnp.kml',
-  tmnpBoundaryFallback: 'static-site/tmnp.kml'
+  tmnpBoundaryPrimary: path.join(PROJECT_ROOT, 'static-site', 'tmnp.kml'),
+  tmnpBoundaryFallback: path.join(PROJECT_ROOT, 'static-site', 'tmnp.kml')
 };
 
 // Prepare build directory (preserve optimized KMLs)
@@ -39,8 +38,10 @@ if (fs.existsSync(SOURCE_DIRS.tmnpBoundaryPrimary)) {
 if (boundarySource) {
   if (path.resolve(boundarySource) !== path.resolve(boundaryDest)) {
     fs.copyFileSync(boundarySource, boundaryDest);
+    console.log('✅ TMNP boundary copied');
+  } else {
+    console.log('✅ TMNP boundary already in place');
   }
-  console.log('✅ TMNP boundary available');
 } else {
   console.log('⚠️  TMNP boundary file not found');
 }
@@ -62,21 +63,32 @@ pdfFiles.forEach(pdfFile => {
   }
 });
 
-// Note: Full-sized KMLs stay in backend/uploads/ and are never copied to static-site
-// Only optimized KMLs (created separately) go to static-site/kml-optimised/
-console.log('📁 KML files remain in backend/uploads/ (not copied to static-site)');
-console.log('🔧 Optimized KMLs are managed separately in static-site/kml-optimised/');
+// Note: Original KML files are served from GitHub raw URLs, not copied to static-site
+// The app.js references: https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/
+console.log('📁 Original KML files served from GitHub raw URLs (not copied locally)');
+// Note: PNG flight maps are served from GitHub media URLs, not copied to static-site
+// The app.js references: https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/
+console.log('📸 PNG flight maps served from GitHub media URLs (not copied locally)');
 
 // Ensure optimized KML directory exists (optimized files are created by separate process)
 const optimizedDir = path.join(BUILD_DIR, 'kml-optimised');
 fs.mkdirSync(optimizedDir, { recursive: true });
 console.log('✅ Optimized KML directory ready');
 
-// PNG files are now served from GitHub LFS - no need to copy locally
-console.log('📸 PNG files will be served from GitHub LFS');
-
-// TMNP boundary KML is now loaded externally from ./tmnp.kml
-console.log('\n📄 TMNP boundary KML will be loaded externally from ./tmnp.kml');
+// Load TMNP boundary KML for embedding
+console.log('\n📄 Loading TMNP boundary KML for embedding...');
+let tmnpKmlContent = '';
+try {
+  const tmnpPath = path.join(BUILD_DIR, 'tmnp.kml');
+  if (fs.existsSync(tmnpPath)) {
+    tmnpKmlContent = fs.readFileSync(tmnpPath, 'utf8');
+    console.log('✅ TMNP boundary KML loaded successfully');
+  } else {
+    console.log('⚠️  TMNP boundary KML not found at', tmnpPath);
+  }
+} catch (error) {
+  console.error('❌ Error loading TMNP boundary KML:', error.message);
+}
 
 // Load flight metadata
 console.log('\n📊 Loading flight metadata...');
@@ -312,6 +324,19 @@ const htmlContent = `<!DOCTYPE html>
             font-weight: 700;
             color: #2c3e50;
             line-height: 1;
+        }
+        
+        /* Update schedule notification */
+        .update-schedule-notification {
+            background: rgba(0, 123, 255, 0.08);
+            border: 1px solid rgba(0, 123, 255, 0.2);
+            color: #0056b3;
+            padding: 12px 18px;
+            border-radius: 6px;
+            margin: 20px 0;
+            text-align: center;
+            font-size: 13px;
+            font-weight: 500;
         }
         
         #map {
@@ -988,6 +1013,11 @@ const htmlContent = `<!DOCTYPE html>
                 <div class="summary-value" id="dateEndCard">${flightData.length > 0 ? flightData.map(f => f.date).sort().slice(-1)[0] : ''}</div>
             </div>
         </div>
+        
+        <!-- Update schedule notification -->
+        <div class="update-schedule-notification">
+            ℹ️ This site is updated on weekends, once per month
+        </div>
 
         <div class="filters-container">
             <div id="filtersCard" class="filters">
@@ -1111,6 +1141,7 @@ const htmlContent = `<!DOCTYPE html>
         window.buildTimestamp = ${JSON.stringify(buildTimestamp)};
         window.latestFlightDate = ${JSON.stringify(latestFlightDate)};
         window.embeddedFlightData = ${JSON.stringify(flightData)};
+        window.embeddedTmnpKml = ${JSON.stringify(tmnpKmlContent)};
     </script>
     <script src="./js/app.js"></script>
 
@@ -1198,8 +1229,8 @@ console.log('📄 Files generated:');
 console.log('   • index.html (main website)');
 console.log('   • README.md (deployment guide)');
 console.log(`   • kml-optimised/ (${fs.readdirSync(path.join(BUILD_DIR, 'kml-optimised')).length} optimized KML files)`);
-console.log(`   • flight-maps/ (served from GitHub LFS)`);
 console.log('   • tmnp.kml (boundary file)');
+console.log('   • PNG flight maps served from GitHub media URLs');
 
 console.log('\n🚀 Next Steps:');
 console.log('1. Test the site locally: ./launch.sh (opens http://localhost:8080)');
