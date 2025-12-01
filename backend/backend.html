@@ -741,6 +741,14 @@
                 <p style="font-size: 12px; color: #666; margin-top: 10px;">Upload the contents of the <code>static-site</code> folder to deploy your helicopter tracking website.</p>
             </div>
         </details>
+        
+        <details style="margin-bottom: 15px; border: 1px solid #ddd; border-radius: 6px; padding: 10px;">
+            <summary style="cursor: pointer; font-weight: bold; color: #ffc107;">🔄 Cache Management</summary>
+            <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border-radius: 4px;">
+                <p><strong>Flush Cache:</strong> <a href="https://dash.cloudflare.com/eb1a4a1c65e2782a496f7540c0331178/morons.org.za/caching/configuration" target="_blank" rel="noopener noreferrer">Flush cache</a></p>
+                <p style="font-size: 12px; color: #666; margin-top: 10px;">Use this link to clear Cloudflare cache after deploying updates to the website.</p>
+            </div>
+        </details>
             </div>
         </div>
     </div>
@@ -1059,6 +1067,15 @@
             const totalFiles = selectedFiles.length;
             updateProgress(0, `Preparing to upload ${totalFiles} file${totalFiles > 1 ? 's' : ''}...`);
             
+            // Stage tracking variables (declared outside try block)
+            let stageInterval = null;
+            const clearStageInterval = () => {
+                if (stageInterval) {
+                    clearInterval(stageInterval);
+                    stageInterval = null;
+                }
+            };
+            
             try {
                 // Create FormData with all files
                 const formData = new FormData();
@@ -1070,14 +1087,35 @@
                 const overwrite = document.querySelector('input[name="overwrite"]').checked;
                 formData.append('overwrite', overwrite);
                 
-                // Show processing state during upload
-                updateProgress(0, `Uploading ${totalFiles} file${totalFiles > 1 ? 's' : ''}...`, true);
+                // Show processing state during upload with stage tracking
+                let currentStage = 0;
+                const stages = [
+                    `Validating ${totalFiles} file${totalFiles > 1 ? 's' : ''}...`,
+                    `Processing file${totalFiles > 1 ? 's' : ''}...`,
+                    `Generating PNG${totalFiles > 1 ? 's' : ''}...`,
+                    `Optimizing KML${totalFiles > 1 ? 's' : ''}...`,
+                    `Updating metadata...`,
+                    `Rebuilding static site...`
+                ];
+                
+                updateProgress(0, stages[currentStage], true);
+                
+                // Simulate stage progression (actual stages happen on server)
+                stageInterval = setInterval(() => {
+                    if (currentStage < stages.length - 1) {
+                        currentStage++;
+                        updateProgress(0, stages[currentStage], true);
+                    }
+                }, 2000); // Update every 2 seconds to show progression
                 
                 // Upload with progress
                 const response = await fetch('http://localhost:4000/upload', {
                     method: 'POST',
                     body: formData
                 });
+                
+                // Clear stage interval when upload completes
+                clearStageInterval();
                 
                 // Handle different response types gracefully
                 let result;
@@ -1095,6 +1133,8 @@
                 
                 // Show appropriate completion message based on results
                 let completionMessage = 'Processing completed!';
+                let hasErrors = false;
+                
                 if (result.processed === 0) {
                     if (result.duplicates > 0 && result.rejections > 0) {
                         completionMessage = `Processing completed - ${result.duplicates} duplicate(s), ${result.rejections} rejected`;
@@ -1104,8 +1144,45 @@
                         completionMessage = `Processing completed - ${result.rejections} file(s) rejected`;
                     }
                 } else {
-                    completionMessage = `Upload completed - ${result.processed} file(s) processed`;
+                    const parts = [];
+                    parts.push(`${result.processed} file(s) processed`);
+                    
+                    if (result.optimization) {
+                        if (result.optimization.success) {
+                            parts.push(`${result.optimization.processed || 0} optimized`);
+                        } else {
+                            parts.push('optimization failed');
+                            hasErrors = true;
+                        }
+                    }
+                    
+                    if (result.metadata) {
+                        if (result.metadata.success) {
+                            parts.push('metadata updated');
+                        } else {
+                            parts.push('metadata update failed');
+                            hasErrors = true;
+                        }
+                    }
+                    
+                    if (result.build) {
+                        if (result.build.success) {
+                            parts.push('static site rebuilt');
+                        } else {
+                            parts.push('static site build failed');
+                            hasErrors = true;
+                        }
+                    }
+                    
+                    completionMessage = `Upload completed - ${parts.join(', ')}`;
                 }
+                
+                // Add error count if any
+                if (result.errors && result.errors.length > 0) {
+                    hasErrors = true;
+                    completionMessage += ` (${result.errors.length} error(s))`;
+                }
+                
                 updateProgress(100, completionMessage);
                 
                 // Show results
@@ -1114,6 +1191,7 @@
                 }, 500);
                 
             } catch (error) {
+                clearStageInterval(); // Clear interval on error
                 console.error('Upload error:', error);
                 uploadStatus.textContent = 'Upload failed: ' + error.message;
                 uploadStatus.className = 'upload-status error';
@@ -1262,23 +1340,106 @@
                     });
                 }
                 
-                // Show errors if any
-                if (result.errors && result.errors.length > 0) {
-                    html += '<div class="result-item error">' +
-                        '<span>❌ Processing Errors (' + result.errors.length + ' files):</span>' +
-                    '</div>';
-                    
-                    result.errors.forEach(error => {
-                        html += '<div class="result-item error file-detail">' +
-                            '<div>' +
-                                '<span class="result-filename">' + error.filename + '</span>' +
-                                '<div class="result-details">' +
-                                    '<span class="status-badge error-badge">❌ Processing Error</span>' +
-                                    ' | Error: ' + error.error +
-                                '</div>' +
+                // Show optimization results
+                if (result.optimization) {
+                    if (result.optimization.success) {
+                        html += '<div class="result-item success">' +
+                            '<span>✅ KML Optimization:</span>' +
+                            '<div class="result-details">' +
+                                'Optimized ' + (result.optimization.processed || 0) + ' KML file(s)' +
                             '</div>' +
                         '</div>';
-                    });
+                    } else {
+                        html += '<div class="result-item error">' +
+                            '<span>❌ KML Optimization Failed:</span>' +
+                            '<div class="result-details">' +
+                                '<span class="status-badge error-badge">❌ Optimization Error</span>' +
+                                ' | Error: ' + (result.optimization.error || 'Unknown error') +
+                            '</div>' +
+                        '</div>';
+                    }
+                }
+                
+                // Show metadata refresh results
+                if (result.metadata) {
+                    if (result.metadata.success) {
+                        html += '<div class="result-item success">' +
+                            '<span>✅ Metadata Updated:</span>' +
+                            '<div class="result-details">' +
+                                'Master metadata updated successfully' +
+                            '</div>' +
+                        '</div>';
+                    } else {
+                        html += '<div class="result-item error">' +
+                            '<span>❌ Metadata Update Failed:</span>' +
+                            '<div class="result-details">' +
+                                '<span class="status-badge error-badge">❌ Metadata Error</span>' +
+                                ' | Error: ' + (result.metadata.error || 'Unknown error') +
+                            '</div>' +
+                        '</div>';
+                    }
+                }
+                
+                // Show static site build results
+                if (result.build) {
+                    if (result.build.success) {
+                        html += '<div class="result-item success">' +
+                            '<span>✅ Static Site Rebuilt:</span>' +
+                            '<div class="result-details">' +
+                                'Static site rebuilt successfully with ' + (result.build.processed || 0) + ' flights' +
+                            '</div>' +
+                        '</div>';
+                    } else {
+                        html += '<div class="result-item error">' +
+                            '<span>❌ Static Site Build Failed:</span>' +
+                            '<div class="result-details">' +
+                                '<span class="status-badge error-badge">❌ Build Error</span>' +
+                                ' | Error: ' + (result.build.error || 'Unknown error') +
+                            '</div>' +
+                        '</div>';
+                    }
+                }
+                
+                // Show errors if any
+                if (result.errors && result.errors.length > 0) {
+                    const fileErrors = result.errors.filter(e => e.filename);
+                    const stepErrors = result.errors.filter(e => e.step);
+                    
+                    if (fileErrors.length > 0) {
+                        html += '<div class="result-item error">' +
+                            '<span>❌ Processing Errors (' + fileErrors.length + ' files):</span>' +
+                        '</div>';
+                        
+                        fileErrors.forEach(error => {
+                            html += '<div class="result-item error file-detail">' +
+                                '<div>' +
+                                    '<span class="result-filename">' + error.filename + '</span>' +
+                                    '<div class="result-details">' +
+                                        '<span class="status-badge error-badge">❌ Processing Error</span>' +
+                                        ' | Error: ' + error.error +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                    }
+                    
+                    if (stepErrors.length > 0) {
+                        html += '<div class="result-item error">' +
+                            '<span>⚠️ Step Errors:</span>' +
+                        '</div>';
+                        
+                        stepErrors.forEach(error => {
+                            html += '<div class="result-item error file-detail">' +
+                                '<div>' +
+                                    '<span class="result-filename">' + (error.step || 'Unknown step') + '</span>' +
+                                    '<div class="result-details">' +
+                                        '<span class="status-badge error-badge">⚠️ ' + (error.status || 'WARNING') + '</span>' +
+                                        ' | Error: ' + error.error +
+                                    '</div>' +
+                                '</div>' +
+                            '</div>';
+                        });
+                    }
                 }
                 
                 // Only clear selected files if files were actually processed
@@ -1662,9 +1823,9 @@
             const button = document.getElementById('refreshBtn') || document.querySelector('button[onclick="refreshMetadata()"]');
             try {
                 if (button) setButtonLoading(button);
-                showActionStatus('🔄 Full metadata refresh (slow) - scanning all files...');
+                showActionStatus('🔄 Regenerating metadata from all KML files (slow)...');
                 
-                const response = await fetch('http://localhost:4000/refresh-metadata', { method: 'POST' });
+                const response = await fetch('http://localhost:4000/regenerate-master-metadata', { method: 'POST' });
                 const result = await response.json();
                 
                 if (result.success) {
