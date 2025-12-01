@@ -403,7 +403,7 @@ function pointInTMNP(lat, lon, tmnpPolygons) {
 // Load TMNP coordinates from KML file
 function loadTMNPCoordinates() {
   try {
-    const kmlPath = path.join(__dirname, '..', 'public', 'tmnp.kml');
+    const kmlPath = path.join(__dirname, '..', '..', 'static-site', 'tmnp.kml');
     const xmlData = fs.readFileSync(kmlPath, 'utf8');
     const parser = new XMLParser({ ignoreAttributes: false });
     const xml = parser.parse(xmlData);
@@ -510,16 +510,18 @@ async function checkForViolations(filePath) {
     function extractCoords(obj) {
       if (!obj || typeof obj !== 'object') return;
       
-      // Check for gx:Track coordinates (ADS-B Exchange format)
-      if (obj['gx:Track'] && obj['gx:Track'].coord) {
-        const coordElements = Array.isArray(obj['gx:Track'].coord) ? obj['gx:Track'].coord : [obj['gx:Track'].coord];
+      // Check for gx:coord elements (ADS-B Exchange format inside gx:Track)
+      if (obj['gx:coord']) {
+        const coordElements = Array.isArray(obj['gx:coord']) ? obj['gx:coord'] : [obj['gx:coord']];
         for (const coord of coordElements) {
-          const parts = coord.split(' ');
-          if (parts.length >= 2) {
-            const lon = parseFloat(parts[0]);
-            const lat = parseFloat(parts[1]);
-            if (!isNaN(lat) && !isNaN(lon)) {
-              coordinates.push({ lat, lon });
+          if (typeof coord === 'string') {
+            const parts = coord.trim().split(/\s+/);
+            if (parts.length >= 2) {
+              const lon = parseFloat(parts[0]);
+              const lat = parseFloat(parts[1]);
+              if (!isNaN(lat) && !isNaN(lon)) {
+                coordinates.push({ lat, lon });
+              }
             }
           }
         }
