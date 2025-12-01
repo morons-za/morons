@@ -477,16 +477,18 @@ async function checkForViolations(filePath) {
     function extractCoords(obj) {
       if (!obj || typeof obj !== 'object') return;
       
-      // Check for gx:Track coordinates (ADS-B Exchange format)
-      if (obj['gx:Track'] && obj['gx:Track'].coord) {
-        const coordElements = Array.isArray(obj['gx:Track'].coord) ? obj['gx:Track'].coord : [obj['gx:Track'].coord];
+      // Check for gx:coord elements (ADS-B Exchange format)
+      if (obj['gx:coord']) {
+        const coordElements = Array.isArray(obj['gx:coord']) ? obj['gx:coord'] : [obj['gx:coord']];
         for (const coord of coordElements) {
-          const parts = coord.split(' ');
-          if (parts.length >= 2) {
-            const lon = parseFloat(parts[0]);
-            const lat = parseFloat(parts[1]);
-            if (!isNaN(lat) && !isNaN(lon)) {
-              coordinates.push({ lat, lon });
+          if (typeof coord === 'string') {
+            const parts = coord.trim().split(/\s+/);
+            if (parts.length >= 2) {
+              const lon = parseFloat(parts[0]);
+              const lat = parseFloat(parts[1]);
+              if (!isNaN(lat) && !isNaN(lon)) {
+                coordinates.push({ lat, lon });
+              }
             }
           }
         }
@@ -926,12 +928,41 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
   const pngPromises = results.map(async (result) => {
     if (result.status === 'success' && result.filename) {
       try {
-        const pngSuccess = await generateFlightMap(result.filename);
+        // SmartKMLManager renamed files after they were saved, so we need to use the renamed filename
+        // The renamed filename follows the pattern: YYYY-MM-DD-REG-HASH.kml
+        // We need to find it in the uploads directory or construct it from metadata
+        
+        let filenameToUse = result.filename;
+        
+        // Check if file exists with this name
+        const filePath = path.join(__dirname, '..', 'uploads', filenameToUse);
+        if (!fs.existsSync(filePath)) {
+          // File was renamed, try to find it by checking uploads directory
+          // Look for files matching the pattern with the hash
+          try {
+            const files = fs.readdirSync(path.join(__dirname, '..', 'uploads'));
+            // Result filename might be just the hash (e.g., "3ce6b9a6.kml")
+            const hashMatch = result.filename.match(/^([a-f0-9]{8})\.kml$/);
+            if (hashMatch) {
+              const hash = hashMatch[1];
+              // Find the file with this hash in the uploads directory
+              const matchingFile = files.find(f => f.includes(hash) && f.endsWith('.kml'));
+              if (matchingFile) {
+                filenameToUse = matchingFile;
+                console.log(`📝 Found renamed file: ${result.filename} → ${filenameToUse}`);
+              }
+            }
+          } catch (searchError) {
+            console.log(`⚠️ Could not search for renamed file: ${searchError.message}`);
+          }
+        }
+        
+        const pngSuccess = await generateFlightMap(filenameToUse);
         result.pngGenerated = pngSuccess;
         if (pngSuccess) {
-          console.log(`✅ PNG generated for: ${result.filename}`);
+          console.log(`✅ PNG generated for: ${filenameToUse}`);
         } else {
-          console.log(`⚠️ PNG generation failed for: ${result.filename}`);
+          console.log(`⚠️ PNG generation failed for: ${filenameToUse}`);
         }
       } catch (error) {
         console.log(`❌ PNG generation error for ${result.filename}: ${error.message}`);
@@ -954,12 +985,144 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
   const duplicates = results.filter(r => r.status === 'DUPLICATE_SKIPPED').length;
   const rejections = results.filter(r => r.status === 'NO_VIOLATION_REJECTED').length;
   
+  // Automatically optimize KML files for successfully processed files
+  let optimizationResult = null;
+  if (successfullyProcessed > 0) {
+    try {
+      console.log(`🔧 Automatically optimizing KML files for ${successfullyProcessed} processed file(s)...`);
+      const optResult = await optimizeKMLFiles();
+      
+      // Parse stdout to extract processed count
+      const processedMatch = optResult.stdout ? optResult.stdout.match(/Successfully processed:\s*(\d+)/) : null;
+      const processed = processedMatch ? parseInt(processedMatch[1]) : 0;
+      
+      optimizationResult = {
+        success: true,
+        processed: processed,
+        message: `KML optimization completed: ${processed} files optimized`
+      };
+      
+      console.log(`✅ KML optimization completed: ${processed} files optimized`);
+    } catch (error) {
+      console.log(`⚠️ KML optimization failed: ${error.message}`);
+      optimizationResult = {
+        success: false,
+        error: error.message
+      };
+      errors.push({
+        step: 'KML_OPTIMIZATION',
+        error: error.message,
+        status: 'WARNING'
+      });
+    }
+  }
+  
+  // Automatically update master metadata incrementally (only new files)
+  let metadataResult = null;
+  if (successfullyProcessed > 0) {
+    try {
+      // Get the renamed filenames from results (after SmartKMLManager processing)
+      // We need to find the final renamed filenames from the uploads directory
+      const newFilenames = [];
+      
+      for (const result of results) {
+        if (result.status === 'success' && result.filename) {
+          // Try to find the renamed file in uploads directory
+          let filenameToUse = result.filename;
+          const filePath = path.join(__dirname, '..', 'uploads', filenameToUse);
+          
+          if (!fs.existsSync(filePath)) {
+            // File was renamed, try to find it by hash
+            try {
+              const files = fs.readdirSync(path.join(__dirname, '..', 'uploads'));
+              const hashMatch = result.filename.match(/^([a-f0-9]{8})\.kml$/);
+              if (hashMatch) {
+                const hash = hashMatch[1];
+                const matchingFile = files.find(f => f.includes(hash) && f.endsWith('.kml'));
+                if (matchingFile) {
+                  filenameToUse = matchingFile;
+                }
+              } else {
+                // Try to construct the expected renamed filename from metadata
+                // Format: YYYY-MM-DD-REG-HASH.kml
+                if (result.date && result.registration) {
+                  const expectedPattern = new RegExp(`^${result.date}-${result.registration.replace(/-/g, '')}-[a-f0-9]{8}\\.kml$`);
+                  const matchingFile = files.find(f => expectedPattern.test(f));
+                  if (matchingFile) {
+                    filenameToUse = matchingFile;
+                  }
+                }
+              }
+            } catch (searchError) {
+              console.log(`⚠️ Could not find renamed file for ${result.filename}: ${searchError.message}`);
+            }
+          }
+          
+          // Verify file exists before adding to list
+          const finalPath = path.join(__dirname, '..', 'uploads', filenameToUse);
+          if (fs.existsSync(finalPath)) {
+            newFilenames.push(filenameToUse);
+          }
+        }
+      }
+      
+      if (newFilenames.length > 0) {
+        console.log(`🔄 Automatically updating master metadata incrementally for ${newFilenames.length} file(s)...`);
+        metadataResult = await updateMasterMetadataIncremental(newFilenames);
+        console.log('✅ Master metadata updated incrementally');
+      } else {
+        console.log('⚠️ No renamed files found to update metadata');
+        metadataResult = {
+          success: false,
+          error: 'No renamed files found to update'
+        };
+      }
+    } catch (error) {
+      console.log(`⚠️ Incremental metadata update failed: ${error.message}`);
+      metadataResult = {
+        success: false,
+        error: error.message
+      };
+      errors.push({
+        step: 'METADATA_REFRESH',
+        error: error.message,
+        status: 'WARNING'
+      });
+    }
+  }
+  
+  // Automatically rebuild static site after metadata update
+  let buildResult = null;
+  if (metadataResult && metadataResult.success) {
+    try {
+      console.log('🏗️ Automatically rebuilding static site with updated metadata...');
+      buildResult = await buildStaticSite();
+      if (buildResult.success) {
+        console.log(`✅ Static site rebuilt successfully with ${buildResult.processed || 0} flights`);
+      }
+    } catch (error) {
+      console.log(`⚠️ Static site build failed: ${error.message}`);
+      buildResult = {
+        success: false,
+        error: error.message
+      };
+      errors.push({
+        step: 'STATIC_SITE_BUILD',
+        error: error.message,
+        status: 'WARNING'
+      });
+    }
+  }
+  
   // Log what we're sending to frontend
   console.log('📤 Sending response to frontend:', {
     processed: successfullyProcessed,
     duplicates: duplicates,
     rejections: rejections,
-    smartManager: smartManagerResults
+    smartManager: smartManagerResults,
+    optimization: optimizationResult,
+    metadata: metadataResult,
+    build: buildResult
   });
   
   // Return comprehensive results
@@ -972,7 +1135,10 @@ app.post('/upload', upload.array('kml', 50), async (req, res) => {
     errors: errors.length,
     results: results,
     errors: errors,
-    smartManager: smartManagerResults || null
+    smartManager: smartManagerResults || null,
+    optimization: optimizationResult || null,
+    metadata: metadataResult || null,
+    build: buildResult || null
   });
 });
 
@@ -1384,6 +1550,152 @@ function optimizeKMLFiles(specificFile = null) {
     
     python.on('error', (error) => {
       console.log(`❌ Failed to start Python script: ${error.message}`);
+      reject(error);
+    });
+  });
+}
+
+// Helper function to regenerate master metadata (full scan)
+function generateMasterMetadata() {
+  return new Promise((resolve, reject) => {
+    console.log('🔄 Starting master metadata generation...');
+    
+    const scriptPath = path.join(__dirname, 'generate-master-metadata-main.cjs');
+    
+    // Check if script exists
+    if (!fs.existsSync(scriptPath)) {
+      const error = 'Master metadata generation script not found';
+      console.log(`❌ ${error}`);
+      return reject(new Error(error));
+    }
+    
+    const child = spawn('node', [scriptPath], {
+      cwd: __dirname,
+      stdio: ['inherit', 'pipe', 'pipe']
+    });
+    
+    let stdout = '';
+    let stderr = '';
+    
+    child.stdout.on('data', (data) => {
+      const text = data.toString();
+      stdout += text;
+      console.log('📊 Master metadata:', text.trim());
+    });
+    
+    child.stderr.on('data', (data) => {
+      const text = data.toString();
+      stderr += text;
+      console.log('⚠️ Master metadata error:', text.trim());
+    });
+    
+    child.on('close', (code) => {
+      if (code === 0) {
+        // Try to read the generated metadata to get flight count
+        const masterFile = path.join(__dirname, 'master-metadata.json');
+        let flightCount = 0;
+        if (fs.existsSync(masterFile)) {
+          try {
+            const data = JSON.parse(fs.readFileSync(masterFile, 'utf8'));
+            flightCount = data.flights ? data.flights.length : 0;
+          } catch (e) {
+            console.log('Could not read flight count:', e.message);
+          }
+        }
+        
+        console.log('✅ Master metadata regenerated successfully');
+        resolve({
+          success: true,
+          flightCount: flightCount,
+          message: 'Master metadata regenerated successfully'
+        });
+      } else {
+        console.log(`❌ Metadata generation failed with exit code ${code}`);
+        reject(new Error(`Metadata generation failed with code ${code}: ${stderr}`));
+      }
+    });
+    
+    child.on('error', (error) => {
+      console.log(`❌ Failed to start metadata generation script: ${error.message}`);
+      reject(error);
+    });
+  });
+}
+
+// Helper function to incrementally update master metadata (only new files)
+async function updateMasterMetadataIncremental(newFilenames) {
+  try {
+    const { updateMasterMetadataIncremental: updateFn } = require('./generate-master-metadata-main.cjs');
+    const result = await updateFn(newFilenames);
+    
+    return {
+      success: true,
+      flightCount: result.flights ? result.flights.length : 0,
+      message: `Master metadata updated incrementally: ${newFilenames.length} file(s) processed`
+    };
+  } catch (error) {
+    console.log(`❌ Incremental metadata update error: ${error.message}`);
+    throw error;
+  }
+}
+
+// Helper function to build static site
+function buildStaticSite() {
+  return new Promise((resolve, reject) => {
+    console.log('🏗️ Starting static site build...');
+    
+    const buildScript = path.join(__dirname, 'build-static-site.cjs');
+    
+    // Check if script exists
+    if (!fs.existsSync(buildScript)) {
+      const error = 'Static site build script not found';
+      console.log(`❌ ${error}`);
+      return reject(new Error(error));
+    }
+    
+    const nodeProcess = spawn('node', [buildScript], {
+      cwd: path.join(__dirname, '..', '..'), // Run from project root
+      stdio: ['pipe', 'pipe', 'pipe']
+    });
+    
+    let stdout = '';
+    let stderr = '';
+    
+    nodeProcess.stdout.on('data', (data) => {
+      const output = data.toString();
+      stdout += output;
+      console.log('🏗️ Build:', output.trim());
+    });
+    
+    nodeProcess.stderr.on('data', (data) => {
+      const output = data.toString();
+      stderr += output;
+      console.log('⚠️ Build error:', output.trim());
+    });
+    
+    nodeProcess.on('close', (code) => {
+      if (code === 0) {
+        // Parse the output to extract processed count
+        const processedMatch = stdout.match(/📊 Loaded (\d+) flights/);
+        const generatedMatch = stdout.match(/Copied (\d+) optimized KML files/);
+        const processed = processedMatch ? parseInt(processedMatch[1]) : 0;
+        const generated = generatedMatch ? parseInt(generatedMatch[1]) : 0;
+        
+        console.log(`✅ Static site build completed successfully. Processed: ${processed} flights`);
+        resolve({
+          success: true,
+          processed: processed,
+          generated: generated,
+          message: `Static site built successfully with ${processed} flights`
+        });
+      } else {
+        console.log(`❌ Static site build failed with exit code ${code}`);
+        reject(new Error(`Static site build failed with code ${code}: ${stderr}`));
+      }
+    });
+    
+    nodeProcess.on('error', (error) => {
+      console.log(`❌ Failed to start static site build script: ${error.message}`);
       reject(error);
     });
   });
