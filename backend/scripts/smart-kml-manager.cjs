@@ -232,10 +232,10 @@ class SmartKMLManager {
     
     // Check if files need renaming (improperly named files)
     const improperlyNamedFiles = allFiles.filter(f => {
-      // Check if filename matches expected format
-      const properPattern = /^\d{4}-\d{2}-\d{2}-[A-Z]{2}-[A-Z0-9]{3}-[a-f0-9]{8}\.kml$/;
-      const specialPattern = /^\d{4}-\d{2}-\d{2}-(UNKNOWN|ZS-[A-Z0-9]{3}-[A-Z0-9]+)\.kml$/;
-      return !properPattern.test(f) && !specialPattern.test(f);
+      // Check if filename matches expected format: YYYY-MM-DD-REG-HASH.kml
+      // HASH must be exactly 8 hex characters
+      const properPattern = /^\d{4}-\d{2}-\d{2}-[A-Z]{2}-[A-Z0-9]{3}-[a-f0-9]{8}\.kml$/i;
+      return !properPattern.test(f);
     });
     
     // Use improperly named files as the "new" files to process
