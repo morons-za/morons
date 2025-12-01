@@ -133,6 +133,16 @@ def optimise_kml_files(input_dir, output_dir, max_files=None):
     for i, kml_file in enumerate(files_to_iterate, 1):
         # Progress indicator
         progress = i / len(files_to_iterate) * 100
+        
+        # Check if optimized version already exists - skip if it does
+        output_filename = kml_file.stem + "-opt.kml"
+        output_file = output_path / output_filename
+        
+        if output_file.exists():
+            # Skip if optimized version already exists
+            print(f"[{i:3d}/{len(files_to_iterate)}] ({progress:5.1f}%) Skipping {kml_file.name} (already optimized) ⏭️")
+            continue
+        
         print(f"[{i:3d}/{len(files_to_iterate)}] ({progress:5.1f}%) Processing {kml_file.name}...", end="")
         
         try:
@@ -140,7 +150,6 @@ def optimise_kml_files(input_dir, output_dir, max_files=None):
             
             if optimised_content:
                 # Create output filename with -opt suffix
-                output_filename = kml_file.stem + "-opt.kml"
                 output_file = output_path / output_filename
                 
                 with open(output_file, 'w', encoding='utf-8') as f:
@@ -165,8 +174,16 @@ def optimise_kml_files(input_dir, output_dir, max_files=None):
     print(f"\n" + "=" * 60)
     print(f"OPTIMISATION COMPLETE!")
     print(f"✓ Successfully processed: {processed}/{len(files_to_iterate)} files")
-    print(f"📊 Total size reduction: {total_original_size:.1f} MB -> {total_optimised_size:.1f} MB")
-    print(f"💾 Space saved: {total_original_size - total_optimised_size:.1f} MB ({(1-total_optimised_size/total_original_size)*100:.1f}% reduction)")
+    
+    if processed > 0 and total_original_size > 0:
+        print(f"📊 Total size reduction: {total_original_size:.1f} MB -> {total_optimised_size:.1f} MB")
+        reduction_pct = (1 - total_optimised_size / total_original_size) * 100
+        print(f"💾 Space saved: {total_original_size - total_optimised_size:.1f} MB ({reduction_pct:.1f}% reduction)")
+    elif processed == 0:
+        print(f"📊 All files already optimized - no new processing needed")
+    else:
+        print(f"📊 Total size: {total_optimised_size:.1f} MB")
+    
     print(f"📁 Optimised files location: {output_path}")
     return processed
 

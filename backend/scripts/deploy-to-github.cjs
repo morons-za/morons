@@ -116,7 +116,10 @@ class GitDeployer {
         const filePaths = [
             'backend/uploads/',
             'backend/flight-maps/',
-            'static-site/kml-optimised/'
+            'static-site/kml-optimised/',
+            'static-site/index.html',
+            'static-site/js/app.js',
+            'static-site/master-metadata.json'
         ];
         
         const newFiles = [];

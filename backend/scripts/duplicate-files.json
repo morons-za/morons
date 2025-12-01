@@ -1,35 +1,113 @@
 {
   "rejected": [
     {
-      "file": "3ca0359b.kml",
-      "duplicateOf": "2025-10-12-ZS-HMB-3ca0359b.kml",
+      "file": "3d237409.kml",
+      "duplicateOf": "2025-11-17-ZS-HIE-3d237409.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-19T07:24:13.409Z"
+      "timestamp": "2025-12-01T14:32:19.071Z"
     },
     {
-      "file": "3ca3615c.kml",
-      "duplicateOf": "2025-10-13-ZS-HBO-3ca3615c.kml",
+      "file": "3d2e29a4.kml",
+      "duplicateOf": "2025-11-20-ZT-RNW-3d2e29a4.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-19T07:24:13.409Z"
+      "timestamp": "2025-12-01T14:32:19.071Z"
     },
     {
-      "file": "3ca44540.kml",
-      "duplicateOf": "2025-10-13-ZT-HOT-3ca44540.kml",
+      "file": "3d31ba0d.kml",
+      "duplicateOf": "2025-11-21-ZT-RNW-3d31ba0d.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-19T07:24:13.409Z"
+      "timestamp": "2025-12-01T14:32:19.071Z"
     },
     {
-      "file": "3ca445d8.kml",
-      "duplicateOf": "2025-10-13-ZT-RNW-3ca445d8.kml",
+      "file": "3d35ad45.kml",
+      "duplicateOf": "2025-11-22-ZS-HIE-3d35ad45.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-19T07:24:13.409Z"
+      "timestamp": "2025-12-01T14:32:19.071Z"
     },
     {
-      "file": "3ca710fd.kml",
-      "duplicateOf": "2025-10-14-ZT-HOT-3ca710fd.kml",
+      "file": "3d3c5cf6.kml",
+      "duplicateOf": "2025-11-24-ZS-HIE-3d3c5cf6.kml",
       "action": "DELETED",
-      "timestamp": "2025-10-19T07:24:13.409Z"
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4049ec.kml",
+      "duplicateOf": "2025-11-25-ZT-RNW-3d4049ec.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d40c8fa.kml",
+      "duplicateOf": "2025-11-25-ZS-HIE-3d40c8fa.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4371b9.kml",
+      "duplicateOf": "2025-11-26-ZT-HOT-3d4371b9.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4396cc.kml",
+      "duplicateOf": "2025-11-26-ZS-HIE-3d4396cc.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d46fb8f.kml",
+      "duplicateOf": "2025-11-27-ZT-HOT-3d46fb8f.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d49b2c7.kml",
+      "duplicateOf": "2025-11-28-ZT-RNW-3d49b2c7.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d49cbe9.kml",
+      "duplicateOf": "2025-11-28-ZS-HBO-3d49cbe9.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4cf0b0.kml",
+      "duplicateOf": "2025-11-29-ZT-HOT-3d4cf0b0.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4d08c4.kml",
+      "duplicateOf": "2025-11-29-ZS-HIM-3d4d08c4.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4d7993.kml",
+      "duplicateOf": "2025-11-29-ZS-HIM-3d4d7993.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4dcd27.kml",
+      "duplicateOf": "2025-11-29-ZS-HIM-3d4dcd27.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d4df840.kml",
+      "duplicateOf": "2025-11-29-ZS-HIM-3d4df840.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
+    },
+    {
+      "file": "3d502d34.kml",
+      "duplicateOf": "2025-11-30-ZS-HIM-3d502d34.kml",
+      "action": "DELETED",
+      "timestamp": "2025-12-01T14:32:19.071Z"
     }
   ],
-  "summary": "5 duplicate files rejected and deleted"
+  "summary": "18 duplicate files rejected and deleted"
 }
