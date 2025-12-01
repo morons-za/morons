@@ -28,13 +28,8 @@ class SmartKMLManager {
   generateContentHash(filePath) {
     try {
       const content = fs.readFileSync(filePath, 'utf8');
-      // Remove timestamps and dynamic content that might vary between identical flights
-      const normalizedContent = content
-        .replace(/<when>[^<]*<\/when>/g, '') // Remove timestamp elements
-        .replace(/\s+/g, ' ') // Normalize whitespace
-        .trim();
-      
-      return crypto.createHash('md5').update(normalizedContent).digest('hex');
+      // Use raw content hash - timestamps are important for distinguishing different flights
+      return crypto.createHash('md5').update(content).digest('hex');
     } catch (error) {
       console.log(`❌ Error generating hash for ${path.basename(filePath)}: ${error.message}`);
       return null;

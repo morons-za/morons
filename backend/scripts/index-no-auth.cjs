@@ -589,12 +589,8 @@ function loadExistingFileHashes() {
       const existingFilePath = path.join(uploadsDir, flight.filename);
       if (fs.existsSync(existingFilePath)) {
         const existingContent = fs.readFileSync(existingFilePath, 'utf8');
-        // Normalize content (remove timestamps and dynamic content) to match SmartKMLManager
-        const normalizedContent = existingContent
-          .replace(/<when>[^<]*<\/when>/g, '') // Remove timestamp elements
-          .replace(/\s+/g, ' ') // Normalize whitespace
-          .trim();
-        const existingHash = require('crypto').createHash('md5').update(normalizedContent).digest('hex');
+        // Use raw content hash - timestamps are important for distinguishing different flights
+        const existingHash = require('crypto').createHash('md5').update(existingContent).digest('hex');
         existingFileHashes.set(existingHash, flight.filename);
       }
     }
@@ -635,12 +631,8 @@ function isDuplicateFlight(kmlInfo, filePath) {
     // Check 2: Content hash (OPTIMIZED - uses pre-loaded hashes)
     try {
       const fileContent = fs.readFileSync(filePath, 'utf8');
-      // Normalize content (remove timestamps and dynamic content) to match SmartKMLManager
-      const normalizedContent = fileContent
-        .replace(/<when>[^<]*<\/when>/g, '') // Remove timestamp elements
-        .replace(/\s+/g, ' ') // Normalize whitespace
-        .trim();
-      const contentHash = require('crypto').createHash('md5').update(normalizedContent).digest('hex');
+      // Use raw content hash - timestamps are important for distinguishing different flights
+      const contentHash = require('crypto').createHash('md5').update(fileContent).digest('hex');
       
       // Use pre-loaded hashes instead of reading all files again
       const existingFileHashes = loadExistingFileHashes();
