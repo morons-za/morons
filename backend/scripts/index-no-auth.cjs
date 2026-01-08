@@ -1849,6 +1849,10 @@ app.get('/validate-files', async (req, res) => {
     // Check which original files have optimized versions
     const missingOptimized = [];
     const missingPNG = [];
+    const orphanedOptimized = [];
+    
+    // Create a set of original file basenames for fast lookup
+    const originalBaseNames = new Set(uploadFiles.map(f => f.replace('.kml', '')));
     
     uploadFiles.forEach(file => {
       // Check for optimized version (original.kml → original-opt.kml)
@@ -1862,6 +1866,14 @@ app.get('/validate-files', async (req, res) => {
       const expectedPngFile = `${baseName}.png`;
       if (!pngFiles.includes(expectedPngFile)) {
         missingPNG.push(file);
+      }
+    });
+    
+    // Find orphaned optimized files (optimized files without corresponding originals)
+    optimizedFiles.forEach(optFile => {
+      const baseName = optFile.replace('-opt.kml', '');
+      if (!originalBaseNames.has(baseName)) {
+        orphanedOptimized.push(optFile);
       }
     });
     
@@ -1888,11 +1900,13 @@ app.get('/validate-files', async (req, res) => {
       counts: {
         uploads: uploadFiles.length,
         optimized: optimizedFiles.length,
-        pngImages: pngFiles.length
+        pngImages: pngFiles.length,
+        orphanedOptimized: orphanedOptimized.length
       },
       missing: {
         optimized: missingOptimized,
-        png: missingPNG
+        png: missingPNG,
+        orphanedOptimized: orphanedOptimized
       },
       paths: {
         uploadsDir: validateUploadsDir,

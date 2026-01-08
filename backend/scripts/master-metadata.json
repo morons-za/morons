@@ -1,8 +1,1196 @@
 {
-  "generated": "2025-12-01T15:10:50.604Z",
-  "totalFiles": 1017,
-  "validFlights": 1017,
+  "generated": "2026-01-08T13:43:45.633Z",
+  "totalFiles": 1169,
+  "validFlights": 1169,
   "flights": [
+    {
+      "filename": "2025-12-31-ZS-HGD-3db7e6df.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-31",
+      "time": "07:57",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 6.99
+    },
+    {
+      "filename": "2025-12-30-ZS-HGD-3db517e4.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-30",
+      "time": "12:48",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.78
+    },
+    {
+      "filename": "2025-12-29-ZS-HGD-3db11719.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-29",
+      "time": "07:00",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.84
+    },
+    {
+      "filename": "2025-12-28-ZS-HGD-3daf2d01.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-28",
+      "time": "16:01",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 1.22
+    },
+    {
+      "filename": "2025-12-28-ZS-HGD-3dadf516.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-28",
+      "time": "06:45",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.96
+    },
+    {
+      "filename": "2025-12-27-ZT-RNW-3daaff41.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-27",
+      "time": "08:52",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 1.94
+    },
+    {
+      "filename": "2025-12-27-ZS-RTG-3daaf0d6.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-27",
+      "time": "08:19",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 3.05
+    },
+    {
+      "filename": "2025-12-27-ZS-HGD-3daae465.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-27",
+      "time": "07:54",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 6.74
+    },
+    {
+      "filename": "2025-12-26-ZS-RTG-3da851a2.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-26",
+      "time": "12:16",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 1.51
+    },
+    {
+      "filename": "2025-12-26-ZS-HIM-3da848a1.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-26",
+      "time": "12:02",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 1.5
+    },
+    {
+      "filename": "2025-12-26-ZT-HOT-3da84143.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-26",
+      "time": "11:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 2.5
+    },
+    {
+      "filename": "2025-12-26-ZS-HIM-3da7e61e.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-26",
+      "time": "08:56",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.93
+    },
+    {
+      "filename": "2025-12-26-ZS-HGD-3da7dcb4.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-26",
+      "time": "08:34",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.66
+    },
+    {
+      "filename": "2025-12-26-ZS-HIM-3da7c2f9.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-26",
+      "time": "07:32",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 1.11
+    },
+    {
+      "filename": "2025-12-25-ZS-HMB-3da6597b.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-25",
+      "time": "16:09",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 1.45
+    },
+    {
+      "filename": "2025-12-25-ZS-HIM-3da60b4c.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-25",
+      "time": "13:07",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 1.29
+    },
+    {
+      "filename": "2025-12-25-ZS-HIM-3da5f18e.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-25",
+      "time": "12:08",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 1.34
+    },
+    {
+      "filename": "2025-12-25-ZS-HGD-3da5e913.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-25",
+      "time": "11:51",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.96
+    },
+    {
+      "filename": "2025-12-25-ZS-HMB-3da5b266.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-25",
+      "time": "09:34",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 2.33
+    },
+    {
+      "filename": "2025-12-25-ZS-HIM-3da598a6.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-25",
+      "time": "08:22",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 2.18
+    },
+    {
+      "filename": "2025-12-25-ZS-HGD-3da58641.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-25",
+      "time": "07:30",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.87
+    },
+    {
+      "filename": "2025-12-25-ZS-HIM-3da57a3b.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-25",
+      "time": "06:56",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.79
+    },
+    {
+      "filename": "2025-12-24-ZT-HOT-3da31891.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-24",
+      "time": "08:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 3.31
+    },
+    {
+      "filename": "2025-12-24-ZT-RNW-3da2fea4.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-24",
+      "time": "07:52",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 8.8
+    },
+    {
+      "filename": "2025-12-24-ZS-HMB-3da2e33a.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-24",
+      "time": "06:50",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 4.17
+    },
+    {
+      "filename": "2025-12-23-ZT-RNW-3da01208.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-23",
+      "time": "11:04",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 2.84
+    },
+    {
+      "filename": "2025-12-23-ZS-RTG-3d9fc3d5.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-23",
+      "time": "08:31",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 4.37
+    },
+    {
+      "filename": "2025-12-23-ZT-RNW-3d9fbf80.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-23",
+      "time": "08:22",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 2.7
+    },
+    {
+      "filename": "2025-12-23-ZS-HMB-3d9fb5e2.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-23",
+      "time": "08:01",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 4.89
+    },
+    {
+      "filename": "2025-12-23-ZT-HOT-3d9fad55.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-23",
+      "time": "07:44",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 6.08
+    },
+    {
+      "filename": "2025-12-23-ZT-RNW-3d9f7cd4.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-23",
+      "time": "06:00",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 2.41
+    },
+    {
+      "filename": "2025-12-22-ZS-HGD-3d9d3b84.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-22",
+      "time": "14:58",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 1.4
+    },
+    {
+      "filename": "2025-12-22-ZS-HMB-3d9ccb43.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-22",
+      "time": "12:29",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 1.25
+    },
+    {
+      "filename": "2025-12-22-ZS-HGD-3d9cb9c2.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-22",
+      "time": "12:03",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.56
+    },
+    {
+      "filename": "2025-12-22-ZT-RNW-3d9cb23c.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-22",
+      "time": "11:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 4.72
+    },
+    {
+      "filename": "2025-12-22-ZT-RMS-3d9c5925.kml",
+      "registration": "ZT-RMS",
+      "date": "2025-12-22",
+      "time": "09:18",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RMS.jpg",
+      "fileSizeMB": 0.92
+    },
+    {
+      "filename": "2025-12-22-ZS-HIE-3d9c527e.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-22",
+      "time": "08:55",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 3.11
+    },
+    {
+      "filename": "2025-12-22-ZS-RTG-3d9c2e09.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-22",
+      "time": "07:40",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 3.85
+    },
+    {
+      "filename": "2025-12-22-ZS-HMB-3d9c2bcc.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-22",
+      "time": "07:35",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 4.25
+    },
+    {
+      "filename": "2025-12-22-ZT-HOT-3d9c27c9.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-22",
+      "time": "07:26",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 4.13
+    },
+    {
+      "filename": "2025-12-22-ZS-HGD-3d9c1f72.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-22",
+      "time": "07:08",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.25
+    },
+    {
+      "filename": "2025-12-21-ZS-HIE-3d99a1e4.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-21",
+      "time": "13:17",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 2.85
+    },
+    {
+      "filename": "2025-12-21-ZS-HMB-3d999cf5.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-21",
+      "time": "13:09",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 1.42
+    },
+    {
+      "filename": "2025-12-21-ZS-HIE-3d996e9a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-21",
+      "time": "11:55",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.63
+    },
+    {
+      "filename": "2025-12-21-ZS-HIE-3d993de5.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-21",
+      "time": "10:26",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.25
+    },
+    {
+      "filename": "2025-12-21-ZT-HOT-3d99393a.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-21",
+      "time": "10:17",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 1.03
+    },
+    {
+      "filename": "2025-12-21-ZS-HIE-3d991b9a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-21",
+      "time": "09:16",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.24
+    },
+    {
+      "filename": "2025-12-21-ZT-RNW-3d9901a0.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-21",
+      "time": "08:18",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 5.02
+    },
+    {
+      "filename": "2025-12-21-ZT-RNW-3d98da54.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-21",
+      "time": "06:49",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 1.04
+    },
+    {
+      "filename": "2025-12-21-ZS-HGD-3d98d4c1.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-21",
+      "time": "06:36",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.94
+    },
+    {
+      "filename": "2025-12-20-ZS-HIM-3d95c934.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-20",
+      "time": "09:12",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.9
+    },
+    {
+      "filename": "2025-12-20-ZS-HMB-3d95c5a4.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-20",
+      "time": "09:05",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 3.43
+    },
+    {
+      "filename": "2025-12-20-ZS-RTG-3d95bd6b.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-20",
+      "time": "08:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 6.29
+    },
+    {
+      "filename": "2025-12-20-ZS-HGD-3d959dbb.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-20",
+      "time": "07:38",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.47
+    },
+    {
+      "filename": "2025-12-19-ZT-RNW-3d931c35.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-19",
+      "time": "14:37",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.78
+    },
+    {
+      "filename": "2025-12-19-ZS-HMB-3d921e55.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-19",
+      "time": "08:14",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 5.13
+    },
+    {
+      "filename": "2025-12-19-ZT-HOT-3d921a89.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-19",
+      "time": "08:08",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 1.52
+    },
+    {
+      "filename": "2025-12-19-ZS-HGD-3d9209fe.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-19",
+      "time": "07:32",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 1.46
+    },
+    {
+      "filename": "2025-12-19-ZS-RTG-3d91fe5c.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-19",
+      "time": "07:07",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 3.96
+    },
+    {
+      "filename": "2025-12-18-ZS-HIE-3d8ed650.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-18",
+      "time": "10:02",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.7
+    },
+    {
+      "filename": "2025-12-18-ZS-RTG-3d8ea897.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-18",
+      "time": "08:38",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 4.25
+    },
+    {
+      "filename": "2025-12-18-ZS-HGD-3d8ea8d9.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-18",
+      "time": "08:38",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 1.93
+    },
+    {
+      "filename": "2025-12-18-ZS-HIE-3d8ea493.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-18",
+      "time": "08:30",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.49
+    },
+    {
+      "filename": "2025-12-18-ZS-HIE-3d8e77fe.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-18",
+      "time": "07:01",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.42
+    },
+    {
+      "filename": "2025-12-18-ZT-RNW-3d8e76a1.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-18",
+      "time": "06:58",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 2.99
+    },
+    {
+      "filename": "2025-12-17-ZS-HIE-3d8b594b.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-17",
+      "time": "11:52",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.77
+    },
+    {
+      "filename": "2025-12-17-ZT-HOT-3d8af53e.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-17",
+      "time": "08:56",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 2.31
+    },
+    {
+      "filename": "2025-12-17-ZS-HIE-3d8adf2d.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-17",
+      "time": "08:14",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.84
+    },
+    {
+      "filename": "2025-12-17-ZS-HGD-3d8abb00.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-17",
+      "time": "07:05",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.48
+    },
+    {
+      "filename": "2025-12-16-ZS-HIE-3d88263c.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-16",
+      "time": "15:01",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.11
+    },
+    {
+      "filename": "2025-12-16-ZS-RTG-3d870d2f.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-16",
+      "time": "07:44",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 2.98
+    },
+    {
+      "filename": "2025-12-16-ZS-HGD-3d86f97f.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-16",
+      "time": "07:04",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.67
+    },
+    {
+      "filename": "2025-12-15-ZT-RNW-3d83c1d7.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-15",
+      "time": "10:17",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 3.38
+    },
+    {
+      "filename": "2025-12-15-ZS-HIE-3d838c82.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-15",
+      "time": "08:31",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 2.77
+    },
+    {
+      "filename": "2025-12-15-ZS-HGD-3d837323.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-15",
+      "time": "07:40",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.1
+    },
+    {
+      "filename": "2025-12-15-ZS-HIE-3d832aa6.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-15",
+      "time": "05:27",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.89
+    },
+    {
+      "filename": "2025-12-14-ZS-HIE-3d80db2b.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-14",
+      "time": "12:44",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.52
+    },
+    {
+      "filename": "2025-12-14-ZS-HIE-3d8087d2.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-14",
+      "time": "10:09",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 2.05
+    },
+    {
+      "filename": "2025-12-14-ZS-HIE-3d805b78.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-14",
+      "time": "08:35",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.52
+    },
+    {
+      "filename": "2025-12-14-ZS-HGD-3d8035d7.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-14",
+      "time": "06:56",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 7.75
+    },
+    {
+      "filename": "2025-12-14-ZT-RNW-3d803121.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-14",
+      "time": "06:45",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 4.28
+    },
+    {
+      "filename": "2025-12-13-ZT-RNW-3d7de244.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-13",
+      "time": "13:31",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 1.16
+    },
+    {
+      "filename": "2025-12-13-ZS-HIE-3d7da2b0.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-13",
+      "time": "11:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.99
+    },
+    {
+      "filename": "2025-12-13-ZS-HGD-3d7d568c.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-13",
+      "time": "09:25",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.76
+    },
+    {
+      "filename": "2025-12-13-ZT-HOT-3d7d1e95.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-13",
+      "time": "07:14",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 3.47
+    },
+    {
+      "filename": "2025-12-13-ZS-HIE-3d7d1ddc.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-13",
+      "time": "07:12",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.89
+    },
+    {
+      "filename": "2025-12-11-ZS-HIE-3d764b35.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-11",
+      "time": "12:30",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.73
+    },
+    {
+      "filename": "2025-12-11-ZS-HIE-3d75b866.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-11",
+      "time": "08:22",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.35
+    },
+    {
+      "filename": "2025-12-11-ZS-HGD-3d75b5f5.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-11",
+      "time": "08:16",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 3.39
+    },
+    {
+      "filename": "2025-12-11-ZS-RTG-3d75b1dc.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-11",
+      "time": "08:08",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 4.23
+    },
+    {
+      "filename": "2025-12-10-ZS-HIM-3d73308e.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-10",
+      "time": "15:05",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.94
+    },
+    {
+      "filename": "2025-12-10-ZT-HOT-3d72e327.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-10",
+      "time": "13:33",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 0.57
+    },
+    {
+      "filename": "2025-12-10-ZS-HIM-3d72bcdc.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-10",
+      "time": "12:45",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 3.18
+    },
+    {
+      "filename": "2025-12-10-ZT-HOT-3d7249ef.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-10",
+      "time": "09:45",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 0.79
+    },
+    {
+      "filename": "2025-12-10-ZS-HIM-3d72331e.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-10",
+      "time": "09:05",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 1.72
+    },
+    {
+      "filename": "2025-12-10-ZS-HGD-3d720180.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-10",
+      "time": "07:28",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.54
+    },
+    {
+      "filename": "2025-12-09-ZT-RNW-3d6e53c6.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-09",
+      "time": "07:28",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 1.54
+    },
+    {
+      "filename": "2025-12-08-ZS-HIE-3d6b709a.kml",
+      "registration": "ZS-HIE",
+      "date": "2025-12-08",
+      "time": "12:50",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 1.29
+    },
+    {
+      "filename": "2025-12-08-ZT-RNW-3d6b6c06.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-08",
+      "time": "12:43",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 2.76
+    },
+    {
+      "filename": "2025-12-08-ZS-HBO-3d6b54ee.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-12-08",
+      "time": "12:07",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 1.1
+    },
+    {
+      "filename": "2025-12-08-ZS-HMB-3d6ad44a.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-08",
+      "time": "08:10",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 2.39
+    },
+    {
+      "filename": "2025-12-08-ZS-RTG-3d6acaed.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-08",
+      "time": "07:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 1.13
+    },
+    {
+      "filename": "2025-12-08-ZS-HGD-3d6ab673.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-08",
+      "time": "07:06",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.03
+    },
+    {
+      "filename": "2025-12-08-ZT-RNW-3d6ab16d.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-08",
+      "time": "06:56",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 2.55
+    },
+    {
+      "filename": "2025-12-07-ZS-HMB-3d679610.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-07",
+      "time": "07:13",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 1.7
+    },
+    {
+      "filename": "2025-12-07-ZT-HOT-3d679625.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-07",
+      "time": "07:12",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 3.73
+    },
+    {
+      "filename": "2025-12-07-ZS-HGD-3d6794cf.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-07",
+      "time": "07:08",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.51
+    },
+    {
+      "filename": "2025-12-07-ZT-RNW-3d67926d.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-07",
+      "time": "07:02",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 4.34
+    },
+    {
+      "filename": "2025-12-06-ZS-HMB-3d652fff.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-06",
+      "time": "12:42",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 2.64
+    },
+    {
+      "filename": "2025-12-06-ZS-RTG-3d64b62e.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-06",
+      "time": "08:25",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 4.7
+    },
+    {
+      "filename": "2025-12-06-ZT-RNW-3d648e05.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-06",
+      "time": "06:43",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 7.92
+    },
+    {
+      "filename": "2025-12-05-ZT-RNW-3d61b4ec.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-05",
+      "time": "11:22",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 4.26
+    },
+    {
+      "filename": "2025-12-05-ZS-HMB-3d618e8d.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-05",
+      "time": "10:09",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 3.29
+    },
+    {
+      "filename": "2025-12-05-ZT-HOT-3d6148e2.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-05",
+      "time": "07:44",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 3.6
+    },
+    {
+      "filename": "2025-12-05-ZS-HGD-3d613b71.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-05",
+      "time": "07:13",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 1.57
+    },
+    {
+      "filename": "2025-12-05-ZS-HBO-3d61336a.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-12-05",
+      "time": "06:56",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 4.4
+    },
+    {
+      "filename": "2025-12-04-ZS-HGD-3d5e261e.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-04",
+      "time": "11:32",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.75
+    },
+    {
+      "filename": "2025-12-04-ZT-HOT-3d5dccda.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-04",
+      "time": "08:40",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 3.87
+    },
+    {
+      "filename": "2025-12-04-ZS-HBO-3d5dcb70.kml",
+      "registration": "ZS-HBO",
+      "date": "2025-12-04",
+      "time": "08:39",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 2.59
+    },
+    {
+      "filename": "2025-12-03-ZS-HMB-3d5a2daf.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-03",
+      "time": "08:51",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 1.73
+    },
+    {
+      "filename": "2025-12-03-ZT-HOT-3d5a2622.kml",
+      "registration": "ZT-HOT",
+      "date": "2025-12-03",
+      "time": "08:35",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 3.09
+    },
+    {
+      "filename": "2025-12-03-ZT-RNW-3d5a00ef.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-03",
+      "time": "07:17",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 4.04
+    },
+    {
+      "filename": "2025-12-03-ZS-HGD-3d59fbd7.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-03",
+      "time": "07:05",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.16
+    },
+    {
+      "filename": "2025-12-02-ZS-HMB-3d57a10c.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-02",
+      "time": "14:22",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 1.44
+    },
+    {
+      "filename": "2025-12-02-ZS-HIM-3d571036.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-02",
+      "time": "10:43",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.79
+    },
+    {
+      "filename": "2025-12-02-ZT-RNW-3d56f24c.kml",
+      "registration": "ZT-RNW",
+      "date": "2025-12-02",
+      "time": "09:47",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 5.71
+    },
+    {
+      "filename": "2025-12-02-ZS-HGD-3d56be80.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-02",
+      "time": "08:02",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.34
+    },
+    {
+      "filename": "2025-12-02-ZS-RTG-3d56a65f.kml",
+      "registration": "ZS-RTG",
+      "date": "2025-12-02",
+      "time": "07:08",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 3.17
+    },
+    {
+      "filename": "2025-12-02-ZS-HIM-3d569f8b.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-02",
+      "time": "06:51",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 1.2
+    },
+    {
+      "filename": "2025-12-01-ZS-HIM-3d53a28b.kml",
+      "registration": "ZS-HIM",
+      "date": "2025-12-01",
+      "time": "11:08",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.9
+    },
+    {
+      "filename": "2025-12-01-ZS-HMB-3d534d07.kml",
+      "registration": "ZS-HMB",
+      "date": "2025-12-01",
+      "time": "08:20",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 1.59
+    },
+    {
+      "filename": "2025-12-01-ZS-HGD-3d53252f.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-12-01",
+      "time": "06:58",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.64
+    },
     {
       "filename": "2025-11-30-ZS-HMB-3d502e7b.kml",
       "registration": "ZS-HMB",
@@ -20,6 +1208,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HIM.jpg",
       "fileSizeMB": 0.81
+    },
+    {
+      "filename": "2025-11-30-ZS-HGD-3d5018ce.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-30",
+      "time": "07:55",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 3.67
     },
     {
       "filename": "2025-11-29-ZS-HIM-3d4df840.kml",
@@ -58,6 +1255,15 @@
       "fileSizeMB": 2.2
     },
     {
+      "filename": "2025-11-29-ZS-HGD-3d4d3251.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-29",
+      "time": "09:23",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.18
+    },
+    {
       "filename": "2025-11-29-ZS-HIM-3d4d08c4.kml",
       "registration": "ZS-HIM",
       "date": "2025-11-29",
@@ -65,6 +1271,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HIM.jpg",
       "fileSizeMB": 0.96
+    },
+    {
+      "filename": "2025-11-29-ZS-HGD-3d4d0734.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-29",
+      "time": "07:46",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 1.34
     },
     {
       "filename": "2025-11-29-ZT-HOT-3d4cf0b0.kml",
@@ -130,6 +1345,15 @@
       "fileSizeMB": 0.09
     },
     {
+      "filename": "2025-11-27-ZS-HGD-3d470255.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-27",
+      "time": "08:06",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.12
+    },
+    {
       "filename": "2025-11-27-ZT-HOT-3d46fb8f.kml",
       "registration": "ZT-HOT",
       "date": "2025-11-27",
@@ -146,6 +1370,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-RTG.jpg",
       "fileSizeMB": 0.06
+    },
+    {
+      "filename": "2025-11-26-ZS-HGD-3d4373ef.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-26",
+      "time": "08:36",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 1.72
     },
     {
       "filename": "2025-11-26-ZS-HMB-3d439d56.kml",
@@ -220,6 +1453,15 @@
       "fileSizeMB": 3.23
     },
     {
+      "filename": "2025-11-25-ZS-HGD-3d3ff9fc.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-25",
+      "time": "07:56",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.66
+    },
+    {
       "filename": "2025-11-25-ZS-HBO-3d3ffcc8.kml",
       "registration": "ZS-HBO",
       "date": "2025-11-25",
@@ -245,6 +1487,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HIE.jpg",
       "fileSizeMB": 4.85
+    },
+    {
+      "filename": "2025-11-24-ZS-HGD-3d3c55fd.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-24",
+      "time": "07:20",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 6.93
     },
     {
       "filename": "2025-11-24-ZS-HBO-3d3c4811.kml",
@@ -299,6 +1550,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HMB.jpg",
       "fileSizeMB": 1.81
+    },
+    {
+      "filename": "2025-11-22-ZS-HGD-3d3581ea.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-22",
+      "time": "07:20",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 7.53
     },
     {
       "filename": "2025-11-21-ZS-HMB-3d31dc89.kml",
@@ -454,6 +1714,15 @@
       "fileSizeMB": 7.68
     },
     {
+      "filename": "2025-11-17-ZS-HGD-3d235a0a.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-17",
+      "time": "08:51",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 6.56
+    },
+    {
       "filename": "2025-11-17-ZT-RNW-73da3924.kml",
       "registration": "ZT-RNW",
       "date": "2025-11-17",
@@ -562,6 +1831,15 @@
       "fileSizeMB": 11.84
     },
     {
+      "filename": "2025-11-14-ZS-HGD-3d1940f3.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-14",
+      "time": "08:37",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 3.64
+    },
+    {
       "filename": "2025-11-14-ZS-HBO-3d19181a.kml",
       "registration": "ZS-HBO",
       "date": "2025-11-14",
@@ -580,6 +1858,15 @@
       "fileSizeMB": 4.82
     },
     {
+      "filename": "2025-11-13-ZS-HGD-3d152db2.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-13",
+      "time": "07:55",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 3.52
+    },
+    {
       "filename": "2025-11-13-ZT-RNW-3d151c60.kml",
       "registration": "ZT-RNW",
       "date": "2025-11-13",
@@ -587,6 +1874,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZT-RNW.jpg",
       "fileSizeMB": 5.39
+    },
+    {
+      "filename": "2025-11-12-ZS-HGD-3d116ebf.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-12",
+      "time": "08:23",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.7
     },
     {
       "filename": "2025-11-12-ZS-HBO-3d116fd3.kml",
@@ -605,6 +1901,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HIE.jpg",
       "fileSizeMB": 2.09
+    },
+    {
+      "filename": "2025-11-11-ZS-HGD-3d0e45ca.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-11",
+      "time": "11:06",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 5.91
     },
     {
       "filename": "2025-11-11-ZT-HOT-3d0e33c3.kml",
@@ -641,6 +1946,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HIE.jpg",
       "fileSizeMB": 2.82
+    },
+    {
+      "filename": "2025-11-10-ZS-HGD-3d0ada67.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-10",
+      "time": "11:34",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.69
     },
     {
       "filename": "2025-11-10-ZT-HOT-3d0ad7ad.kml",
@@ -695,6 +2009,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HIE.jpg",
       "fileSizeMB": 1.33
+    },
+    {
+      "filename": "2025-11-09-ZS-HGD-3d0745d7.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-09",
+      "time": "08:02",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 8.18
     },
     {
       "filename": "2025-11-09-ZT-HOT-3d073fd9.kml",
@@ -796,6 +2119,15 @@
       "fileSizeMB": 1.48
     },
     {
+      "filename": "2025-11-07-ZS-HGD-3d005b6a.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-07",
+      "time": "07:38",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 2.34
+    },
+    {
       "filename": "2025-11-07-ZS-HMB-3d0059e7.kml",
       "registration": "ZS-HMB",
       "date": "2025-11-07",
@@ -859,6 +2191,15 @@
       "fileSizeMB": 1.99
     },
     {
+      "filename": "2025-11-04-ZS-HGD-3cf4c449.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-04",
+      "time": "08:43",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 4.19
+    },
+    {
       "filename": "2025-11-03-ZS-HMB-3cf13bd0.kml",
       "registration": "ZS-HMB",
       "date": "2025-11-03",
@@ -875,6 +2216,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HBO.jpg",
       "fileSizeMB": 3.3
+    },
+    {
+      "filename": "2025-11-03-ZS-HGD-3cf0f6d4.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-03",
+      "time": "07:44",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 3.48
     },
     {
       "filename": "2025-11-03-ZT-HOT-3cf0ed05.kml",
@@ -949,6 +2299,15 @@
       "fileSizeMB": 5.53
     },
     {
+      "filename": "2025-11-02-ZS-HGD-3ced6923.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-02",
+      "time": "07:37",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 6.03
+    },
+    {
       "filename": "2025-11-02-ZT-HOT-3ced7c47.kml",
       "registration": "ZT-HOT",
       "date": "2025-11-02",
@@ -965,6 +2324,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HMB.jpg",
       "fileSizeMB": 1.75
+    },
+    {
+      "filename": "2025-11-01-ZS-HGD-3cea3ec8.kml",
+      "registration": "ZS-HGD",
+      "date": "2025-11-01",
+      "time": "07:28",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HGD.jpg",
+      "fileSizeMB": 8.94
     },
     {
       "filename": "2025-11-01-ZT-RNW-3cea3c4f.kml",

@@ -78,6 +78,7 @@ function initializeApp() {
     initializeMap();
     populateRegistrationDropdown();
     populateOwnerDropdown();
+    setupEventListeners(); // Set up filter event listeners (registration, owner, date filters)
     renderTable();
 }
 
@@ -350,6 +351,32 @@ function applyFilters() {
     
     renderTable();
     updateSummary();
+}
+
+// Toggle filters visibility
+function toggleFilters() {
+    showFilters = !showFilters;
+    const content = document.getElementById('filtersContent');
+    const button = document.querySelector('.toggle-btn');
+    const clearBtn = document.querySelector('.clear-btn');
+    const filtersCard = document.getElementById('filtersCard');
+    
+    if (showFilters) {
+        content.style.display = 'flex';
+        button.textContent = 'Hide Filters';
+        filtersCard.classList.remove('collapsed');
+    } else {
+        content.style.display = 'none';
+        button.textContent = 'Show Filters';
+        filtersCard.classList.add('collapsed');
+    }
+    
+    // Show/hide clear button based on active filters
+    const hasFilters = document.getElementById('registrationFilter').value || 
+                      document.getElementById('ownerFilter').value ||
+                      document.getElementById('dateStart').value || 
+                      document.getElementById('dateEnd').value;
+    clearBtn.style.display = hasFilters ? 'block' : 'none';
 }
 
 function clearFilters() {

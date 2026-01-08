@@ -1648,6 +1648,18 @@
                         html += '</div>';
                     }
                     
+                    // Show orphaned optimized files (optimized files without originals)
+                    if (missing.orphanedOptimized && missing.orphanedOptimized.length > 0) {
+                        html += '<div class="missing-section" style="background: #f8d7da; border-color: #f5c6cb;">';
+                        html += '<h5>🗑️ Orphaned Optimized Files (' + missing.orphanedOptimized.length + ')</h5>';
+                        html += '<div style="color: #721c24; font-size: 12px; margin-bottom: 10px;">These optimized files have no corresponding original files (likely from renamed or deleted files):</div>';
+                        html += '<div class="missing-files">';
+                        missing.orphanedOptimized.forEach(file => {
+                            html += '<div>• ' + file + '</div>';
+                        });
+                        html += '</div></div>';
+                    }
+                    
                     html += '</div>';
                     
                     validationContent.innerHTML = html;

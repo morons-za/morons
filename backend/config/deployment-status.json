@@ -1,8 +1,8 @@
 {
-  "stage": "error",
-  "message": "Deployment failed: Command failed: git commit -m \"Add new helicopter violations: ZS-HIE\"\nCommand failed: git commit -m \"Add new helicopter violations: ZS-HIE\"\n\n",
-  "progress": 60,
-  "error": "Command failed: git commit -m \"Add new helicopter violations: ZS-HIE\"\nCommand failed: git commit -m \"Add new helicopter violations: ZS-HIE\"\n\n",
-  "filesProcessed": 0,
-  "totalFiles": 3
+  "stage": "complete",
+  "message": "Successfully deployed 103 files to GitHub",
+  "progress": 100,
+  "error": null,
+  "filesProcessed": 100,
+  "totalFiles": 103
 }
