@@ -19,6 +19,11 @@ dist-ssr
 !.vscode/extensions.json
 .idea
 .DS_Store
+.cursor-test-api/credentials.json
+cursor-test-api/credentials.json
+cursor-test-api/cache/
+API/credentials.json
+API/cache/
 *.suo
 *.ntvs*
 *.njsproj

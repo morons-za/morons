@@ -1,0 +1,1159 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenSky Backfill Tester</title>
+    <style>
+      :root {
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+        --bg: #ffffff;
+        --panel: #fafafa;
+        --good: #16a34a;
+        --bad: #dc2626;
+        --warn: #f59e0b;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 18px;
+        color: var(--text);
+        background: var(--bg);
+      }
+
+      .wrap {
+        max-width: 980px;
+      }
+
+      .status-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel);
+        margin-bottom: 14px;
+      }
+
+      .status-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: var(--warn);
+        flex: 0 0 auto;
+      }
+
+      .status-text {
+        font-size: 14px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .muted {
+        color: var(--muted);
+        font-size: 12px;
+      }
+
+      .panel {
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 14px;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      label {
+        display: block;
+        font-size: 12px;
+        color: #374151;
+        margin-bottom: 6px;
+      }
+
+      select,
+      input,
+      button {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+      }
+
+      button {
+        cursor: pointer;
+        background: #111;
+        color: #fff;
+        border: 1px solid #111;
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        background: #e5e7eb;
+        color: #6b7280;
+        border-color: #d1d5db;
+      }
+
+      .actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 10px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        font-size: 13px;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+
+      th {
+        font-size: 12px;
+        color: #374151;
+        background: #fafafa;
+        position: sticky;
+        top: 0;
+      }
+
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border-radius: 999px;
+        font-size: 12px;
+        border: 1px solid var(--border);
+        color: #111;
+        background: #fff;
+      }
+
+      details {
+        margin-top: 10px;
+      }
+
+      pre {
+        background: #0b1020;
+        color: #e8ecff;
+        padding: 12px;
+        border-radius: 12px;
+        overflow: auto;
+        max-height: 300px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="status-line">
+        <div class="status-left">
+          <div id="statusDot" class="dot" aria-hidden="true"></div>
+          <div class="status-text" id="statusText">Connecting to OpenSky…</div>
+        </div>
+        <div class="muted">Open: <span class="pill">http://localhost:4599/opensky.html</span></div>
+      </div>
+
+      <div class="panel">
+        <div class="row">
+          <div>
+            <label>Aircraft</label>
+            <select id="aircraftSelect"></select>
+            <div class="muted" id="aircraftMeta" style="margin-top: 6px;"></div>
+          </div>
+          <div>
+            <label>Days to fetch (ending on date below)</label>
+            <input id="days" type="number" min="1" max="30" value="3" />
+            <div class="muted" style="margin-top: 6px;">OpenSky flight history is batch-updated nightly; “today” often won’t show yet.</div>
+          </div>
+        </div>
+
+        <div class="row" style="margin-top: 10px;">
+          <div>
+            <label>End day (UTC)</label>
+            <input id="endDayUtc" type="date" />
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <div class="actions">
+              <button id="btnFetch" disabled>Fetch flights</button>
+              <button id="btnViolations" disabled>Check violations</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="resultSummary" class="muted" style="margin-top: 10px;"></div>
+        <div style="max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; margin-top: 10px;">
+          <table id="resultsTable" aria-label="Flights">
+            <thead>
+              <tr>
+                <th>First seen (UTC)</th>
+                <th>Last seen (UTC)</th>
+                <th>Aircraft</th>
+                <th>Callsign</th>
+                <th>Est. from → to</th>
+                <th>TMNP</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody">
+              <tr><td colspan="6" class="muted">No data yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details>
+          <summary class="muted">Debug details</summary>
+          <pre id="debugOut">{}</pre>
+        </details>
+      </div>
+    </div>
+
+    <script>
+      // Hard-coded aircraft list for now (add more later).
+      const ALL_AIRCRAFT_ID = '__all__';
+      const AIRCRAFT = [
+        { id: '0090c5', icao24: '0090c5', tail: 'ZT-HOT', label: 'ZT-HOT (0090c5)' }
+      ];
+
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const aircraftSelect = document.getElementById('aircraftSelect');
+      const aircraftMeta = document.getElementById('aircraftMeta');
+      const endDayUtc = document.getElementById('endDayUtc');
+      const daysEl = document.getElementById('days');
+      const btnFetch = document.getElementById('btnFetch');
+      const btnViolations = document.getElementById('btnViolations');
+      const resultsBody = document.getElementById('resultsBody');
+      const resultSummary = document.getElementById('resultSummary');
+      const debugOut = document.getElementById('debugOut');
+
+      let token = null;
+      let lastFlights = [];
+
+      function isAllAircraftSelected() {
+        return aircraftSelect.value === ALL_AIRCRAFT_ID;
+      }
+
+      function getSelectedAircraft() {
+        if (isAllAircraftSelected()) return null;
+        return AIRCRAFT.find(a => a.id === aircraftSelect.value) || null;
+      }
+
+      function setDebug(obj) {
+        debugOut.textContent = JSON.stringify(obj, null, 2);
+      }
+
+      function setStatus(state, text) {
+        // state: 'good' | 'bad' | 'warn'
+        statusDot.style.background =
+          state === 'good' ? 'var(--good)' : state === 'bad' ? 'var(--bad)' : 'var(--warn)';
+        statusText.textContent = text;
+      }
+
+      function fmtUtc(ts) {
+        if (!Number.isFinite(ts)) return '';
+        return new Date(ts * 1000).toISOString().replace('.000Z', 'Z');
+      }
+
+      function setAircraftMeta(a) {
+        if (!a) {
+          aircraftMeta.textContent = `All aircraft (${AIRCRAFT.length} known)`;
+          return;
+        }
+        aircraftMeta.textContent = `ICAO24: ${a.icao24.toUpperCase()} • Tail: ${a.tail}`;
+      }
+
+      function defaultEndDayUtcYesterday() {
+        const now = new Date();
+        const yest = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+        const yy = yest.getUTCFullYear();
+        const mm = String(yest.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(yest.getUTCDate()).padStart(2, '0');
+        return `${yy}-${mm}-${dd}`;
+      }
+
+      function utcDayRange(endDayUtcStr, days) {
+        const [y, m, d] = (endDayUtcStr || '').split('-').map(Number);
+        if (!y || !m || !d) return null;
+        const endExclusive = Date.UTC(y, m - 1, d + 1, 0, 0, 0) / 1000;
+        const begin = endExclusive - days * 24 * 60 * 60;
+        const end = endExclusive - 1;
+        return { begin: Math.floor(begin), end: Math.floor(end) };
+      }
+
+      function renderFlights(flights) {
+        resultsBody.innerHTML = '';
+
+        if (!Array.isArray(flights) || flights.length === 0) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="6" class="muted">No flights found for that window.</td>`;
+          resultsBody.appendChild(tr);
+          return;
+        }
+
+        for (const f of flights) {
+          const v = f._violation;
+          const vText =
+            v === true ? 'Yes' : v === false ? 'No' : v === 'checking' ? 'Checking…' : '—';
+          const vColor = v === true ? 'var(--bad)' : v === false ? 'var(--good)' : 'var(--muted)';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${fmtUtc(Number(f.firstSeen))}</td>
+            <td>${fmtUtc(Number(f.lastSeen))}</td>
+            <td>${String(f._tail || '').trim() || '—'}</td>
+            <td>${(f.callsign || '').trim()}</td>
+            <td>${(f.estDepartureAirport || '—')} → ${(f.estArrivalAirport || '—')}</td>
+            <td><span class="pill" style="border-color:${vColor}; color:${vColor};">${vText}</span></td>
+          `;
+          resultsBody.appendChild(tr);
+        }
+      }
+
+      async function authenticate() {
+        setStatus('warn', 'Connecting to OpenSky…');
+        btnFetch.disabled = true;
+        btnViolations.disabled = true;
+        token = null;
+
+        try {
+          const resp = await fetch('/api/opensky/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          const json = await resp.json();
+          if (!json.ok) {
+            setStatus('bad', 'OpenSky: not connected (check credentials.json)');
+            setDebug({ stage: 'auth', ok: false, details: json });
+            return;
+          }
+
+          const payload = json.response || json;
+          token = payload.access_token || null;
+          if (!token) {
+            setStatus('bad', 'OpenSky: auth failed (no token returned)');
+            setDebug({ stage: 'auth', ok: false, details: json });
+            return;
+          }
+
+          setStatus('good', 'OpenSky: connected');
+          btnFetch.disabled = false;
+          btnViolations.disabled = true;
+          setDebug({
+            stage: 'auth',
+            ok: true,
+            proxied: !!json.proxied,
+            token_type: payload.token_type,
+            expires_in: payload.expires_in,
+            scope: payload.scope
+          });
+        } catch (e) {
+          setStatus('bad', 'OpenSky: not connected (server not running?)');
+          setDebug({ stage: 'auth', ok: false, error: String(e) });
+        }
+      }
+
+      async function fetchFlights() {
+        if (!token) return;
+
+        const selected = getSelectedAircraft();
+        const days = Math.max(1, Math.min(30, Number(daysEl.value || 3)));
+        const range = utcDayRange(endDayUtc.value, days);
+        if (!range) {
+          resultSummary.textContent = 'Invalid end day.';
+          return;
+        }
+
+        btnFetch.disabled = true;
+        btnViolations.disabled = true;
+        setStatus('warn', 'OpenSky: fetching flights…');
+        resultSummary.textContent = `Fetching ${days} day(s) ending ${endDayUtc.value} (UTC)…`;
+
+        // OpenSky /flights/aircraft max interval: 2 days, so chunk.
+        const TWO_DAYS = 2 * 24 * 60 * 60;
+        const chunks = [
+          { begin: range.begin, end: Math.min(range.end, range.begin + TWO_DAYS - 1) },
+          { begin: Math.min(range.end, range.begin + TWO_DAYS), end: range.end }
+        ].filter(c => c.begin < c.end);
+
+        const all = [];
+        const targets = selected ? [selected] : AIRCRAFT.slice();
+        for (const aircraft of targets) {
+          for (const c of chunks) {
+            const resp = await fetch('/api/opensky/flights/aircraft', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token, icao24: aircraft.icao24, begin: c.begin, end: c.end })
+            });
+            const json = await resp.json();
+            if (!json.ok) {
+              setStatus('bad', 'OpenSky: request failed');
+              setDebug({ stage: 'flights', ok: false, aircraft, chunk: c, details: json });
+              btnFetch.disabled = false;
+              return;
+            }
+            if (Array.isArray(json.response)) {
+              all.push(...json.response.map(r => ({ ...r, _icao24: aircraft.icao24, _tail: aircraft.tail })));
+            }
+          }
+        }
+
+        all.sort((a, b) => (a.firstSeen || 0) - (b.firstSeen || 0));
+        lastFlights = all.map((f, idx) => ({
+          ...f,
+          _icao24: String(f._icao24 || selected?.icao24 || '').toLowerCase(),
+          _tail: String(f._tail || selected?.tail || ''),
+          key: `${String(f._icao24 || selected?.icao24 || '').toLowerCase()}:${Number(f.firstSeen) || 0}:${Number(f.lastSeen) || 0}:${idx}`,
+          _violation: null
+        }));
+        renderFlights(lastFlights);
+
+        resultSummary.textContent = selected
+          ? `Found ${lastFlights.length} flight(s) for ${selected.tail} (${selected.icao24.toUpperCase()}) in that window.`
+          : `Found ${lastFlights.length} flight(s) across ${AIRCRAFT.length} aircraft in that window.`;
+        setStatus('good', 'OpenSky: connected');
+        setDebug({ stage: 'flights', ok: true, aircraft: selected, targets: targets.map(t => ({ tail: t.tail, icao24: t.icao24 })), range, chunks, count: lastFlights.length });
+        btnFetch.disabled = false;
+        btnViolations.disabled = lastFlights.length === 0;
+      }
+
+      async function checkViolations() {
+        if (!token) return;
+        if (!Array.isArray(lastFlights) || lastFlights.length === 0) return;
+
+        // Mark as checking
+        lastFlights = lastFlights.map(f => ({ ...f, _violation: 'checking' }));
+        renderFlights(lastFlights);
+        btnViolations.disabled = true;
+        setStatus('warn', 'OpenSky: checking violations…');
+        resultSummary.textContent = `Checking TMNP violations for ${lastFlights.length} flight(s)…`;
+
+        const groups = new Map();
+        for (const f of lastFlights) {
+          const key = String(f._icao24 || '').toLowerCase();
+          if (!key) continue;
+          if (!groups.has(key)) groups.set(key, []);
+          groups.get(key).push(f);
+        }
+
+        const allResults = [];
+        const perAircraft = [];
+        for (const [icao24, flights] of groups.entries()) {
+          const payloadFlights = flights.map(f => ({
+            key: f.key,
+            firstSeen: f.firstSeen,
+            lastSeen: f.lastSeen,
+            callsign: f.callsign
+          }));
+
+          const resp = await fetch('/api/opensky/violations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, icao24, flights: payloadFlights })
+          });
+          const json = await resp.json();
+          perAircraft.push({ icao24, ok: !!json.ok, count: flights.length, raw: json });
+          if (!json.ok) {
+            setStatus('bad', 'OpenSky: violation check failed');
+            setDebug({ stage: 'violations', ok: false, aircraft: icao24, details: json, perAircraft });
+            // Reset state
+            lastFlights = lastFlights.map(f => ({ ...f, _violation: null }));
+            renderFlights(lastFlights);
+            btnViolations.disabled = false;
+            return;
+          }
+          if (Array.isArray(json.results)) allResults.push(...json.results);
+        }
+
+        const byKey = new Map(allResults.map(r => [r.key, r]));
+        lastFlights = lastFlights.map(f => {
+          const r = byKey.get(f.key);
+          return { ...f, _violation: r ? r.violation : null };
+        });
+        renderFlights(lastFlights);
+
+        const yes = lastFlights.filter(f => f._violation === true).length;
+        const no = lastFlights.filter(f => f._violation === false).length;
+        const unk = lastFlights.length - yes - no;
+        resultSummary.textContent = `TMNP violations: ${yes} yes, ${no} no, ${unk} unknown (no track / insufficient points).`;
+        setStatus('good', 'OpenSky: connected');
+        setDebug({ stage: 'violations', ok: true, summary: { yes, no, unknown: unk }, perAircraft });
+        btnViolations.disabled = false;
+      }
+
+      // Init UI
+      (function init() {
+        {
+          const opt = document.createElement('option');
+          opt.value = ALL_AIRCRAFT_ID;
+          opt.textContent = 'All aircraft';
+          aircraftSelect.appendChild(opt);
+        }
+        for (const a of AIRCRAFT) {
+          const opt = document.createElement('option');
+          opt.value = a.id;
+          opt.textContent = a.label;
+          aircraftSelect.appendChild(opt);
+        }
+        aircraftSelect.value = ALL_AIRCRAFT_ID;
+        setAircraftMeta(null);
+        endDayUtc.value = defaultEndDayUtcYesterday();
+
+        aircraftSelect.addEventListener('change', () => {
+          const a = getSelectedAircraft();
+          setAircraftMeta(a);
+        });
+        btnFetch.addEventListener('click', fetchFlights);
+        btnViolations.addEventListener('click', checkViolations);
+
+        authenticate();
+      })();
+    </script>
+  </body>
+</html>
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenSky Backfill Test</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 18px;
+        color: #111;
+      }
+      .card {
+        max-width: 980px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 14px;
+        margin-bottom: 14px;
+      }
+      .muted {
+        color: #666;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #444;
+        margin-top: 10px;
+      }
+      input,
+      button {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+      button {
+        cursor: pointer;
+        background: #111;
+        color: #fff;
+        border: 1px solid #111;
+        margin-top: 12px;
+      }
+      button:disabled {
+        cursor: not-allowed;
+        background: #e5e7eb;
+        color: #6b7280;
+        border-color: #d1d5db;
+      }
+      pre {
+        background: #0b1020;
+        color: #e8ecff;
+        padding: 12px;
+        border-radius: 12px;
+        overflow: auto;
+        max-height: 360px;
+        font-size: 12px;
+        margin-top: 12px;
+      }
+      code {
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 style="margin: 0 0 8px 0;">OpenSky backfill test</h2>
+    <div class="muted" style="margin-bottom: 14px;">
+      This page reads OpenSky credentials from <code>API/credentials.json</code> (server-side) and authenticates automatically on load.
+      Run: <code>node API/server.cjs</code> and open <code>http://localhost:4599/opensky.html</code>.
+    </div>
+
+    <div class="card">
+      <h3 style="margin: 0 0 8px 0;">Status</h3>
+      <div class="muted">Current test aircraft: <strong>0090c5</strong> (<strong>ZT-HOT</strong>)</div>
+      <pre id="authOut">{}</pre>
+    </div>
+
+    <div class="card">
+      <h3 style="margin: 0 0 8px 0;">Fetch flights (last 3 days)</h3>
+      <div class="muted" style="margin-bottom: 10px;">
+        OpenSky <code>/flights/aircraft</code> is batch-updated nightly; very recent flights may not show yet.
+      </div>
+
+      <div class="row">
+        <div>
+          <label>ICAO24 (locked for now)</label>
+          <input id="icao24" value="0090c5" readonly />
+        </div>
+        <div>
+          <label>Tail / callsign (for display)</label>
+          <input id="tail" value="ZT-HOT" readonly />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>End day (UTC)</label>
+          <input id="endDayUtc" type="date" />
+          <div class="muted" style="margin-top: 6px;">We’ll query the 3 full UTC days ending on this date (inclusive).</div>
+        </div>
+        <div>
+          <label>Max flights</label>
+          <input id="maxFlights" type="number" value="30" min="1" max="200" />
+        </div>
+      </div>
+
+      <button id="btnFlights" disabled>Fetch flights</button>
+      <pre id="flightsOut">{}</pre>
+    </div>
+
+    <script>
+      const authOut = document.getElementById('authOut');
+      const flightsOut = document.getElementById('flightsOut');
+      const btnFlights = document.getElementById('btnFlights');
+
+      let token = null;
+
+      function setAuthOut(obj) {
+        authOut.textContent = JSON.stringify(obj, null, 2);
+      }
+      function setFlightsOut(obj) {
+        flightsOut.textContent = JSON.stringify(obj, null, 2);
+      }
+
+      function utcDayRange(endDayUtcStr, days) {
+        const [y, m, d] = (endDayUtcStr || '').split('-').map(Number);
+        if (!y || !m || !d) return null;
+        const endExclusive = Date.UTC(y, m - 1, d + 1, 0, 0, 0) / 1000;
+        const begin = endExclusive - days * 24 * 60 * 60;
+        const end = endExclusive - 1;
+        return { begin: Math.floor(begin), end: Math.floor(end) };
+      }
+
+      function defaultEndDayUtcYesterday() {
+        const now = new Date();
+        const yest = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - 1));
+        const yy = yest.getUTCFullYear();
+        const mm = String(yest.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(yest.getUTCDate()).padStart(2, '0');
+        return `${yy}-${mm}-${dd}`;
+      }
+
+      async function authenticate() {
+        setAuthOut({ ok: true, message: 'Authenticating…' });
+        try {
+          const resp = await fetch('/api/opensky/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({})
+          });
+          const json = await resp.json();
+          if (!json.ok) {
+            token = null;
+            btnFlights.disabled = true;
+            setAuthOut({ ok: false, error: 'Auth failed', details: json });
+            return;
+          }
+
+          // Token payload is under response when proxied.
+          const tokenPayload = json.response || json;
+          token = tokenPayload.access_token || null;
+
+          const masked = token ? `${token.slice(0, 18)}…${token.slice(-10)}` : null;
+          btnFlights.disabled = !token;
+          setAuthOut({
+            ok: true,
+            proxied: !!json.proxied,
+            token_type: tokenPayload.token_type,
+            expires_in: tokenPayload.expires_in,
+            scope: tokenPayload.scope,
+            access_token_masked: masked
+          });
+        } catch (e) {
+          token = null;
+          btnFlights.disabled = true;
+          setAuthOut({ ok: false, error: String(e) });
+        }
+      }
+
+      btnFlights.addEventListener('click', async () => {
+        if (!token) {
+          setFlightsOut({ ok: false, error: 'Not authenticated' });
+          return;
+        }
+
+        const icao24 = document.getElementById('icao24').value.trim().toLowerCase();
+        const endDay = document.getElementById('endDayUtc').value;
+        const maxFlights = Math.max(1, Math.min(200, Number(document.getElementById('maxFlights').value || 30)));
+        const range = utcDayRange(endDay, 3);
+        if (!range) return setFlightsOut({ ok: false, error: 'Invalid end day' });
+
+        setFlightsOut({ ok: true, message: 'Fetching flights…', range });
+
+        // OpenSky max window: 2 days. Query [range.begin, range.begin+2d) and remainder.
+        const TWO_DAYS = 2 * 24 * 60 * 60;
+        const chunks = [
+          { begin: range.begin, end: Math.min(range.end, range.begin + TWO_DAYS - 1) },
+          { begin: Math.min(range.end, range.begin + TWO_DAYS), end: range.end }
+        ].filter(c => c.begin < c.end);
+
+        const allFlights = [];
+        for (const c of chunks) {
+          const resp = await fetch('/api/opensky/flights/aircraft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, icao24, begin: c.begin, end: c.end })
+          });
+          const json = await resp.json();
+          if (!json.ok) return setFlightsOut({ ok: false, error: 'Flights request failed', details: json });
+          if (Array.isArray(json.response)) allFlights.push(...json.response);
+        }
+
+        allFlights.sort((a, b) => (a.firstSeen || 0) - (b.firstSeen || 0));
+        const flights = allFlights.slice(0, maxFlights);
+        setFlightsOut({ ok: true, icao24, returned: flights.length, flights });
+      });
+
+      // Init
+      document.getElementById('endDayUtc').value = defaultEndDayUtcYesterday();
+      authenticate();
+    </script>
+  </body>
+</html>
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenSky API (OAuth) Test</title>
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 18px;
+        color: #111;
+      }
+      .card {
+        max-width: 840px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 14px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #444;
+        margin-top: 10px;
+      }
+      input,
+      button,
+      textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+      button {
+        cursor: pointer;
+        background: #111;
+        color: #fff;
+        border: 1px solid #111;
+        margin-top: 12px;
+      }
+      button.secondary {
+        background: #fff;
+        color: #111;
+      }
+      .muted {
+        color: #666;
+        font-size: 12px;
+        line-height: 1.35;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      pre {
+        background: #0b1020;
+        color: #e8ecff;
+        padding: 12px;
+        border-radius: 12px;
+        overflow: auto;
+        max-height: 340px;
+        font-size: 12px;
+        margin-top: 12px;
+      }
+      code {
+        background: #f3f4f6;
+        padding: 2px 6px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2 style="margin: 0 0 8px 0;">OpenSky API OAuth test</h2>
+    <div class="muted" style="margin-bottom: 14px;">
+      This page requests an OAuth access token using OpenSky’s <code>client_credentials</code> flow and displays the response.
+      <br />
+      Token endpoint: <code>https://auth.opensky-network.org/auth/realms/opensky-network/protocol/openid-connect/token</code>
+      <br />
+      Tip: Run <code>node API/server.cjs</code> and open <code>http://localhost:4599/opensky.html</code> to avoid CORS (the server proxies token requests).
+    </div>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <label>client_id</label>
+          <input id="clientId" placeholder="Paste OpenSky client_id" autocomplete="off" />
+        </div>
+        <div>
+          <label>client_secret</label>
+          <input id="clientSecret" placeholder="Paste OpenSky client_secret" autocomplete="off" />
+        </div>
+      </div>
+
+      <label>Or upload OpenSky API client JSON (optional)</label>
+      <input id="jsonFile" type="file" accept="application/json,.json" />
+      <div class="muted" style="margin-top: 8px;">
+        If the JSON contains <code>client_id</code> and <code>client_secret</code>, they’ll auto-fill above.
+      </div>
+
+      <button id="btnToken">Get access token</button>
+      <button id="btnCopy" class="secondary" disabled>Copy token to clipboard</button>
+
+      <pre id="out">{}</pre>
+    </div>
+
+    <div style="height: 14px;"></div>
+
+    <div class="card">
+      <h3 style="margin: 0 0 8px 0;">Fetch aircraft history (last 3 days)</h3>
+      <div class="muted" style="margin-bottom: 10px;">
+        OpenSky’s historical endpoints require the aircraft’s <strong>ICAO24</strong> (hex). A “tail number” like <code>ZSHMB</code> is often transmitted as a callsign,
+        but OpenSky doesn’t provide a reliable “tail → ICAO24” lookup in the REST API. If you know the ICAO24, paste it below.
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Tail / callsign (optional, for your notes)</label>
+          <input id="tail" placeholder="e.g. ZSHMB or ZS-HMB" autocomplete="off" />
+        </div>
+        <div>
+          <label>ICAO24 (required for OpenSky history)</label>
+          <input id="icao24" placeholder="e.g. 3c675a" autocomplete="off" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>End day (UTC)</label>
+          <input id="endDayUtc" type="date" />
+          <div class="muted" style="margin-top: 6px;">We’ll query the 3 full UTC days ending on this date (inclusive).</div>
+        </div>
+        <div>
+          <label>Max flights</label>
+          <input id="maxFlights" type="number" value="30" min="1" max="200" />
+          <div class="muted" style="margin-top: 6px;">OpenSky updates flights nightly; very recent flights may not show yet.</div>
+        </div>
+      </div>
+
+      <button id="btnFlights" disabled>Fetch flights (3 days)</button>
+      <button id="btnTrackFirst" class="secondary" disabled>Fetch track for first flight</button>
+      <pre id="historyOut">{}</pre>
+    </div>
+
+    <script>
+      const elClientId = document.getElementById('clientId');
+      const elClientSecret = document.getElementById('clientSecret');
+      const elJsonFile = document.getElementById('jsonFile');
+      const elOut = document.getElementById('out');
+      const elBtnToken = document.getElementById('btnToken');
+      const elBtnCopy = document.getElementById('btnCopy');
+      const elBtnFlights = document.getElementById('btnFlights');
+      const elBtnTrackFirst = document.getElementById('btnTrackFirst');
+      const elHistoryOut = document.getElementById('historyOut');
+
+      let lastToken = null;
+      let lastFlights = null;
+
+      function setOut(obj) {
+        elOut.textContent = JSON.stringify(obj, null, 2);
+      }
+      function setHistoryOut(obj) {
+        elHistoryOut.textContent = JSON.stringify(obj, null, 2);
+      }
+
+      function safeGet(obj, keys) {
+        for (const k of keys) {
+          if (obj && typeof obj === 'object' && k in obj) return obj[k];
+        }
+        return null;
+      }
+
+      elJsonFile.addEventListener('change', async () => {
+        const file = elJsonFile.files && elJsonFile.files[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const json = JSON.parse(text);
+
+          const clientId = safeGet(json, ['client_id', 'clientId', 'id']);
+          const clientSecret = safeGet(json, ['client_secret', 'clientSecret', 'secret']);
+
+          if (typeof clientId === 'string') elClientId.value = clientId;
+          if (typeof clientSecret === 'string') elClientSecret.value = clientSecret;
+
+          setOut({ ok: true, message: 'Loaded JSON file', detectedKeys: { client_id: !!clientId, client_secret: !!clientSecret } });
+        } catch (e) {
+          setOut({ ok: false, error: String(e) });
+        }
+      });
+
+      elBtnCopy.addEventListener('click', async () => {
+        if (!lastToken) return;
+        try {
+          await navigator.clipboard.writeText(lastToken);
+          setOut({ ok: true, message: 'Copied token to clipboard' });
+        } catch (e) {
+          setOut({ ok: false, error: String(e) });
+        }
+      });
+
+      elBtnToken.addEventListener('click', async () => {
+        const clientId = elClientId.value.trim();
+        const clientSecret = elClientSecret.value.trim();
+        lastToken = null;
+        elBtnCopy.disabled = true;
+
+        if (!clientId || !clientSecret) {
+          setOut({ ok: false, error: 'Please provide both client_id and client_secret.' });
+          return;
+        }
+
+        setOut({ ok: true, message: 'Requesting token…' });
+
+        try {
+          // Call local proxy (recommended). If you opened this page via file://, this will fail.
+          const resp = await fetch('/api/opensky/token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ clientId, clientSecret })
+          });
+
+          const text = await resp.text();
+          let json;
+          try {
+            json = JSON.parse(text);
+          } catch {
+            json = { raw: text };
+          }
+
+          if (!resp.ok) {
+            setOut({ ok: false, status: resp.status, statusText: resp.statusText, response: json });
+            return;
+          }
+
+          const tokenPayload = json?.response || json;
+          lastToken = tokenPayload && tokenPayload.access_token ? tokenPayload.access_token : null;
+          elBtnCopy.disabled = !lastToken;
+          elBtnFlights.disabled = !lastToken;
+          elBtnTrackFirst.disabled = true;
+          lastFlights = null;
+
+          // Don’t print the full token by default (still available to copy)
+          const masked = lastToken ? `${lastToken.slice(0, 18)}…${lastToken.slice(-10)}` : null;
+          setOut({
+            ok: true,
+            proxied: !!json?.proxied,
+            token_type: tokenPayload?.token_type,
+            expires_in: tokenPayload?.expires_in,
+            scope: tokenPayload?.scope,
+            access_token_masked: masked,
+            note: lastToken ? 'Use “Copy token” to copy the full token.' : 'Token response did not include access_token.'
+          });
+        } catch (e) {
+          setOut({
+            ok: false,
+            error: String(e),
+            hint:
+              'Open this page via the local server: node API/server.cjs (http://localhost:4599/opensky.html).'
+          });
+        }
+      });
+
+      function utcDayRange(endDayUtcStr, days) {
+        // endDayUtcStr: "YYYY-MM-DD" inclusive
+        const [y, m, d] = (endDayUtcStr || '').split('-').map(Number);
+        if (!y || !m || !d) return null;
+        const endExclusive = Date.UTC(y, m - 1, d + 1, 0, 0, 0) / 1000; // next day 00:00 UTC
+        const begin = endExclusive - days * 24 * 60 * 60;
+        const end = endExclusive - 1; // inclusive end
+        return { begin: Math.floor(begin), end: Math.floor(end) };
+      }
+
+      // Default end day = yesterday UTC (because OpenSky flights are batch-updated nightly)
+      (function initDefaultEndDay() {
+        const now = new Date();
+        const y = now.getUTCFullYear();
+        const m = String(now.getUTCMonth() + 1).padStart(2, '0');
+        const d = String(now.getUTCDate()).padStart(2, '0');
+        // yesterday:
+        const yest = new Date(Date.UTC(y, now.getUTCMonth(), now.getUTCDate() - 1));
+        const yy = yest.getUTCFullYear();
+        const mm = String(yest.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(yest.getUTCDate()).padStart(2, '0');
+        document.getElementById('endDayUtc').value = `${yy}-${mm}-${dd}`;
+      })();
+
+      elBtnFlights.addEventListener('click', async () => {
+        if (!lastToken) {
+          setHistoryOut({ ok: false, error: 'Authenticate first (get token).' });
+          return;
+        }
+
+        const icao24 = document.getElementById('icao24').value.trim().toLowerCase();
+        const endDay = document.getElementById('endDayUtc').value;
+        const maxFlights = Math.max(1, Math.min(200, Number(document.getElementById('maxFlights').value || 30)));
+
+        if (!icao24) {
+          setHistoryOut({
+            ok: false,
+            error: 'OpenSky history requires ICAO24. Tail/callsign alone is not enough.',
+            hint: 'Find ICAO24 from ADSBexchange/adsb.lol/your known dataset, then paste it here.'
+          });
+          return;
+        }
+
+        const range = utcDayRange(endDay, 3);
+        if (!range) {
+          setHistoryOut({ ok: false, error: 'Invalid end day' });
+          return;
+        }
+
+        setHistoryOut({ ok: true, message: 'Fetching flights…', range });
+
+        // OpenSky /flights/aircraft max window is 2 days, so we do 2 calls: [d0,d2) and [d2,d3)
+        const TWO_DAYS = 2 * 24 * 60 * 60;
+        const chunks = [
+          { begin: range.begin, end: Math.min(range.end, range.begin + TWO_DAYS - 1) },
+          { begin: Math.min(range.end, range.begin + TWO_DAYS), end: range.end }
+        ].filter(c => c.begin < c.end);
+
+        const allFlights = [];
+        for (const c of chunks) {
+          const resp = await fetch('/api/opensky/flights/aircraft', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: lastToken, icao24, begin: c.begin, end: c.end })
+          });
+          const json = await resp.json();
+          if (!json.ok) {
+            setHistoryOut({ ok: false, error: 'OpenSky flights request failed', details: json });
+            return;
+          }
+          if (Array.isArray(json.response)) allFlights.push(...json.response);
+        }
+
+        // Sort and cap
+        allFlights.sort((a, b) => (a.firstSeen || 0) - (b.firstSeen || 0));
+        lastFlights = allFlights.slice(0, maxFlights);
+        elBtnTrackFirst.disabled = !(lastFlights && lastFlights.length > 0);
+
+        setHistoryOut({
+          ok: true,
+          icao24,
+          returned: lastFlights.length,
+          note: 'Flights come from OpenSky’s nightly batch; if you include “today” you may see nothing yet.',
+          flights: lastFlights
+        });
+      });
+
+      elBtnTrackFirst.addEventListener('click', async () => {
+        if (!lastToken) return setHistoryOut({ ok: false, error: 'Authenticate first.' });
+        const icao24 = document.getElementById('icao24').value.trim().toLowerCase();
+        if (!icao24) return setHistoryOut({ ok: false, error: 'Missing ICAO24.' });
+        if (!Array.isArray(lastFlights) || lastFlights.length === 0) {
+          return setHistoryOut({ ok: false, error: 'No flights loaded yet.' });
+        }
+
+        const f = lastFlights[0];
+        const firstSeen = Number(f.firstSeen);
+        const lastSeen = Number(f.lastSeen);
+        const timeHint = Number.isFinite(firstSeen) && Number.isFinite(lastSeen)
+          ? Math.floor((firstSeen + lastSeen) / 2)
+          : (Number.isFinite(firstSeen) ? firstSeen : 0);
+
+        if (!timeHint) return setHistoryOut({ ok: false, error: 'Flight has no usable time hint.' });
+
+        setHistoryOut({ ok: true, message: 'Fetching track…', timeHint, flight: f });
+        const resp = await fetch('/api/opensky/tracks/all', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: lastToken, icao24, time: timeHint })
+        });
+        const json = await resp.json();
+        if (!json.ok) return setHistoryOut({ ok: false, error: 'OpenSky track request failed', details: json });
+
+        setHistoryOut({
+          ok: true,
+          icao24,
+          timeHint,
+          flight: f,
+          track: json.response
+        });
+      });
+    </script>
+  </body>
+</html>
+
