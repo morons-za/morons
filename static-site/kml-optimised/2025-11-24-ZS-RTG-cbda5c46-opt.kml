@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>Flight Path - Optimised</name>
+    <description><![CDATA[Optimised flight path with 37 points (decimated from 185 original points). Source format: Google Earth Extended (gx:coord)]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ff0000ff</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[Optimized flight path]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.426876,-33.901015,15 18.426987,-33.90097,15 18.427277,-33.901015,15 18.428164,-33.901199,22 18.431751,-33.901749,68 18.434834,-33.90097,114 18.437637,-33.897766,175 18.438085,-33.891998,243 18.43276,-33.881241,350 18.427334,-33.876063,411 18.418407,-33.873643,472 18.407817,-33.873825,563 18.39529,-33.877413,662 18.38213,-33.885141,746 18.367964,-33.896851,822 18.352773,-33.915573,906 18.337326,-33.937326,990 18.329716,-33.951944,1104 18.324738,-33.967678,1051 18.322337,-33.985519,1066 18.322112,-34.002548,1082 18.325825,-34.014743,1043 18.338299,-34.028243,1013 18.346825,-34.039415,1013 18.349971,-34.047592,1021 18.347855,-34.057943,975 18.341103,-34.071443,975 18.336525,-34.084664,929 18.326316,-34.103851,914 18.318749,-34.118546,822 18.312079,-34.135803,739 18.313065,-34.153701,655 18.32056,-34.164687,624 18.329487,-34.174696,624 18.336067,-34.177908,617 18.35182,-34.182907,518 18.362246,-34.185471,426
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>

@@ -22,14 +22,11 @@ dist-ssr
 .cursor-test-api/credentials.json
 cursor-test-api/credentials.json
 cursor-test-api/cache/
-API/credentials.json
-API/cache/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
-static-site/
 service-account-key.json
 
 # Google Cloud credentials

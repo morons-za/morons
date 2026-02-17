@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>-/ZSHIM - Optimised</name>
+    <description><![CDATA[Optimised flight path with 50 points (decimated from 249 original points). Source format: Standard KML]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ff0000ff</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[<div style="width:220px; text-align:center;">
+<div style="width:210px; text-align:center;">
+<div style=" background: #000; color: #fff; font-size: 14px; text-align:left; border: 1px solid #000; padding: 2px 6px; text-shadow: 0 1px 0 #000; box-shadow: 0 1px 3px rgba(0,0,0,0.6); background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#808080), color-stop(2%,#303030), color-stop(100%,#0c0c0c));"><span style="font-size: 14px; font-weight: bold;"><a href="javascript:void(0);" style="color: #fff; cursor: pointer;text-decoration: none;">-</a></span> / ZSHIM<br/>Private owner</div>
+<div>
+<span style="margin: 125px 0 0 10px; color: #f0f0f0; font-size: 0.7em !important; padding: 2px 3px; position: absolute; text-align: right; text-shadow: 0 1px 0 #000; width: 194px; background: -moz-linear-gradient(left,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.45) 100%);  background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(0,0,0,0)), color-stop(65%,rgba(0,0,0,0.45)), color-stop(100%,rgba(0,0,0,0.45)));  background: -webkit-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); background: -o-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%);  background: -ms-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); background: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); ">&copy; Daniel Klein</span>
+<a title="View bigger image of ZS-HIM at Jetphotos.com" target="_blank" href="https://www.flightradar24.com/redir.php?url=https%3A%2F%2Fwww.jetphotos.com%2Fphoto%2F10951608">
+<img style="width:210px;" src="https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0"/>
+</a>
+</div>
+<div style="border-top: 1px solid #005c90; color: #fff; padding-bottom: 5px; box-shadow: 0 0 1px #9BE3F6 inset, 0 1px 0 #9BE3F6 inset, 0 -1px 3px rgba(0,0,0,0.4); background:rgba(43,114,173,1); background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(92,184,229,1)), color-stop(100%,rgba(43,114,173,1)));">
+<a style="text-decoration: none; color: rgb(255, 255, 255); font-size: 12px; width:77px; display: inline-block;" title=" Airport" href="javascript:void(0);/departures"><h3 style="padding: 0px; margin: 10px 0px 0px; font-size: 16px; ">?</h3></a>
+<span style="background: url(https://www.flightradar24.com/static/images/userUI_sprite.png?14) no-repeat scroll 0 -464px rgba(0, 0, 0, 0); border: medium none; display: inline-block; height: 16px; width: 45px;"></span>
+<a style="text-decoration: none; color: rgb(255, 255, 255); font-size: 12px; width:77px; display: inline-block;" title=" Airport" href="javascript:void(0);/arrivals"><h3 style="padding: 0px; margin: 10px 0px 0px; font-size: 16px;">?</h3></a>
+<div style=" margin-top:10px;">
+<div style="display: inline-block; font-size: 12px; padding: 0 5px;">
+<div>
+<span style="color: #c1eaff;" title="Scheduled Time of Departure">STD </span>
+<span title="2025-10-28 09:31">09:31</span> <span title="Coordinated Universal Time">UTC</span>
+</div>
+<div>
+<span style="color: #c1eaff;" title="Actual Time of Departure">ATD </span>
+<span title="2025-10-28 09:31">09:31</span> <span title="Coordinated Universal Time">UTC</span>
+</div>
+</div>
+<div style="display: inline-block; font-size: 12px; padding: 0 5px;">
+<div>
+<span style="color: #c1eaff;" title="Estimated Time of Arrival">ETA </span>
+<span title="2025-10-28 09:55">09:55</span> <span title="Coordinated Universal Time">UTC</span>
+</div>
+</div>
+</div>
+<br style="clear: both;"/>
+</div>
+
+<div style="display: block;">
+<table style="border-collapse: collapse; width: 100%;">
+<tr style="border-right: 1px solid #dadada; ">
+<td style="background: none repeat scroll 0 0 #dadada; padding: 0; width: 31px;">
+<span style="background: url(https://www.flightradar24.com/static/images/userUI_sprite.png?14) no-repeat scroll -208px -464px rgba(0, 0, 0, 0); height: 26px; margin: 8px 0 0 4px; width: 23px; display: block;"></span>
+</td>
+<td colspan="2" style="border-bottom: 1px solid #dadada; border-left: 1px solid #dadada; color: #666; line-height: 1.1em; padding: 3px 6px; vertical-align: top; font-size: 14px;">
+Aircraft<span style="float: right; font-size: 12px;">(R44)</span><br>
+<span style="color: #333; font-size: 16px; font-weight: bold; line-height: 1.3em;">Robinson R44 Raven II</span>
+</td>
+</tr>
+<tr style="border-right: 1px solid #dadada; ">
+<td style="background: none repeat scroll 0 0 #dadada; padding: 0; width: 31px;">
+<td colspan="2" style="border-bottom: 1px solid #dadada; border-left: 1px solid #dadada; color: #666; line-height: 1.1em; padding: 3px 6px; vertical-align: top; font-size: 14px;">
+Registration<br>
+<span style="color: #333; font-size: 16px; font-weight: bold; line-height: 1.3em;"><a href="https://www.flightradar24.com/reg/zs-him" style="text-decoration: none; color: #333;">ZS-HIM</a></span>
+</td>
+</tr>
+</table>
+</div>
+
+</div>
+</div>]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.436293,-33.885818,83.82 18.434723,-33.881607,129.54 18.431911,-33.878437,167.64 18.435059,-33.876709,198.12 18.438814,-33.878174,251.46 18.439693,-33.881184,259.08 18.433857,-33.881836,251.46 18.427883,-33.881424,289.56 18.422585,-33.881046,312.42 18.416519,-33.880814,342.9 18.410797,-33.880764,381 18.404846,-33.881046,381 18.39896,-33.881836,381 18.38719,-33.886551,381 18.376236,-33.89473,381 18.36731,-33.903809,381 18.358154,-33.915985,381 18.344078,-33.938675,381 18.332987,-33.960892,381 18.326683,-33.973404,381 18.324131,-33.986389,381 18.325024,-33.99966,381 18.328514,-34.011669,381 18.335495,-34.022934,381 18.341732,-34.033875,381 18.436293,-33.885818,83.82 18.436293,-33.884216,99.06 18.434723,-33.881607,129.54 18.434162,-33.881104,137.16 18.431911,-33.878437,167.64 18.431969,-33.877647,175.26 18.435059,-33.876709,198.12 18.436031,-33.8769,205.74 18.438814,-33.878174,251.46 18.439487,-33.878723,259.08 18.439693,-33.881184,259.08 18.438589,-33.881744,243.84 18.433857,-33.881836,251.46 18.43277,-33.88179,259.08 18.427883,-33.881424,289.56 18.426874,-33.881332,289.56 18.422585,-33.881046,312.42 18.421326,-33.880997,320.04 18.416519,-33.880814,342.9 18.415384,-33.880829,350.52 18.410797,-33.880764,381 18.409666,-33.880783,381 18.404846,-33.881046,381 18.403725,-33.881149,381 18.39896,-33.881836,381 18.397951,-33.882111,381 18.38719,-33.886551,381 18.384705,-33.887981,381 18.376236,-33.89473,381 18.374405,-33.896454,381 18.36731,-33.903809,381 18.365721,-33.905777,381 18.358154,-33.915985,381 18.355352,-33.920105,381 18.344078,-33.938675,381 18.341446,-33.943516,381 18.332987,-33.960892,381 18.332062,-33.963348,381 18.326683,-33.973404,381 18.325924,-33.975952,381 18.324131,-33.986389,381 18.324131,-33.989044,381 18.325024,-33.99966,381 18.325476,-34.001999,381 18.328514,-34.011669,381 18.329905,-34.014084,381 18.335495,-34.022934,381 18.337023,-34.025024,381 18.341732,-34.033875,381 18.342247,-34.036156,381
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>

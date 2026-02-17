@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>-/ZSHIM - Optimised</name>
+    <description><![CDATA[Optimised flight path with 128 points (decimated from 639 original points). Source format: Standard KML]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ff0000ff</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[<div style="width:220px; text-align:center;">
+<div style="width:210px; text-align:center;">
+<div style=" background: #000; color: #fff; font-size: 14px; text-align:left; border: 1px solid #000; padding: 2px 6px; text-shadow: 0 1px 0 #000; box-shadow: 0 1px 3px rgba(0,0,0,0.6); background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#808080), color-stop(2%,#303030), color-stop(100%,#0c0c0c));"><span style="font-size: 14px; font-weight: bold;"><a href="javascript:void(0);" style="color: #fff; cursor: pointer;text-decoration: none;">-</a></span> / ZSHIM<br/>Private owner</div>
+<div>
+<span style="margin: 125px 0 0 10px; color: #f0f0f0; font-size: 0.7em !important; padding: 2px 3px; position: absolute; text-align: right; text-shadow: 0 1px 0 #000; width: 194px; background: -moz-linear-gradient(left,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.45) 100%);  background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(0,0,0,0)), color-stop(65%,rgba(0,0,0,0.45)), color-stop(100%,rgba(0,0,0,0.45)));  background: -webkit-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); background: -o-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%);  background: -ms-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); background: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); ">&copy; Daniel Klein</span>
+<a title="View bigger image of ZS-HIM at Jetphotos.com" target="_blank" href="https://www.flightradar24.com/redir.php?url=https%3A%2F%2Fwww.jetphotos.com%2Fphoto%2F10951608">
+<img style="width:210px;" src="https://cdn.jetphotos.com/200/6/933160_1684001654_tb.jpg?v=0"/>
+</a>
+</div>
+<div style="border-top: 1px solid #005c90; color: #fff; padding-bottom: 5px; box-shadow: 0 0 1px #9BE3F6 inset, 0 1px 0 #9BE3F6 inset, 0 -1px 3px rgba(0,0,0,0.4); background:rgba(43,114,173,1); background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(92,184,229,1)), color-stop(100%,rgba(43,114,173,1)));">
+<a style="text-decoration: none; color: rgb(255, 255, 255); font-size: 12px; width:77px; display: inline-block;" title=" Airport" href="javascript:void(0);/departures"><h3 style="padding: 0px; margin: 10px 0px 0px; font-size: 16px; ">?</h3></a>
+<span style="background: url(https://www.flightradar24.com/static/images/userUI_sprite.png?14) no-repeat scroll 0 -464px rgba(0, 0, 0, 0); border: medium none; display: inline-block; height: 16px; width: 45px;"></span>
+<a style="text-decoration: none; color: rgb(255, 255, 255); font-size: 12px; width:77px; display: inline-block;" title=" Airport" href="javascript:void(0);/arrivals"><h3 style="padding: 0px; margin: 10px 0px 0px; font-size: 16px;">?</h3></a>
+<div style=" margin-top:10px;">
+<div style="display: inline-block; font-size: 12px; padding: 0 5px;">
+<div>
+<span style="color: #c1eaff;" title="Actual Time of Departure">ATD </span>
+<span title="2025-05-03 06:59">06:59</span> <span title="Coordinated Universal Time">UTC</span>
+</div>
+</div>
+<div style="display: inline-block; font-size: 12px; padding: 0 5px;">
+<div>
+<span style="color: #c1eaff;" title="Estimated Time of Arrival">ETA </span>
+<span title="2025-05-03 07:14">07:14</span> <span title="Coordinated Universal Time">UTC</span>
+</div>
+</div>
+</div>
+<br style="clear: both;"/>
+</div>
+
+<div style="display: block;">
+<table style="border-collapse: collapse; width: 100%;">
+<tr style="border-right: 1px solid #dadada; ">
+<td style="background: none repeat scroll 0 0 #dadada; padding: 0; width: 31px;">
+<span style="background: url(https://www.flightradar24.com/static/images/userUI_sprite.png?14) no-repeat scroll -208px -464px rgba(0, 0, 0, 0); height: 26px; margin: 8px 0 0 4px; width: 23px; display: block;"></span>
+</td>
+<td colspan="2" style="border-bottom: 1px solid #dadada; border-left: 1px solid #dadada; color: #666; line-height: 1.1em; padding: 3px 6px; vertical-align: top; font-size: 14px;">
+Aircraft<span style="float: right; font-size: 12px;">(R44)</span><br>
+<span style="color: #333; font-size: 16px; font-weight: bold; line-height: 1.3em;">Robinson R44 Raven II</span>
+</td>
+</tr>
+<tr style="border-right: 1px solid #dadada; ">
+<td style="background: none repeat scroll 0 0 #dadada; padding: 0; width: 31px;">
+<td colspan="2" style="border-bottom: 1px solid #dadada; border-left: 1px solid #dadada; color: #666; line-height: 1.1em; padding: 3px 6px; vertical-align: top; font-size: 14px;">
+Registration<br>
+<span style="color: #333; font-size: 16px; font-weight: bold; line-height: 1.3em;"><a href="https://www.flightradar24.com/reg/zs-him" style="text-decoration: none; color: #333;">ZS-HIM</a></span>
+</td>
+</tr>
+</table>
+</div>
+
+</div>
+</div>]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.435974,-33.887005,45.72 18.437347,-33.880161,129.54 18.432928,-33.878082,182.88 18.428249,-33.876762,236.22 18.423288,-33.875885,281.94 18.418121,-33.875458,335.28 18.412971,-33.875645,373.38 18.406919,-33.87648,426.72 18.401356,-33.877834,464.82 18.396158,-33.879639,495.3 18.390713,-33.882069,518.16 18.385048,-33.885094,541.02 18.379898,-33.888821,556.26 18.375092,-33.892731,563.88 18.37043,-33.896759,571.5 18.365993,-33.901154,563.88 18.361965,-33.905869,563.88 18.358154,-33.910629,563.88 18.354549,-33.915585,579.12 18.347397,-33.926479,617.22 18.34465,-33.931973,632.46 18.342123,-33.937363,647.7 18.339825,-33.942856,662.94 18.337246,-33.95018,662.94 18.334724,-33.958374,647.7 18.32983,-33.980106,609.6 18.330633,-33.994492,617.22 18.33395,-34.004177,632.46 18.337023,-34.01239,647.7 18.338814,-34.019444,640.08 18.339041,-34.025482,617.22 18.337269,-34.031456,601.98 18.335228,-34.037476,609.6 18.339264,-34.041275,586.74 18.343357,-34.037292,510.54 18.344193,-34.030895,495.3 18.344936,-34.024799,495.3 18.34515,-34.016006,495.3 18.346081,-34.007854,487.68 18.354567,-33.997742,480.06 18.370285,-33.987324,525.78 18.374176,-33.972382,449.58 18.376204,-33.949677,266.7 18.379555,-33.918613,137.16 18.378239,-33.914051,243.84 18.378181,-33.911072,304.8 18.379791,-33.90802,342.9 18.382759,-33.904648,381 18.386078,-33.901436,426.72 18.389824,-33.898224,441.96 18.394196,-33.894836,449.58 18.399868,-33.891567,426.72 18.406136,-33.888885,403.86 18.413479,-33.8871,373.38 18.420765,-33.885864,350.52 18.428782,-33.885178,312.42 18.436031,-33.885189,274.32 18.442841,-33.887238,220.98 18.445652,-33.891907,167.64 18.441181,-33.895988,83.82 18.436516,-33.898453,0 18.433882,-33.899231,0 18.432083,-33.899712,0 18.429623,-33.900272,0 18.435974,-33.887005,45.72 18.437805,-33.883484,91.44 18.437347,-33.880161,129.54 18.436741,-33.879776,137.16 18.432928,-33.878082,182.88 18.431911,-33.877739,190.5 18.428249,-33.876762,236.22 18.427162,-33.87653,251.46 18.423288,-33.875885,281.94 18.422184,-33.875736,297.18 18.418121,-33.875458,335.28 18.417206,-33.875412,342.9 18.412971,-33.875645,373.38 18.41177,-33.875786,388.62 18.406919,-33.87648,426.72 18.405819,-33.876667,426.72 18.401356,-33.877834,464.82 18.40044,-33.878067,472.44 18.396158,-33.879639,495.3 18.395149,-33.880051,502.92 18.390713,-33.882069,518.16 18.389454,-33.882675,525.78 18.385048,-33.885094,541.02 18.384132,-33.8857,548.64 18.379898,-33.888821,556.26 18.378983,-33.889519,556.26 18.375092,-33.892731,563.88 18.374233,-33.893475,563.88 18.37043,-33.896759,571.5 18.369476,-33.89772,571.5 18.365993,-33.901154,563.88 18.365105,-33.902115,556.26 18.361965,-33.905869,563.88 18.361073,-33.906929,563.88 18.358154,-33.910629,563.88 18.357296,-33.911816,571.5 18.354549,-33.915585,579.12 18.352325,-33.918732,586.74 18.347397,-33.926479,617.22 18.346767,-33.927643,617.22 18.34465,-33.931973,632.46 18.344135,-33.93309,640.08 18.342123,-33.937363,647.7 18.341675,-33.93837,647.7 18.339825,-33.942856,662.94 18.339096,-33.944733,662.94 18.337246,-33.95018,662.94 18.336868,-33.951244,655.32 18.334724,-33.958374,647.7 18.333323,-33.963135,632.46 18.32983,-33.980106,609.6 18.329601,-33.982903,609.6 18.330633,-33.994492,617.22 18.331432,-33.997379,617.22 18.33395,-34.004177,632.46 18.334332,-34.005203,640.08 18.337023,-34.01239,647.7 18.337727,-34.014648,647.7 18.338814,-34.019444,640.08 18.339041,-34.020721,640.08 18.339041,-34.025482,617.22 18.338816,-34.026581,617.22 18.337269,-34.031456,601.98 18.336798,-34.032532,601.98 18.335228,-34.037476,609.6 18.335398,-34.038437,609.6 18.339264,-34.041275,586.74 18.340816,-34.041092,571.5 18.343357,-34.037292,510.54 18.343506,-34.036251,495.3 18.344193,-34.030895,495.3 18.344366,-34.029465,495.3 18.344936,-34.024799,495.3 18.345037,-34.023697,495.3 18.34515,-34.016006,495.3 18.34515,-34.014725,495.3 18.346081,-34.007854,487.68 18.346481,-34.006596,480.06 18.354567,-33.997742,480.06 18.357754,-33.996403,495.3 18.370285,-33.987324,525.78 18.371544,-33.984577,518.16 18.374176,-33.972382,449.58 18.374578,-33.96936,419.1 18.376204,-33.949677,266.7 18.37635,-33.944263,220.98 18.379555,-33.918613,137.16 18.37904,-33.917122,175.26 18.378239,-33.914051,243.84 18.378124,-33.91349,251.46 18.378181,-33.911072,304.8 18.37841,-33.910324,312.42 18.379791,-33.90802,342.9 18.380407,-33.907288,350.52 18.382759,-33.904648,381 18.383446,-33.90395,396.24 18.386078,-33.901436,426.72 18.386742,-33.900833,434.34 18.389824,-33.898224,441.96 18.39072,-33.897491,441.96 18.394196,-33.894836,449.58 18.395205,-33.89415,449.58 18.399868,-33.891567,426.72 18.400755,-33.891129,419.1 18.406136,-33.888885,403.86 18.407705,-33.888382,396.24 18.413479,-33.8871,373.38 18.414803,-33.886864,373.38 18.420765,-33.885864,350.52 18.422335,-33.885681,342.9 18.428782,-33.885178,312.42 18.430239,-33.885086,304.8 18.436031,-33.885189,274.32 18.437021,-33.885315,266.7 18.442841,-33.887238,220.98 18.444082,-33.88797,213.36 18.445652,-33.891907,167.64 18.445015,-33.892635,152.4 18.441181,-33.895988,83.82 18.440208,-33.896824,60.96 18.436516,-33.898453,0 18.436089,-33.898594,0 18.433882,-33.899231,0 18.433456,-33.899338,0 18.432083,-33.899712,0 18.431797,-33.899807,0 18.429623,-33.900272,0 18.42923,-33.90033,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>
