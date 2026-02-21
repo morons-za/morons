@@ -280,7 +280,9 @@ Use `git config` (without `--global`) so it applies only to this project.
    - `API/digest-config.example.json` → `API/digest-config.json` (subscriber emails for daily digest)
    - `API/review-config.example.json` → `API/review-config.json` (review email for sync pipeline)
 
-7. **Deploy updates:**
+7. **Daily Flight Sync (GitHub Actions):** The `.github/workflows/daily-sync.yml` workflow runs at 21:00 SAST. Required secrets: `FR24_TOKEN`, `SENDGRID_API_KEY`, `HMAC_SECRET`, and `REVIEW_EMAIL` (email for violation digest).
+
+8. **Deploy updates:**
    ```bash
    git add .
    git commit -m "Process new flights"

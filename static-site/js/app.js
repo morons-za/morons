@@ -108,10 +108,11 @@ function loadTmnpBoundary() {
         return;
     }
     
+    const tmnpCacheBust = window.buildTimestamp ? '?v=' + encodeURIComponent(window.buildTimestamp) : '';
     console.log('📄 Loading TMNP boundary from ./tmnp.kml...');
     
     try {
-        window.tmnpLayer = omnivore.kml('./tmnp.kml', null, L.geoJson(null, {
+        window.tmnpLayer = omnivore.kml('./tmnp.kml' + tmnpCacheBust, null, L.geoJson(null, {
             style: function(feature) {
                 return {
                     color: '#ff0000',
@@ -533,7 +534,8 @@ function loadFlightOnMap(filename) {
     
     // Try optimized KML first, fallback to original KML from GitHub
     const optimizedFilename = filename.replace('.kml', '-opt.kml');
-    const optimizedUrl = './kml-optimised/' + optimizedFilename;
+    const cacheBust = window.buildTimestamp ? '?v=' + encodeURIComponent(window.buildTimestamp) : '';
+    const optimizedUrl = './kml-optimised/' + optimizedFilename + cacheBust;
     const originalUrl = 'https://raw.githubusercontent.com/morons-za/morons/main/backend/uploads/' + filename;
     
     console.log('📍 Checking optimized KML first:', optimizedUrl);
