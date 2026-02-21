@@ -147,7 +147,14 @@ function readOpenSkyCredentialsFromFile() {
   return { clientId, clientSecret };
 }
 
+function sanitiseHeaderValue(s) {
+  return String(s || '').replace(/[\x00-\x1f\x7f]+/g, '').trim();
+}
+
 function readFR24TokenFromFile() {
+  const fromEnv = sanitiseHeaderValue(process.env.FR24_TOKEN || process.env.FR24_API_KEY);
+  if (fromEnv) return fromEnv;
+
   if (!fs.existsSync(CREDENTIALS_PATH)) return null;
   const raw = fs.readFileSync(CREDENTIALS_PATH, 'utf8').trim();
   if (!raw) return null;
@@ -157,17 +164,17 @@ function readFR24TokenFromFile() {
   // - JSON containing token fields (legacy) or FR24_API_KEY (preferred)
   try {
     const json = JSON.parse(raw);
-    const token = String(
+    const token = sanitiseHeaderValue(
       json?.FR24_API_KEY ||
         json?.FR24_TOKEN ||
         json?.fr24Token ||
         json?.apiToken ||
         json?.token ||
         ''
-    ).trim();
+    );
     return token || null;
   } catch {
-    return raw;
+    return sanitiseHeaderValue(raw) || null;
   }
 }
 
