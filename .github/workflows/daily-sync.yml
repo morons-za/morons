@@ -2,8 +2,8 @@ name: Daily Flight Sync
 
 on:
   schedule:
-    # Run daily at 19:00 UTC (21:00 SAST)
-    - cron: '0 19 * * *'
+    # Temporary: run at 20:00 UTC (22:00 SAST) for testing
+    - cron: '0 20 * * *'
   workflow_dispatch:
     inputs:
       hours:
@@ -52,6 +52,19 @@ jobs:
           }
           CREDS_EOF
 
+      - name: Create review config
+        # review-config.json is gitignored; create from example + REVIEW_EMAIL secret
+        run: |
+          cp API/review-config.example.json API/review-config.json
+          node -e "
+          const fs = require('fs');
+          const config = JSON.parse(fs.readFileSync('API/review-config.json', 'utf8'));
+          config.review_email = process.env.REVIEW_EMAIL || config.review_email;
+          fs.writeFileSync('API/review-config.json', JSON.stringify(config));
+          "
+        env:
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+
       - name: Run daily sync
         env:
           FR24_TOKEN: ${{ secrets.FR24_TOKEN }}
@@ -80,6 +93,6 @@ jobs:
             git push
           fi
 
-      - name: Clean up credentials
+      - name: Clean up credentials and config
         if: always()
-        run: rm -f API/credentials.json
+        run: rm -f API/credentials.json API/review-config.json
