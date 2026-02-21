@@ -482,6 +482,18 @@ function renderTable() {
 }
 
 
+function styleFlightKmlLayer(layer) {
+    layer.eachLayer(function(sub) {
+        if (sub instanceof L.Polygon) {
+            sub.setStyle({ color: '#ff0000', weight: 2, opacity: 0.7, fillColor: '#ff0000', fillOpacity: 0.15 });
+        } else if (sub instanceof L.Polyline) {
+            sub.setStyle({ color: '#0000ff', weight: 4, opacity: 0.8 });
+        } else if (sub.eachLayer) {
+            styleFlightKmlLayer(sub);
+        }
+    });
+}
+
 function loadFlightOnMap(filename) {
     const startTime = performance.now();
     const flight = flightData.find(f => f.filename === filename);
@@ -549,11 +561,7 @@ function loadFlightOnMap(filename) {
                 loadingDiv.parentNode.removeChild(loadingDiv);
             }
             
-            this.setStyle(() => ({
-                color: '#0000ff',
-                weight: 4,
-                opacity: 0.8
-            }));
+            styleFlightKmlLayer(this);
             
             // Fit bounds to both TMNP and the new KML if both are present
             if (window.tmnpLayer) {
@@ -590,11 +598,7 @@ function loadFlightOnMap(filename) {
                     
                     currentFlightLayer = this;
                     
-                    this.setStyle(() => ({
-                        color: '#0000ff',
-                        weight: 4,
-                        opacity: 0.8
-                    }));
+                    styleFlightKmlLayer(this);
                     
                     // Fit bounds to both TMNP and the new KML if both are present
                     if (window.tmnpLayer) {
