@@ -96,6 +96,54 @@ function analyseTrackForGaps(trackResponse, opts = {}) {
   };
 }
 
+/**
+ * Classify a violating flight as 'gap_only', 'mixed', or 'clean'.
+ *
+ * - 'clean':    no transponder gaps detected
+ * - 'mixed':    gaps exist, but real (non-gap) segments also violate TMNP
+ * - 'gap_only': the ONLY segments that violate TMNP are gap segments
+ *
+ * @param {object} trackResponse - raw FR24 track API response
+ * @param {object} [gapResult]   - output of analyseTrackForGaps (computed if omitted)
+ * @param {object} [opts]        - options for analyseTrackForGaps
+ * @returns {{ classification: 'clean'|'mixed'|'gap_only', realViolationCount: number, gapViolationCount: number }}
+ */
+function classifyViolation(trackResponse, gapResult, opts = {}) {
+  const { segmentViolatesTMNP, loadTMNPPolygons } = require('./tmnp-geometry.cjs');
+  const polys = loadTMNPPolygons();
+
+  if (!gapResult) gapResult = analyseTrackForGaps(trackResponse, opts);
+  if (!gapResult.suspicious) return { classification: 'clean', realViolationCount: 0, gapViolationCount: 0 };
+
+  const tracks = extractTracks(trackResponse);
+  const pts = (Array.isArray(tracks) ? tracks : [])
+    .map((p) => ({ lat: Number(p?.lat), lon: Number(p?.lon) }))
+    .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon));
+
+  if (pts.length < 2) return { classification: 'clean', realViolationCount: 0, gapViolationCount: 0 };
+
+  const gapSegments = new Set();
+  for (const gap of gapResult.gaps) {
+    gapSegments.add(gap.fromIdx);
+  }
+
+  let realViolationCount = 0;
+  let gapViolationCount = 0;
+
+  for (let i = 0; i < pts.length - 1; i++) {
+    const violates = segmentViolatesTMNP(pts[i].lat, pts[i].lon, pts[i + 1].lat, pts[i + 1].lon, polys);
+    if (!violates) continue;
+    if (gapSegments.has(i)) {
+      gapViolationCount++;
+    } else {
+      realViolationCount++;
+    }
+  }
+
+  const classification = realViolationCount > 0 ? 'mixed' : 'gap_only';
+  return { classification, realViolationCount, gapViolationCount };
+}
+
 // CLI mode
 if (require.main === module) {
   const flightId = process.argv[2];
@@ -119,6 +167,11 @@ if (require.main === module) {
 
   const result = analyseTrackForGaps(trackResponse);
   console.log(JSON.stringify(result, null, 2));
+
+  if (result.suspicious) {
+    const cv = classifyViolation(trackResponse, result);
+    console.log('Classification:', JSON.stringify(cv, null, 2));
+  }
 }
 
-module.exports = { analyseTrackForGaps, haversineKm, extractTracks };
+module.exports = { analyseTrackForGaps, classifyViolation, haversineKm, extractTracks };

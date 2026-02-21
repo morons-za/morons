@@ -27,7 +27,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const { analyseTrackForGaps } = require('./detect-transponder-gaps.cjs');
+const { analyseTrackForGaps, classifyViolation } = require('./detect-transponder-gaps.cjs');
 const { addPendingFlight, readPendingReview } = require('./pending-review.cjs');
 const { sendReviewDigest } = require('./review-email.cjs');
 
@@ -312,16 +312,25 @@ async function main() {
       const trackResponse = trackJson?.response || trackJson;
 
       // Run transponder gap check
-      const gapResult = analyseTrackForGaps(trackResponse, {
+      const gapOpts = {
         thresholdKm: config.transponder_gap_threshold_km,
         ratioThreshold: config.transponder_gap_ratio
-      });
+      };
+      const gapResult = analyseTrackForGaps(trackResponse, gapOpts);
+
+      // Classify: 'clean' (no gaps), 'mixed' (gaps + real violations), 'gap_only' (false positive)
+      let classification = 'clean';
+      if (gapResult.suspicious) {
+        const cv = classifyViolation(trackResponse, gapResult, gapOpts);
+        classification = cv.classification;
+      }
 
       const flightInfo = {
         flight_id: id8,
         filename,
         registration: reg,
         date: ymd,
+        classification,
         maxGapKm: gapResult.maxGapKm,
         avgSegmentKm: gapResult.avgSegmentKm,
         totalSegments: gapResult.totalSegments,
@@ -329,8 +338,8 @@ async function main() {
       };
 
       if (args.dryRun) {
-        console.log(`[sync] [DRY] ${id8} ${reg} ${ymd} — ${gapResult.suspicious ? 'SUSPICIOUS' : 'CLEAN'} (max gap: ${gapResult.maxGapKm} km)`);
-        (gapResult.suspicious ? suspicious : autoPublished).push(flightInfo);
+        console.log(`[sync] [DRY] ${id8} ${reg} ${ymd} — ${classification.toUpperCase()} (max gap: ${gapResult.maxGapKm} km)`);
+        (classification === 'gap_only' ? suspicious : autoPublished).push(flightInfo);
         continue;
       }
 
@@ -357,15 +366,15 @@ async function main() {
         console.warn(`[sync] PNG generation failed for ${id8}: ${e.message}`);
       }
 
-      if (gapResult.suspicious) {
-        console.log(`[sync] SUSPICIOUS ${id8} ${reg} ${ymd} — max gap: ${gapResult.maxGapKm} km, ${gapResult.gaps.length} gap(s)`);
+      if (classification === 'gap_only') {
+        console.log(`[sync] GAP-ONLY ${id8} ${reg} ${ymd} — max gap: ${gapResult.maxGapKm} km → pending review`);
         addPendingFlight({
           ...flightInfo,
-          reason: 'transponder_gap'
+          reason: 'gap_only_violation'
         }, hmacSecret, config.token_expiry_days);
         suspicious.push(flightInfo);
       } else {
-        console.log(`[sync] CLEAN ${id8} ${reg} ${ymd} — publishing`);
+        console.log(`[sync] ${classification === 'mixed' ? 'MIXED' : 'CLEAN'} ${id8} ${reg} ${ymd} — publishing (real violations on non-gap segments)`);
         autoPublished.push(flightInfo);
       }
 
@@ -417,7 +426,7 @@ async function main() {
           autoPublished,
           suspicious,
           workerUrl: config.cloudflare_worker_url,
-          siteUrl: ''
+          siteUrl: config.site_url || 'https://morons.org.za'
         });
         console.log(`[sync] Email sent: HTTP ${result.status}`);
       } catch (e) {
