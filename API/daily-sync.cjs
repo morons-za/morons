@@ -405,16 +405,25 @@ async function main() {
       }
     }
 
-    // Step 6: Update metadata and index.html for auto-published flights
+    // Step 6: Incrementally update metadata for auto-published flights
     if (autoPublished.length > 0 && !args.dryRun) {
-      console.log('[sync] Updating metadata...');
+      console.log('[sync] Updating metadata (incremental)...');
       try {
-        const { execSync } = require('child_process');
-        execSync('node backend/scripts/generate-master-metadata-main.cjs', {
-          cwd: path.join(__dirname, '..'),
-          stdio: 'pipe',
-          timeout: 60000
-        });
+        const { updateMasterMetadataIncremental } = require('../backend/scripts/generate-master-metadata-main.cjs');
+        const flightRecords = autoPublished.map(f => ({
+          filename: f.filename,
+          registration: f.registration,
+          date: f.date,
+          time: '00:00'
+        }));
+        await updateMasterMetadataIncremental(null, { flightRecords });
+
+        const srcMeta = path.join(__dirname, '..', 'backend', 'scripts', 'master-metadata.json');
+        const dstMeta = path.join(__dirname, '..', 'static-site', 'master-metadata.json');
+        if (fs.existsSync(srcMeta)) {
+          fs.copyFileSync(srcMeta, dstMeta);
+          console.log('[sync] Copied master-metadata.json to static-site/');
+        }
       } catch (e) {
         console.warn(`[sync] Metadata update warning: ${e.message}`);
       }

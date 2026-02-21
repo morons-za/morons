@@ -334,18 +334,20 @@ if (require.main === module) {
 }
 
 // Incremental update function - only processes new files
-async function updateMasterMetadataIncremental(newFilenames = null) {
+// Accepts either:
+//   - newFilenames: array of KML filenames to parse from uploads/
+//   - flightRecords: array of pre-computed { filename, registration, date, time } objects
+//     (skips KML parsing entirely — used by daily-sync which already has all metadata)
+async function updateMasterMetadataIncremental(newFilenames = null, { flightRecords } = {}) {
   console.log('🔄 Incrementally updating master metadata...');
-  console.log('');
-  
-  // Load existing metadata
+
   let existingMetadata = {
     generated: new Date().toISOString(),
     totalFiles: 0,
     validFlights: 0,
     flights: []
   };
-  
+
   if (fs.existsSync(masterMetadataFile)) {
     try {
       existingMetadata = JSON.parse(fs.readFileSync(masterMetadataFile, 'utf8'));
@@ -354,119 +356,103 @@ async function updateMasterMetadataIncremental(newFilenames = null) {
       console.log(`⚠️ Could not load existing metadata: ${error.message}, starting fresh`);
     }
   }
-  
-  // Create Set of existing filenames for fast lookup
+
   const existingFilenames = new Set(existingMetadata.flights.map(f => f.filename));
-  
-  // Load helicopter metadata
   const helicopterMetadata = loadHelicopterMetadata();
-  
-  // If specific filenames provided, process only those; otherwise find new files
-  let filesToProcess = [];
-  
-  if (newFilenames && newFilenames.length > 0) {
-    // Process only the specified new files
-    filesToProcess = newFilenames.filter(filename => !existingFilenames.has(filename));
-    console.log(`📁 Processing ${filesToProcess.length} specified new file(s)`);
+
+  const newFlights = [];
+
+  if (flightRecords && flightRecords.length > 0) {
+    // Fast path: pre-computed metadata from daily-sync (no KML parsing needed)
+    for (const rec of flightRecords) {
+      if (existingFilenames.has(rec.filename)) continue;
+      const heliData = helicopterMetadata[rec.registration] || {};
+      const filePath = path.join(uploadsDir, rec.filename);
+      let fileSizeMB = 0;
+      try { fileSizeMB = parseFloat((fs.statSync(filePath).size / (1024 * 1024)).toFixed(2)); } catch {}
+      newFlights.push({
+        filename: rec.filename,
+        registration: rec.registration,
+        date: rec.date,
+        time: rec.time || '00:00',
+        owner: heliData.owner || rec.owner || '',
+        imageUrl: heliData.imageUrl || '',
+        fileSizeMB
+      });
+    }
+    console.log(`📁 Added ${newFlights.length} flight(s) from pre-computed records`);
   } else {
-    // Find new files by comparing with existing metadata
-    const allFiles = fs.existsSync(uploadsDir) 
-      ? fs.readdirSync(uploadsDir).filter(f => f.toLowerCase().endsWith('.kml'))
-      : [];
-    
-    filesToProcess = allFiles.filter(filename => !existingFilenames.has(filename));
-    console.log(`📁 Found ${filesToProcess.length} new file(s) to process`);
+    // Slow path: parse KML files from disk
+    let filesToProcess = [];
+
+    if (newFilenames && newFilenames.length > 0) {
+      filesToProcess = newFilenames.filter(f => !existingFilenames.has(f));
+      console.log(`📁 Processing ${filesToProcess.length} specified new file(s)`);
+    } else {
+      const allFiles = fs.existsSync(uploadsDir)
+        ? fs.readdirSync(uploadsDir).filter(f => f.toLowerCase().endsWith('.kml'))
+        : [];
+      filesToProcess = allFiles.filter(f => !existingFilenames.has(f));
+      console.log(`📁 Found ${filesToProcess.length} new file(s) to process`);
+    }
+
+    if (filesToProcess.length === 0) {
+      console.log('✅ No new files to process - metadata is up to date');
+      return existingMetadata;
+    }
+
+    const excludedFiles = [];
+    filesToProcess.forEach((filename) => {
+      const filePath = path.join(uploadsDir, filename);
+      if (!fs.existsSync(filePath)) { console.log(`⚠️ File not found: ${filename}`); return; }
+
+      const meta = extractKmlInfoFromFile(filePath, filename);
+      if (meta.registration) {
+        const heliData = helicopterMetadata[meta.registration] || {};
+        const fileSizeMB = parseFloat((fs.statSync(filePath).size / (1024 * 1024)).toFixed(2));
+        newFlights.push({
+          filename: meta.filename,
+          registration: meta.registration,
+          date: meta.date,
+          time: meta.time,
+          owner: heliData.owner || meta.owner || '',
+          imageUrl: heliData.imageUrl || '',
+          fileSizeMB
+        });
+      } else {
+        excludedFiles.push(filename);
+      }
+    });
+
+    if (excludedFiles.length > 0) {
+      console.log(`⚠️ Excluded ${excludedFiles.length} file(s) (no registration): ${excludedFiles.join(', ')}`);
+    }
   }
-  
-  if (filesToProcess.length === 0) {
-    console.log('✅ No new files to process - metadata is up to date');
+
+  if (newFlights.length === 0) {
+    console.log('✅ No new flights to add');
     return existingMetadata;
   }
-  
-  console.log('');
-  
-  // Process only new files
-  const newFlights = [];
-  const excludedFiles = [];
-  
-  filesToProcess.forEach((filename, idx) => {
-    const filePath = path.join(uploadsDir, filename);
-    
-    // Skip if file doesn't exist
-    if (!fs.existsSync(filePath)) {
-      console.log(`⚠️ File not found: ${filename}`);
-      return;
-    }
-    
-    const meta = extractKmlInfoFromFile(filePath, filename);
-    
-    // Only include flights with valid registration
-    if (meta.registration) {
-      const heliData = helicopterMetadata[meta.registration] || {};
-      
-      // Calculate file size in MB
-      const fileSizeBytes = fs.statSync(filePath).size;
-      const fileSizeMB = parseFloat((fileSizeBytes / (1024 * 1024)).toFixed(2));
-      
-      // Priority: helicopters.json (curated data) > KML extraction (FlightRadar24)
-      newFlights.push({
-        filename: meta.filename,
-        registration: meta.registration,
-        date: meta.date,
-        time: meta.time,
-        owner: heliData.owner || meta.owner || '',
-        imageUrl: heliData.imageUrl || '',
-        fileSizeMB: fileSizeMB
-      });
-    } else {
-      excludedFiles.push({
-        filename: filename,
-        reason: 'No registration extracted'
-      });
-    }
-  });
-  
-  // Merge new flights with existing flights
+
   const allFlights = [...existingMetadata.flights, ...newFlights];
-  
-  // Sort by date and time (newest first)
   allFlights.sort((a, b) => {
     const dateCompare = b.date.localeCompare(a.date);
     if (dateCompare !== 0) return dateCompare;
     return b.time.localeCompare(a.time);
   });
-  
-  // Update metadata
+
   const updatedMetadata = {
     generated: new Date().toISOString(),
-    totalFiles: allFlights.length, // This is actually the valid flights count
+    totalFiles: allFlights.length,
     validFlights: allFlights.length,
     flights: allFlights
   };
-  
-  // Ensure server directory exists
+
   const serverDir = path.dirname(masterMetadataFile);
-  if (!fs.existsSync(serverDir)) {
-    fs.mkdirSync(serverDir, { recursive: true });
-  }
-  
+  if (!fs.existsSync(serverDir)) fs.mkdirSync(serverDir, { recursive: true });
   fs.writeFileSync(masterMetadataFile, JSON.stringify(updatedMetadata, null, 2));
-  
-  console.log('');
-  console.log('✅ Master metadata updated incrementally!');
-  console.log(`📊 Summary:`);
-  console.log(`   • Processed: ${filesToProcess.length} new file(s)`);
-  console.log(`   • Added: ${newFlights.length} valid flight(s)`);
-  console.log(`   • Excluded: ${excludedFiles.length} file(s) (missing registration)`);
-  console.log(`   • Total flights: ${allFlights.length}`);
-  
-  if (excludedFiles.length > 0) {
-    console.log(`\n⚠️ Excluded files:`);
-    excludedFiles.forEach(file => {
-      console.log(`   • ${file.filename} - ${file.reason}`);
-    });
-  }
-  
+
+  console.log(`✅ Metadata updated: +${newFlights.length} flights, ${allFlights.length} total`);
   return updatedMetadata;
 }
 
