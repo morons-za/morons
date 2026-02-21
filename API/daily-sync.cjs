@@ -67,6 +67,11 @@ function isoToYmd(iso) {
   return m ? m[1] : null;
 }
 
+function isoToHHMM(iso) {
+  const m = String(iso || '').match(/T(\d{2}:\d{2})/);
+  return m ? m[1] : null;
+}
+
 function normalizeReg(input) {
   const raw = String(input || '').trim().toUpperCase();
   const compact = raw.replace(/[^A-Z0-9]/g, '');
@@ -304,6 +309,7 @@ async function main() {
       if (!id8) continue;
       const meta = flightsById.get(id) || {};
       const ymd = isoToYmd(meta.first_seen) || isoToYmd(meta.last_seen) || 'UNKNOWN';
+      const hhmm = isoToHHMM(meta.first_seen) || isoToHHMM(meta.last_seen) || '00:00';
       const reg = normalizeReg(meta.registration) || 'UNKNOWN';
       const filename = `${ymd}-${reg}-${id8}.kml`;
 
@@ -338,6 +344,7 @@ async function main() {
         filename,
         registration: reg,
         date: ymd,
+        time: hhmm,
         classification,
         maxGapKm: gapResult.maxGapKm,
         avgSegmentKm: gapResult.avgSegmentKm,
@@ -414,7 +421,7 @@ async function main() {
           filename: f.filename,
           registration: f.registration,
           date: f.date,
-          time: '00:00'
+          time: f.time || '00:00'
         }));
         await updateMasterMetadataIncremental(null, { flightRecords });
 
