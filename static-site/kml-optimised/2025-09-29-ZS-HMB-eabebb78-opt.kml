@@ -6,7 +6,7 @@
     
     <Style id="flightPath">
       <LineStyle>
-        <color>ff0000ff</color>
+        <color>ffff0000</color>
         <width>3</width>
       </LineStyle>
     </Style>

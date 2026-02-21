@@ -10,37 +10,59 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 def extract_coordinates_from_kml(kml_content):
-    """Extract all coordinates from KML points and return as LineString coordinates
-    Supports both standard KML <coordinates> and Google Earth Extended <gx:coord> formats
+    """Extract flight path coordinates from KML, skipping boundary polygons and markers.
+    Supports standard KML <coordinates>, <LineString>, and Google Earth <gx:coord> formats.
+    Returns a list of individual coordinate strings ("lon,lat,alt").
     """
     coordinates = []
-    
-    # Method 1: Standard KML format with <coordinates> elements
-    coordinate_pattern = r'<coordinates>([^<]+)</coordinates>'
-    matches = re.findall(coordinate_pattern, kml_content)
-    
-    for match in matches:
-        coord_str = match.strip()
-        if coord_str:
-            coordinates.append(coord_str)
-    
-    # Method 2: Google Earth Extended format with <gx:coord> elements
-    if not coordinates:
-        gx_coord_pattern = r'<gx:coord[^>]*>([^<]+)</gx:coord>'
-        gx_matches = re.findall(gx_coord_pattern, kml_content)
-        
-        # Convert gx:coord format ("lon lat alt") to KML coordinates format ("lon,lat,alt")
+
+    # Preferred: extract coordinates only from <LineString> elements
+    if '<LineString>' in kml_content:
+        ls_pattern = r'<LineString>.*?<coordinates>([^<]+)</coordinates>.*?</LineString>'
+        matches = re.findall(ls_pattern, kml_content, re.DOTALL)
+        for match in matches:
+            for pt in match.strip().split():
+                pt = pt.strip()
+                if pt:
+                    coordinates.append(pt)
+        if coordinates:
+            return coordinates
+
+    # Fallback: Google Earth Extended format with <gx:coord> elements
+    gx_coord_pattern = r'<gx:coord[^>]*>([^<]+)</gx:coord>'
+    gx_matches = re.findall(gx_coord_pattern, kml_content)
+    if gx_matches:
         for match in gx_matches:
             coord_parts = match.strip().split()
-            if len(coord_parts) >= 2:  # At least longitude and latitude
-                # Convert "18.427323 -33.90097 22" to "18.427323,-33.90097,22"
+            if len(coord_parts) >= 2:
                 if len(coord_parts) >= 3:
                     coord_str = f"{coord_parts[0]},{coord_parts[1]},{coord_parts[2]}"
                 else:
                     coord_str = f"{coord_parts[0]},{coord_parts[1]},0"
                 coordinates.append(coord_str)
-    
+        return coordinates
+
+    # Last resort: individual <Point> placemarks (old FR24 point-per-placemark format)
+    coordinate_pattern = r'<Point>\s*(?:<altitudeMode>[^<]*</altitudeMode>\s*)?<coordinates>([^<]+)</coordinates>\s*</Point>'
+    matches = re.findall(coordinate_pattern, kml_content, re.DOTALL)
+    for match in matches:
+        pt = match.strip()
+        if pt:
+            coordinates.append(pt)
+
     return coordinates
+
+
+def extract_entry_exit_markers(kml_content):
+    """Extract Entry/Exit point placemarks from server-generated KMLs."""
+    markers = []
+    pattern = r'<Placemark>\s*<name>((?:Entry|Exit)\s+\d+)</name>\s*<description><!\[CDATA\[(.*?)\]\]></description>\s*<Style>.*?</Style>\s*<Point>.*?<coordinates>([^<]+)</coordinates>.*?</Point>\s*</Placemark>'
+    for m in re.finditer(pattern, kml_content, re.DOTALL):
+        name, desc, coords = m.group(1), m.group(2), m.group(3).strip()
+        is_entry = name.startswith('Entry')
+        color = 'ff00ff00' if is_entry else 'ff0000ff'  # green / red in AABBGGRR
+        markers.append((name, desc, coords, color))
+    return markers
 
 def get_flight_info(kml_content):
     """Extract flight registration and basic info from KML"""
@@ -55,28 +77,42 @@ def get_flight_info(kml_content):
     return flight_name, description
 
 def create_optimised_kml(original_kml_path, decimation_factor=5):
-    """Convert KML with individual points to LineString KML"""
+    """Convert KML to optimised LineString KML, preserving entry/exit markers."""
     
     with open(original_kml_path, 'r', encoding='utf-8') as f:
         kml_content = f.read()
     
-    # Extract coordinates
     coordinates = extract_coordinates_from_kml(kml_content)
     
     if not coordinates:
         print(f"No coordinates found in {original_kml_path}")
         return None
     
-    # Detect which format was used (for debugging)
     format_type = "Standard KML" if '<coordinates>' in kml_content else "Google Earth Extended (gx:coord)"
     
-    # Decimate coordinates (take every Nth point for performance)
     decimated_coords = coordinates[::decimation_factor]
     
-    # Get flight info
     flight_name, description = get_flight_info(kml_content)
-    
-    # Create optimised KML with LineString
+    markers = extract_entry_exit_markers(kml_content)
+
+    marker_xml = ''
+    for name, desc, coords, color in markers:
+        marker_xml += f'''
+    <Placemark>
+      <name>{name}</name>
+      <description><![CDATA[{desc}]]></description>
+      <Style>
+        <IconStyle>
+          <color>{color}</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>{coords}</coordinates>
+      </Point>
+    </Placemark>'''
+
     optimised_kml = f'''<?xml version="1.0" encoding="UTF-8"?>
 <kml xmlns="http://www.opengis.net/kml/2.2">
   <Document>
@@ -85,7 +121,7 @@ def create_optimised_kml(original_kml_path, decimation_factor=5):
     
     <Style id="flightPath">
       <LineStyle>
-        <color>ff0000ff</color>
+        <color>ffff0000</color>
         <width>3</width>
       </LineStyle>
     </Style>
@@ -102,7 +138,7 @@ def create_optimised_kml(original_kml_path, decimation_factor=5):
           {' '.join(decimated_coords)}
         </coordinates>
       </LineString>
-    </Placemark>
+    </Placemark>{marker_xml}
   </Document>
 </kml>'''
     

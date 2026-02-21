@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FR24 Track Viewer</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <style>
+      :root {
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+        --bg: #ffffff;
+        --panel: #fafafa;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 18px;
+        color: var(--text);
+        background: var(--bg);
+      }
+      .wrap { max-width: 1100px; }
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel);
+        margin-bottom: 12px;
+      }
+      .muted { color: var(--muted); font-size: 12px; }
+      .btn {
+        display: inline-block;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: #fff;
+        color: #111;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      #map { height: 76vh; min-height: 520px; border: 1px solid var(--border); border-radius: 12px; }
+      pre { background: #0b1020; color: #e8ecff; padding: 12px; border-radius: 12px; overflow: auto; max-height: 240px; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <div style="font-weight: 600;">FR24 track viewer</div>
+          <div class="muted" id="subtitle">Loading…</div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap: wrap; justify-content: flex-end;">
+          <a class="btn" href="/fr24.html">← Back</a>
+          <a class="btn" id="kmlLink" href="#" download>Download KML</a>
+        </div>
+      </div>
+
+      <div id="map"></div>
+
+      <details style="margin-top: 12px;">
+        <summary class="muted">Debug</summary>
+        <pre id="debugOut">{}</pre>
+      </details>
+    </div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script>
+      const qs = new URLSearchParams(location.search);
+      const flightId = (qs.get('flight_id') || '').trim();
+      const subtitle = document.getElementById('subtitle');
+      const debugOut = document.getElementById('debugOut');
+      const kmlLink = document.getElementById('kmlLink');
+
+      function setDebug(obj) { debugOut.textContent = JSON.stringify(obj, null, 2); }
+
+      if (!flightId) {
+        subtitle.textContent = 'Missing flight_id';
+        setDebug({ ok: false, error: 'Missing flight_id in query string' });
+      } else {
+        subtitle.textContent = `Flight ID: ${flightId}`;
+        kmlLink.href = `/api/fr24/flight-tracks.kml?flight_id=${encodeURIComponent(flightId)}`;
+      }
+
+      const map = L.map('map').setView([-33.95, 18.45], 10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      let trackLayer = null;
+      let tmnpLayer = null;
+
+      async function loadTmnp() {
+        const resp = await fetch('/api/tmnp.geojson');
+        const json = await resp.json();
+        if (!json.ok) throw new Error('Failed to load TMNP geojson');
+
+        tmnpLayer = L.geoJSON(json.data, {
+          style: { color: '#ef4444', weight: 2, fillOpacity: 0.02 }
+        }).addTo(map);
+      }
+
+      function extractTrackLonLat(trackResponse) {
+        const maybeTracks =
+          trackResponse?.tracks ||
+          trackResponse?.data?.tracks ||
+          (Array.isArray(trackResponse) ? trackResponse?.[0]?.tracks : null) ||
+          (Array.isArray(trackResponse?.data) ? trackResponse?.data?.[0]?.tracks : null);
+        const pts = Array.isArray(maybeTracks)
+          ? maybeTracks
+              .map((p) => [Number(p?.lat), Number(p?.lon)])
+              .filter(([lat, lon]) => Number.isFinite(lat) && Number.isFinite(lon))
+          : [];
+        return pts;
+      }
+
+      async function loadTrack() {
+        const resp = await fetch(`/api/fr24/flight-tracks?flight_id=${encodeURIComponent(flightId)}`);
+        const json = await resp.json();
+        if (!json.ok) throw new Error(`Track request failed: ${json?.error || 'unknown'}`);
+        const pts = extractTrackLonLat(json.response);
+        if (pts.length === 0) throw new Error('No track points returned');
+
+        trackLayer = L.polyline(pts, { color: '#2563eb', weight: 3 }).addTo(map);
+        map.fitBounds(trackLayer.getBounds(), { padding: [20, 20] });
+        setDebug({ ok: true, flightId, points: pts.length });
+      }
+
+      (async () => {
+        try {
+          if (!flightId) return;
+          await loadTmnp();
+          await loadTrack();
+        } catch (e) {
+          setDebug({ ok: false, error: String(e) });
+        }
+      })();
+    </script>
+  </body>
+</html>
+

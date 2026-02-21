@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Flight report</title>
+    <style>
+      :root {
+        --bg: #0b1020;
+        --panel: rgba(255,255,255,0.06);
+        --panel2: rgba(255,255,255,0.08);
+        --text: rgba(255,255,255,0.92);
+        --muted: rgba(255,255,255,0.65);
+        --border: rgba(255,255,255,0.14);
+        --good: #38d996;
+        --warn: #ffd166;
+        --bad: #ff5c77;
+        --link: #9be3f6;
+        --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        font-family: var(--sans);
+        color: var(--text);
+        background: radial-gradient(1200px 800px at 30% -20%, rgba(155,227,246,0.20), transparent 60%),
+                    radial-gradient(900px 650px at 80% 0%, rgba(56,217,150,0.14), transparent 55%),
+                    var(--bg);
+      }
+      .wrap { max-width: 1100px; margin: 0 auto; padding: 20px 16px 42px; }
+      .topbar { display:flex; align-items:center; justify-content:space-between; gap: 12px; }
+      .h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.2px; }
+      .muted { color: var(--muted); }
+      .mono { font-family: var(--mono); }
+      .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+      .grid { display:grid; grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+      @media (min-width: 940px) { .grid { grid-template-columns: 1.2fr 0.8fr; } }
+      .row { display:flex; flex-wrap:wrap; gap: 10px 18px; align-items: center; }
+      .pill {
+        display:inline-flex; align-items:center; gap: 8px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.06);
+        color: var(--text);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
+      }
+      .dot { width: 8px; height: 8px; border-radius: 999px; background: var(--muted); }
+      .link { color: var(--link); text-decoration: none; }
+      .link:hover { text-decoration: underline; }
+      .btn {
+        display:inline-flex; align-items:center; justify-content:center;
+        padding: 8px 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        background: rgba(255,255,255,0.08);
+        color: var(--text);
+        cursor: pointer;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      .btn:hover { background: rgba(255,255,255,0.10); }
+      h2 { font-size: 15px; margin: 0 0 10px; }
+      .kvs { display:grid; grid-template-columns: 170px 1fr; gap: 6px 10px; }
+      .k { color: var(--muted); }
+      .v { color: var(--text); }
+      .hr { height: 1px; background: var(--border); margin: 12px 0; }
+      table { width: 100%; border-collapse: collapse; }
+      th, td { text-align:left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 13px; vertical-align: top; }
+      th { color: var(--muted); font-weight: 600; background: rgba(255,255,255,0.04); position: sticky; top: 0; }
+      .scroll { max-height: 420px; overflow: auto; border-radius: 12px; border: 1px solid var(--border); }
+      pre { margin: 0; white-space: pre-wrap; word-break: break-word; font-family: var(--mono); font-size: 12px; color: rgba(255,255,255,0.82); }
+      .warn { color: var(--warn); }
+      .bad { color: var(--bad); }
+      .good { color: var(--good); }
+      #narrative { white-space: pre-wrap; }
+      .imgWrap { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; background: rgba(255,255,255,0.03); }
+      .mapStack { position: relative; width: 100%; }
+      .mapStack img { display: block; width: 100%; height: auto; }
+      .mapOverlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+      .imgCaption { margin-top: 8px; font-size: 12px; color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <div class="h1">Flight report</div>
+          <div class="muted">TMNP / NP17 airspace incursion summary</div>
+        </div>
+        <div class="row">
+          <span class="pill" id="statusPill"><span class="dot" id="statusDot"></span><span id="statusText">Loading…</span></span>
+          <a class="btn" id="btnOpenTrack" target="_blank" rel="noreferrer">Open track</a>
+          <a class="btn" id="btnDownloadKml" target="_blank" rel="noreferrer">Download KML</a>
+        </div>
+      </div>
+
+      <div class="grid">
+        <div class="card">
+          <h2>Summary</h2>
+          <div class="kvs" id="summaryKvs"></div>
+          <div class="hr"></div>
+          <h2>Overview image</h2>
+          <div class="imgWrap">
+            <a id="overviewLink" target="_blank" rel="noreferrer">
+              <div class="mapStack">
+                <img id="overviewBase" alt="OpenStreetMap basemap" />
+                <img id="overviewOverlay" class="mapOverlay" alt="Track overlay" />
+              </div>
+            </a>
+          </div>
+          <div class="imgCaption">Track overview with TMNP boundary and entry/exit markers. Click to open full-size.</div>
+          <div class="hr"></div>
+          <h2>Narrative</h2>
+          <div id="narrative" class="muted"></div>
+        </div>
+
+        <div class="card">
+          <h2>Workflow</h2>
+          <div class="muted" style="margin-bottom: 10px;">
+            Email sending is not implemented yet. This section is a placeholder for future “Reviewed / Sent to authorities” status and audit trail.
+          </div>
+          <div class="kvs">
+            <div class="k">Report status</div><div class="v"><span class="pill"><span class="dot"></span>Not sent</span></div>
+            <div class="k">Recipient</div><div class="v">—</div>
+            <div class="k">Sent at</div><div class="v">—</div>
+            <div class="k">SendGrid message id</div><div class="v mono">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top: 12px;">
+        <h2>Incursions (entry → exit)</h2>
+        <div class="scroll">
+          <table aria-label="Incursions">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Entry (SAST)</th>
+                <th>Entry (lat, lon)</th>
+                <th>Entry speed</th>
+                <th>Entry alt</th>
+                <th>Exit (SAST)</th>
+                <th>Exit (lat, lon)</th>
+                <th>Exit speed</th>
+                <th>Exit alt</th>
+              </tr>
+            </thead>
+            <tbody id="incursionsBody">
+              <tr><td colspan="9" class="muted">Loading…</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <details style="margin-top: 10px;">
+          <summary class="muted">Raw report JSON</summary>
+          <pre id="rawJson">{}</pre>
+        </details>
+      </div>
+    </div>
+
+    <script>
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const summaryKvs = document.getElementById('summaryKvs');
+      const narrativeEl = document.getElementById('narrative');
+      const incursionsBody = document.getElementById('incursionsBody');
+      const rawJson = document.getElementById('rawJson');
+      const btnOpenTrack = document.getElementById('btnOpenTrack');
+      const btnDownloadKml = document.getElementById('btnDownloadKml');
+      const overviewLink = document.getElementById('overviewLink');
+      const overviewBase = document.getElementById('overviewBase');
+      const overviewOverlay = document.getElementById('overviewOverlay');
+
+      function setStatus(state, text) {
+        statusDot.style.background = state === 'good' ? 'var(--good)' : state === 'bad' ? 'var(--bad)' : 'var(--warn)';
+        statusText.textContent = text;
+      }
+
+      function qs(name) {
+        const url = new URL(location.href);
+        return url.searchParams.get(name);
+      }
+
+      function fmtNumber(n, digits = 0) {
+        const x = Number(n);
+        if (!Number.isFinite(x)) return '—';
+        return x.toFixed(digits);
+      }
+
+      function fmtCoord(lat, lon) {
+        const la = Number(lat), lo = Number(lon);
+        if (!Number.isFinite(la) || !Number.isFinite(lo)) return '—';
+        return `${la.toFixed(6)}, ${lo.toFixed(6)}`;
+      }
+
+      function fmtDurationMinutes(mins) {
+        const m = Number(mins);
+        if (!Number.isFinite(m)) return '—';
+        const totalSec = Math.max(0, Math.round(m * 60));
+        const mm = Math.floor(totalSec / 60);
+        const ss = totalSec % 60;
+        return `${mm}m ${String(ss).padStart(2, '0')}s`;
+      }
+
+      function fmtSastFromIso(iso) {
+        if (!iso) return '';
+        const raw = String(iso).trim();
+        const withZ = /Z$/i.test(raw) ? raw : `${raw}Z`;
+        const ms = Date.parse(withZ);
+        if (!Number.isFinite(ms)) return '';
+        const d = new Date(ms + 2 * 60 * 60 * 1000); // SAST is UTC+2 (no DST)
+        const pad2 = (n) => String(n).padStart(2, '0');
+        return `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())} ${pad2(d.getUTCHours())}:${pad2(d.getUTCMinutes())}:${pad2(d.getUTCSeconds())}`;
+      }
+
+      function kv(k, v, { mono = false } = {}) {
+        const kEl = document.createElement('div');
+        kEl.className = 'k';
+        kEl.textContent = k;
+        const vEl = document.createElement('div');
+        vEl.className = 'v' + (mono ? ' mono' : '');
+        vEl.textContent = v == null || v === '' ? '—' : String(v);
+        summaryKvs.appendChild(kEl);
+        summaryKvs.appendChild(vEl);
+      }
+
+      async function main() {
+        const flightId = (qs('flight_id') || '').trim();
+        document.title = flightId ? `Report ${flightId}` : 'Flight report';
+
+        btnOpenTrack.href = flightId ? `/fr24-track.html?flight_id=${encodeURIComponent(flightId)}` : '#';
+        btnDownloadKml.href = flightId ? `/api/fr24/flight-tracks.kml?flight_id=${encodeURIComponent(flightId)}&v=3d` : '#';
+        const baseUrl = flightId ? `/api/fr24/report-basemap.webp?flight_id=${encodeURIComponent(flightId)}` : '';
+        const overlayUrl = flightId ? `/api/fr24/report-overlay.svg?flight_id=${encodeURIComponent(flightId)}` : '';
+        overviewBase.src = baseUrl;
+        overviewOverlay.src = overlayUrl;
+        // Open the self-contained (saveable) SVG in a new tab.
+        overviewLink.href = flightId ? `/api/fr24/report-image.svg?flight_id=${encodeURIComponent(flightId)}` : '#';
+
+        if (!flightId) {
+          setStatus('bad', 'Missing flight_id');
+          narrativeEl.innerHTML = `<span class="bad">Missing <span class="mono">flight_id</span> query parameter.</span>`;
+          incursionsBody.innerHTML = `<tr><td colspan="9" class="bad">Missing flight_id.</td></tr>`;
+          return;
+        }
+
+        setStatus('warn', 'Loading report…');
+        const resp = await fetch(`/api/fr24/report?flight_id=${encodeURIComponent(flightId)}`);
+        const json = await resp.json().catch(() => null);
+        rawJson.textContent = JSON.stringify(json, null, 2);
+
+        if (!json || !json.ok) {
+          const err = json && json.error ? String(json.error) : `HTTP ${resp.status}`;
+          setStatus('bad', 'Report unavailable');
+          narrativeEl.innerHTML = `<span class="bad">${err}</span>`;
+          incursionsBody.innerHTML = `<tr><td colspan="9" class="bad">${err}</td></tr>`;
+          return;
+        }
+
+        const r = json.report || {};
+        setStatus('good', 'Report ready');
+
+        summaryKvs.innerHTML = '';
+        kv('Flight ID', r.flight_id, { mono: true });
+        kv('Registration', r.registration_guess || '—', { mono: true });
+        kv('Owner', r.owner || '—');
+        kv('Source', r.source || '—');
+        kv('Start (SAST)', r.start_sast || fmtSastFromIso(r.start_utc) || '—');
+        kv('End (SAST)', r.end_sast || fmtSastFromIso(r.end_utc) || '—');
+        kv('Incursions', r.entries != null ? String(r.entries) : '—');
+        kv('Min altitude inside', (r.min_alt_m != null ? `${fmtNumber(r.min_alt_m, 0)} m (${fmtNumber(r.min_alt_m * 3.28084, 0)} ft)` : '—'));
+        kv('Max altitude inside', (r.max_alt_m != null ? `${fmtNumber(r.max_alt_m, 0)} m (${fmtNumber(r.max_alt_m * 3.28084, 0)} ft)` : '—'));
+        kv('Speed inside', (r.min_speed_kt != null && r.max_speed_kt != null) ? `${fmtNumber(r.min_speed_kt * 1.852, 0)}–${fmtNumber(r.max_speed_kt * 1.852, 0)} km/h (${fmtNumber(r.min_speed_kt, 0)}–${fmtNumber(r.max_speed_kt, 0)} kt)` : '—');
+
+        narrativeEl.textContent = r.narrative_text_sast || r.narrative_text || '—';
+
+        const incs = Array.isArray(r.incursions) ? r.incursions : [];
+        incursionsBody.innerHTML = '';
+        if (incs.length === 0) {
+          incursionsBody.innerHTML = `<tr><td colspan="9" class="muted">No incursions computed.</td></tr>`;
+          return;
+        }
+
+        for (let i = 0; i < incs.length; i++) {
+          const inc = incs[i] || {};
+          const e = inc.entry || {};
+          const x = inc.exit || {};
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="muted">${i + 1}</td>
+            <td class="mono">${e.time_sast || fmtSastFromIso(e.time_utc) || '—'}</td>
+            <td class="mono">${fmtCoord(e.lat, e.lon)}</td>
+            <td>${e.gspeed_kt != null ? `${fmtNumber(e.gspeed_kt, 0)} kt` : '—'}</td>
+            <td>${e.alt_m != null ? `${fmtNumber(e.alt_m, 0)} m` : '—'}</td>
+            <td class="mono">${x.time_sast || fmtSastFromIso(x.time_utc) || '—'}</td>
+            <td class="mono">${fmtCoord(x.lat, x.lon)}</td>
+            <td>${x.gspeed_kt != null ? `${fmtNumber(x.gspeed_kt, 0)} kt` : '—'}</td>
+            <td>${x.alt_m != null ? `${fmtNumber(x.alt_m, 0)} m` : '—'}</td>
+          `;
+          incursionsBody.appendChild(tr);
+        }
+      }
+
+      main().catch((e) => {
+        setStatus('bad', 'Report failed');
+        narrativeEl.innerHTML = `<span class="bad">${String(e)}</span>`;
+      });
+    </script>
+  </body>
+</html>
+

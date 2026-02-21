@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Backfill Tester (OpenSky vs adsb.lol traces)</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <style>
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 16px;
+        color: #111;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 10px;
+        padding: 12px;
+      }
+      label {
+        display: block;
+        font-size: 12px;
+        color: #444;
+        margin-top: 10px;
+      }
+      input, select, button, textarea {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 14px;
+      }
+      button {
+        cursor: pointer;
+        background: #111;
+        color: #fff;
+        border: 1px solid #111;
+        margin-top: 10px;
+      }
+      button.secondary {
+        background: #fff;
+        color: #111;
+      }
+      .muted { color: #666; font-size: 12px; }
+      #map { height: 520px; border-radius: 10px; border: 1px solid #ddd; }
+      pre {
+        background: #0b1020;
+        color: #e8ecff;
+        padding: 10px;
+        border-radius: 10px;
+        overflow: auto;
+        max-height: 260px;
+        font-size: 12px;
+      }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    </style>
+  </head>
+  <body>
+    <h2 style="margin:0 0 6px 0;">Backfill tester</h2>
+    <div class="muted" style="margin-bottom: 14px;">
+      Compares <strong>OpenSky historical flights/tracks</strong> against <strong>adsb.lol readsb trace files</strong> (you upload the trace <code>.json.gz</code> files).
+      Secrets are sent only to <code>localhost:4000</code> and are not stored by the server.
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3 style="margin:0 0 8px 0;">OpenSky</h3>
+
+        <label>ICAO24 (hex, lowercase preferred)</label>
+        <input id="openskyIcao24" placeholder="e.g. 3c675a" />
+
+        <div class="row">
+          <div>
+            <label>Begin (UTC)</label>
+            <input id="openskyBegin" type="datetime-local" />
+          </div>
+          <div>
+            <label>End (UTC)</label>
+            <input id="openskyEnd" type="datetime-local" />
+          </div>
+        </div>
+
+        <label>Auth type</label>
+        <select id="openskyAuthType">
+          <option value="oauth" selected>OAuth client credentials (recommended)</option>
+          <option value="basic">Legacy username/password (deprecated by OpenSky)</option>
+        </select>
+
+        <div id="openskyOauthFields">
+          <label>OpenSky client_id</label>
+          <input id="openskyClientId" placeholder="client_id" />
+          <label>OpenSky client_secret</label>
+          <input id="openskyClientSecret" placeholder="client_secret" />
+        </div>
+
+        <div id="openskyBasicFields" style="display:none;">
+          <label>OpenSky username</label>
+          <input id="openskyUsername" placeholder="username" />
+          <label>OpenSky password</label>
+          <input id="openskyPassword" type="password" placeholder="password" />
+        </div>
+
+        <div class="row">
+          <div>
+            <label>Max flights</label>
+            <input id="openskyMaxFlights" type="number" value="10" min="0" max="200" />
+          </div>
+          <div>
+            <label>Include tracks</label>
+            <select id="openskyIncludeTracks">
+              <option value="true" selected>Yes</option>
+              <option value="false">No (flights only)</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="btnOpenSky">Fetch OpenSky backfill</button>
+        <button class="secondary" id="btnPlotOpenSky">Plot first track on map</button>
+        <pre id="openskyOut">{}</pre>
+      </div>
+
+      <div class="card">
+        <h3 style="margin:0 0 8px 0;">adsb.lol (trace import)</h3>
+        <div class="muted" style="margin-bottom: 10px;">
+          Upload one or more <code>readsb</code> trace files (<code>*.json.gz</code>) for the aircraft/day.
+          These live under <code>traces/</code> in the extracted <code>globe_history_YYYY</code> release tar.
+          Format reference: <a href="https://github.com/wiedehopf/readsb/blob/dev/README-json.md#trace-jsons" target="_blank" rel="noreferrer">readsb trace jsons</a>.
+        </div>
+
+        <label>Trace files (.json.gz)</label>
+        <input id="adsbFiles" type="file" multiple accept=".gz,.json.gz" />
+        <button id="btnAdsbLol">Upload + parse traces</button>
+        <button class="secondary" id="btnPlotAdsbLol">Plot first segment on map</button>
+        <pre id="adsbOut">{}</pre>
+      </div>
+    </div>
+
+    <div style="height: 14px;"></div>
+    <div id="map"></div>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script>
+      const map = L.map('map').setView([-33.95, 18.45], 10);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(map);
+
+      let openSkyLast = null;
+      let adsbLast = null;
+      let plottedLayers = [];
+
+      function clearPlotted() {
+        for (const l of plottedLayers) map.removeLayer(l);
+        plottedLayers = [];
+      }
+
+      function toUnixSeconds(dtLocalValue) {
+        if (!dtLocalValue) return null;
+        // datetime-local is interpreted as local time; convert to unix seconds.
+        const d = new Date(dtLocalValue);
+        const ms = d.getTime();
+        if (!Number.isFinite(ms)) return null;
+        return Math.floor(ms / 1000);
+      }
+
+      function pretty(obj) {
+        return JSON.stringify(obj, null, 2);
+      }
+
+      const authTypeEl = document.getElementById('openskyAuthType');
+      authTypeEl.addEventListener('change', () => {
+        const t = authTypeEl.value;
+        document.getElementById('openskyOauthFields').style.display = t === 'oauth' ? 'block' : 'none';
+        document.getElementById('openskyBasicFields').style.display = t === 'basic' ? 'block' : 'none';
+      });
+
+      document.getElementById('btnOpenSky').addEventListener('click', async () => {
+        const icao24 = document.getElementById('openskyIcao24').value.trim();
+        const begin = toUnixSeconds(document.getElementById('openskyBegin').value);
+        const end = toUnixSeconds(document.getElementById('openskyEnd').value);
+        const maxFlights = Number(document.getElementById('openskyMaxFlights').value);
+        const includeTracks = document.getElementById('openskyIncludeTracks').value === 'true';
+
+        const authType = document.getElementById('openskyAuthType').value;
+        let auth = { type: authType };
+        if (authType === 'oauth') {
+          auth.clientId = document.getElementById('openskyClientId').value.trim();
+          auth.clientSecret = document.getElementById('openskyClientSecret').value.trim();
+        } else {
+          auth.username = document.getElementById('openskyUsername').value.trim();
+          auth.password = document.getElementById('openskyPassword').value;
+        }
+
+        const resp = await fetch('/api/debug/backfill/opensky', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ icao24, begin, end, maxFlights, includeTracks, auth })
+        });
+        const json = await resp.json();
+        openSkyLast = json;
+        document.getElementById('openskyOut').textContent = pretty(json);
+      });
+
+      document.getElementById('btnAdsbLol').addEventListener('click', async () => {
+        const input = document.getElementById('adsbFiles');
+        const files = input.files;
+        if (!files || files.length === 0) {
+          alert('Select at least one .json.gz trace file first');
+          return;
+        }
+        const form = new FormData();
+        for (const f of files) form.append('traceFiles', f, f.name);
+
+        const resp = await fetch('/api/debug/backfill/adsblol-traces', {
+          method: 'POST',
+          body: form
+        });
+        const json = await resp.json();
+        adsbLast = json;
+        document.getElementById('adsbOut').textContent = pretty(json);
+      });
+
+      document.getElementById('btnPlotOpenSky').addEventListener('click', () => {
+        if (!openSkyLast?.success) {
+          alert('Fetch OpenSky results first');
+          return;
+        }
+        const t = openSkyLast.tracks?.[0];
+        if (!t?.path || !Array.isArray(t.path) || t.path.length === 0) {
+          alert('No OpenSky track found to plot');
+          return;
+        }
+        clearPlotted();
+        const latlngs = t.path
+          .map(p => ({ lat: p[1], lon: p[2] }))
+          .filter(p => Number.isFinite(p.lat) && Number.isFinite(p.lon))
+          .map(p => [p.lat, p.lon]);
+        const line = L.polyline(latlngs, { color: '#2563eb', weight: 3 }).addTo(map);
+        plottedLayers.push(line);
+        map.fitBounds(line.getBounds(), { padding: [20, 20] });
+      });
+
+      document.getElementById('btnPlotAdsbLol').addEventListener('click', () => {
+        if (!adsbLast?.success) {
+          alert('Upload/parse adsb.lol traces first');
+          return;
+        }
+        const firstFile = adsbLast.files?.[0];
+        const firstSeg = firstFile?.segments?.[0];
+        const sample = firstSeg?.sample;
+        if (!Array.isArray(sample) || sample.length === 0) {
+          alert('No trace segment found to plot');
+          return;
+        }
+        clearPlotted();
+        const latlngs = sample
+          .filter(p => p.lat != null && p.lon != null)
+          .map(p => [p.lat, p.lon]);
+        const line = L.polyline(latlngs, { color: '#16a34a', weight: 3 }).addTo(map);
+        plottedLayers.push(line);
+        map.fitBounds(line.getBounds(), { padding: [20, 20] });
+      });
+    </script>
+  </body>
+</html>
+

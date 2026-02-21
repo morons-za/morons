@@ -1,0 +1,447 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FR24 Backfill Tester</title>
+    <style>
+      :root {
+        --border: #e5e7eb;
+        --text: #111827;
+        --muted: #6b7280;
+        --bg: #ffffff;
+        --panel: #fafafa;
+        --good: #16a34a;
+        --bad: #dc2626;
+        --warn: #f59e0b;
+      }
+      body {
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+        margin: 18px;
+        color: var(--text);
+        background: var(--bg);
+      }
+      .wrap { max-width: 980px; }
+      .status-line {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 10px 12px;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        background: var(--panel);
+        margin-bottom: 14px;
+      }
+      .status-left { display: flex; align-items: center; gap: 10px; min-width: 0; }
+      .dot { width: 10px; height: 10px; border-radius: 999px; background: var(--warn); flex: 0 0 auto; }
+      .status-text { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .muted { color: var(--muted); font-size: 12px; }
+      .status-stack { min-width: 0; }
+      .api-details { margin: 2px 0 0 0; }
+      .api-details > summary { cursor: pointer; user-select: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+      .status-line pre { max-height: 220px; }
+      .panel { border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-bottom: 14px; }
+      .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+      label { display: block; font-size: 12px; color: #374151; margin-bottom: 6px; }
+      select, input, button {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 10px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+      }
+      button { cursor: pointer; background: #111; color: #fff; border: 1px solid #111; }
+      button:disabled { cursor: not-allowed; background: #e5e7eb; color: #6b7280; border-color: #d1d5db; }
+      .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+      table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+      th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+      th { font-size: 12px; color: #374151; background: #fafafa; position: sticky; top: 0; }
+      .pill { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 12px; border: 1px solid var(--border); background: #fff; }
+      a.link { color: #111; text-decoration: underline; text-underline-offset: 2px; }
+      details { margin-top: 10px; }
+      pre { background: #0b1020; color: #e8ecff; padding: 12px; border-radius: 12px; overflow: auto; max-height: 300px; font-size: 12px; }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <div class="status-line">
+        <div class="status-left">
+          <div id="statusDot" class="dot" aria-hidden="true"></div>
+          <div class="status-stack">
+            <div class="status-text" id="statusText">Connecting to FR24…</div>
+            <details id="apiDetails" class="api-details">
+              <summary class="muted" id="apiSummary">Last API: —</summary>
+              <pre id="apiOut">{}</pre>
+            </details>
+          </div>
+        </div>
+        <div class="muted">Open: <a id="openLink" class="pill" href="/fr24.html">/fr24.html</a></div>
+      </div>
+
+      <div class="panel">
+        <div class="row">
+          <div>
+            <label>Aircraft</label>
+            <select id="aircraftSelect"></select>
+            <div class="muted" id="aircraftMeta" style="margin-top: 6px;"></div>
+          </div>
+          <div>
+            <label>&nbsp;</label>
+            <div class="actions" style="grid-template-columns: 1fr;">
+              <button id="btnSync" disabled>Fetch new flights</button>
+            </div>
+            <div class="muted" style="margin-top: 6px;">Syncs from the most recently cached flight and computes TMNP violations (rate limits may cause partial results).</div>
+          </div>
+        </div>
+
+        <div id="resultSummary" class="muted" style="margin-top: 10px;"></div>
+        <div style="max-height: 420px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; margin-top: 10px;">
+          <table id="resultsTable" aria-label="Flights">
+            <thead>
+              <tr>
+                <th>First seen (UTC)</th>
+                <th>Last seen (UTC)</th>
+                <th>Registration</th>
+                <th>Flight ID</th>
+                <th>TMNP</th>
+                <th>Sanity check</th>
+              </tr>
+            </thead>
+            <tbody id="resultsBody">
+              <tr><td colspan="6" class="muted">No data yet.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details>
+          <summary class="muted">Debug details</summary>
+          <pre id="debugOut">{}</pre>
+        </details>
+      </div>
+    </div>
+
+    <script>
+      // Hard-coded aircraft list for now (add more later).
+      const AIRCRAFT = [
+        { id: 'zt-hot', registration: 'ZT-HOT', label: 'ZT-HOT' },
+        { id: 'zt-rnw', registration: 'ZT-RNW', label: 'ZT-RNW' }
+      ];
+
+      const statusDot = document.getElementById('statusDot');
+      const statusText = document.getElementById('statusText');
+      const aircraftSelect = document.getElementById('aircraftSelect');
+      const aircraftMeta = document.getElementById('aircraftMeta');
+      const btnSync = document.getElementById('btnSync');
+      const resultsBody = document.getElementById('resultsBody');
+      const resultSummary = document.getElementById('resultSummary');
+      const debugOut = document.getElementById('debugOut');
+      const apiDetails = document.getElementById('apiDetails');
+      const apiSummary = document.getElementById('apiSummary');
+      const apiOut = document.getElementById('apiOut');
+
+      let lastFlights = [];
+      let flightsVersion = 0; // increments every time we load a new flights list
+
+      function setDebug(obj) {
+        debugOut.textContent = JSON.stringify(obj, null, 2);
+      }
+
+      function truncateForDisplay(value, { maxArray = 50, maxString = 4000 } = {}) {
+        const seen = new WeakSet();
+        const walk = (v) => {
+          if (v == null) return v;
+          const t = typeof v;
+          if (t === 'string') return v.length > maxString ? (v.slice(0, maxString) + '…(truncated)') : v;
+          if (t === 'number' || t === 'boolean') return v;
+          if (t !== 'object') return String(v);
+          if (seen.has(v)) return '[Circular]';
+          seen.add(v);
+          if (Array.isArray(v)) {
+            const out = v.slice(0, maxArray).map(walk);
+            if (v.length > maxArray) out.push(`…(${v.length - maxArray} more)`);
+            return out;
+          }
+          const out = {};
+          for (const k of Object.keys(v)) out[k] = walk(v[k]);
+          return out;
+        };
+        return walk(value);
+      }
+
+      function setLastApi(label, json, { request } = {}) {
+        try {
+          const http = json && typeof json === 'object' ? json._http : null;
+          const upstreamStatus = json && typeof json === 'object' && Number.isFinite(Number(json.status)) ? Number(json.status) : null;
+          const upstreamText = json && typeof json === 'object' ? String(json.statusText || '') : '';
+          const hdrs = json && typeof json === 'object' ? (json.headers || json.responseHeaders || null) : null;
+          const retryAfter = hdrs && typeof hdrs === 'object' ? (hdrs['retry-after'] || hdrs['Retry-After'] || null) : null;
+          const statusPart = upstreamStatus
+            ? `${upstreamStatus}${upstreamText ? ' ' + upstreamText : ''}`
+            : (http && Number.isFinite(http.httpStatus) ? `${http.httpStatus}${http.httpStatusText ? ' ' + http.httpStatusText : ''}` : '—');
+          const timePart = http && Number.isFinite(http.elapsedMs) ? ` • ${http.elapsedMs}ms` : '';
+          const retryPart = retryAfter ? ` • Retry-After: ${String(retryAfter)}` : '';
+          let partialPart = '';
+          // Special-case: the violations endpoint can return 200 OK even if some underlying track fetches were rate-limited.
+          if (label.includes('/api/fr24/violations') && json && typeof json === 'object' && json.ok && Array.isArray(json.results)) {
+            const total = json.results.length;
+            const rateLimited = json.results.filter(r => String(r?.reason || '') === 'track-http-429').length;
+            const otherTrackErrors = json.results.filter(r => String(r?.reason || '').startsWith('track-http-') && String(r?.reason || '') !== 'track-http-429').length;
+            if (rateLimited > 0 || otherTrackErrors > 0) {
+              const parts = [];
+              if (rateLimited > 0) parts.push(`${rateLimited}/${total} rate-limited`);
+              if (otherTrackErrors > 0) parts.push(`${otherTrackErrors}/${total} track errors`);
+              partialPart = ` • partial: ${parts.join(', ')}`;
+              apiDetails.open = true; // make it noticeable
+            }
+          }
+          // Special-case: sync can also be partial (200 OK, but some tracks rate-limited).
+          if (label.includes('/api/fr24/sync') && json && typeof json === 'object' && json.ok) {
+            const rateLimited = Number(json.rate_limited || 0);
+            const trackErrors = Number(json.track_errors || 0);
+            if (rateLimited > 0 || trackErrors > 0) {
+              const parts = [];
+              if (rateLimited > 0) parts.push(`rate-limited ${rateLimited}`);
+              if (trackErrors > 0) parts.push(`track errors ${trackErrors}`);
+              partialPart = ` • partial: ${parts.join(', ')}`;
+              apiDetails.open = true;
+            }
+          }
+          apiSummary.textContent = `Last API: ${label} • ${statusPart}${timePart}${retryPart}${partialPart}`;
+
+          const payload = {
+            label,
+            request: request || undefined,
+            response: truncateForDisplay(json)
+          };
+          apiOut.textContent = JSON.stringify(payload, null, 2);
+
+          // Keep it collapsed by default, but if we hit rate limits, expand so it’s obvious.
+          if (upstreamStatus === 429) apiDetails.open = true;
+        } catch {
+          // never block the UI if debugging rendering fails
+        }
+      }
+
+      async function fetchJsonWithTimeout(url, options = {}, timeoutMs = 45000, metaLabel = null) {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), timeoutMs);
+        const startedAt = Date.now();
+        try {
+          const resp = await fetch(url, { ...options, signal: controller.signal });
+          const text = await resp.text();
+          let json;
+          try {
+            json = JSON.parse(text);
+          } catch {
+            json = { ok: false, error: 'Non-JSON response', raw: text };
+          }
+          const httpMeta = {
+            url,
+            method: String(options?.method || 'GET').toUpperCase(),
+            httpStatus: resp.status,
+            httpStatusText: resp.statusText,
+            elapsedMs: Date.now() - startedAt
+          };
+          if (json && typeof json === 'object') {
+            json._http = httpMeta;
+            // Preserve upstream status if present; otherwise attach http status.
+            if (!resp.ok && !('status' in json)) {
+              json.status = resp.status;
+              json.statusText = resp.statusText;
+            }
+          } else {
+            json = { ok: false, error: 'Non-JSON response', raw: text, _http: httpMeta };
+          }
+          if (metaLabel) setLastApi(metaLabel, json);
+          return json;
+        } finally {
+          clearTimeout(t);
+        }
+      }
+
+      function setStatus(state, text) {
+        statusDot.style.background =
+          state === 'good' ? 'var(--good)' : state === 'bad' ? 'var(--bad)' : 'var(--warn)';
+        statusText.textContent = text;
+      }
+
+      function fmtUtcFromIso(iso) {
+        if (!iso) return '';
+        // Display as "YYYY-MM-DD HH:MM:SS" (no "T" / "Z")
+        const s = String(iso).trim().replace('T', ' ').replace('Z', '');
+        return s;
+      }
+
+      function setAircraftMeta(a) {
+        aircraftMeta.textContent = `Registration: ${a.registration}`;
+      }
+
+      function renderFlights(flights) {
+        resultsBody.innerHTML = '';
+        if (!Array.isArray(flights) || flights.length === 0) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="6" class="muted">No flights found for that window.</td>`;
+          resultsBody.appendChild(tr);
+          return;
+        }
+
+        for (const f of flights) {
+          const v = f._violation;
+          const vText = v === true ? 'Yes' : v === false ? 'No' : v === 'checking' ? 'Checking…' : '—';
+          const vColor = v === true ? 'var(--bad)' : v === false ? 'var(--good)' : 'var(--muted)';
+          const vTitle = f._violationReason ? String(f._violationReason) : '';
+          const fid = f.fr24_id || '';
+          const viewHref = fid ? `/fr24-track.html?flight_id=${encodeURIComponent(fid)}` : '';
+          const kmlHref = fid ? `/api/fr24/flight-tracks.kml?flight_id=${encodeURIComponent(fid)}` : '';
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${fmtUtcFromIso(f.first_seen)}</td>
+            <td>${fmtUtcFromIso(f.last_seen)}</td>
+            <td>${f.registration || '—'}</td>
+            <td>${f.fr24_id || '—'}</td>
+            <td><span class="pill" title="${vTitle.replaceAll('\"','&quot;')}" style="border-color:${vColor}; color:${vColor};">${vText}</span></td>
+            <td>
+              ${fid ? `<a class="link" href="${viewHref}" target="_blank" rel="noreferrer">View</a> • <a class="link" href="${kmlHref}">KML</a>` : '—'}
+            </td>
+          `;
+          resultsBody.appendChild(tr);
+        }
+      }
+
+      async function connect() {
+        try {
+          setStatus('warn', 'Connecting to FR24…');
+          btnSync.disabled = true;
+
+          const json = await fetchJsonWithTimeout('/api/fr24/status', {}, 20000, 'GET /api/fr24/status');
+          if (!json.ok) {
+            setStatus('bad', 'FR24: not connected (check credentials.json)');
+            setDebug({ stage: 'status', ok: false, details: json });
+            return;
+          }
+          setStatus('good', 'FR24: connected');
+          btnSync.disabled = false;
+          setDebug({ stage: 'status', ok: true });
+
+          // On first load, show what we already have cached for this aircraft.
+          await loadCachedFlights();
+        } catch (e) {
+          setStatus('bad', 'FR24: not connected (request failed)');
+          setDebug({ stage: 'status', ok: false, error: String(e) });
+        }
+      }
+
+      async function loadCachedFlights() {
+        const aircraft = AIRCRAFT.find(a => a.id === aircraftSelect.value) || AIRCRAFT[0];
+        try {
+          const url = `/api/fr24/cache/flights?registration=${encodeURIComponent(aircraft.registration)}`;
+          const json = await fetchJsonWithTimeout(url, {}, 20000, 'GET /api/fr24/cache/flights');
+          if (!json.ok) return;
+          const flights = Array.isArray(json.flights) ? json.flights : [];
+          if (flights.length === 0) return;
+
+          flightsVersion++;
+          lastFlights = flights.map((f, idx) => ({
+            fr24_id: f.fr24_id,
+            first_seen: f.first_seen,
+            last_seen: f.last_seen,
+            registration: f.registration || aircraft.registration,
+            _violation: f.violation,
+            _violationReason: String(f.reason || ''),
+            _key: `${f.fr24_id || 'noid'}:cached:${idx}`,
+            _version: flightsVersion
+          }));
+          renderFlights(lastFlights);
+
+          const yes = lastFlights.filter(f => f._violation === true).length;
+          const no = lastFlights.filter(f => f._violation === false).length;
+          const unk = lastFlights.length - yes - no;
+          resultSummary.textContent = `Loaded ${lastFlights.length} cached flight(s). TMNP: ${yes} yes, ${no} no, ${unk} unknown.`;
+          // With sync, there’s nothing else to click; this is just informational.
+        } catch {
+          // ignore (cache is optional)
+        }
+      }
+
+      async function syncFlights() {
+        const aircraft = AIRCRAFT.find(a => a.id === aircraftSelect.value) || AIRCRAFT[0];
+        btnSync.disabled = true;
+        setStatus('warn', 'FR24: syncing new flights…');
+        resultSummary.textContent = `Syncing new flights for ${aircraft.registration}…`;
+
+        try {
+          const reqBody = { registration: aircraft.registration };
+          const json = await fetchJsonWithTimeout('/api/fr24/sync', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(reqBody)
+          }, 180000, 'POST /api/fr24/sync');
+          setLastApi('POST /api/fr24/sync', json, { request: reqBody });
+          if (!json.ok) {
+            setStatus('bad', 'FR24: request failed');
+            setDebug({ stage: 'sync', ok: false, details: json });
+            resultSummary.textContent = 'Sync failed. Expand Debug details for the error.';
+            return;
+          }
+
+          const rateLimited = Number(json.rate_limited || 0);
+          const trackErrors = Number(json.track_errors || 0);
+          const checked = Number(json.checked_flights || 0);
+          const discovered = Number(json.discovered_flights || 0);
+          const cachedAlready = Number(json.cached_already || 0);
+          const partial = (rateLimited > 0 || trackErrors > 0);
+
+          // Refresh table from disk cache after sync
+          await loadCachedFlights();
+
+          if (partial) {
+            setStatus('warn', `FR24: synced (partial; rate-limited: ${rateLimited}, track errors: ${trackErrors})`);
+          } else {
+            setStatus('good', 'FR24: synced');
+          }
+          resultSummary.textContent =
+            `Sync complete. Discovered ${discovered} flight(s) in window, checked ${checked}, already cached ${cachedAlready}` +
+            (partial ? ` (partial: rate-limited ${rateLimited}, track errors ${trackErrors}).` : '.');
+          setDebug({ stage: 'sync', ok: true, summary: { discovered, checked, cachedAlready, rateLimited, trackErrors }, raw: json });
+        } catch (e) {
+          setStatus('bad', 'FR24: request failed');
+          setDebug({ stage: 'sync', ok: false, error: String(e) });
+          resultSummary.textContent = 'Sync failed (request error/timeout). Expand Debug details.';
+        } finally {
+          btnSync.disabled = false;
+        }
+      }
+
+      (function init() {
+        // Show the correct origin/port in the header.
+        try {
+          const openLink = document.getElementById('openLink');
+          const href = `${window.location.origin}/fr24.html`;
+          openLink.href = href;
+          openLink.textContent = href;
+        } catch {}
+
+        for (const a of AIRCRAFT) {
+          const opt = document.createElement('option');
+          opt.value = a.id;
+          opt.textContent = a.label;
+          aircraftSelect.appendChild(opt);
+        }
+        aircraftSelect.value = AIRCRAFT[0].id;
+        setAircraftMeta(AIRCRAFT[0]);
+
+        aircraftSelect.addEventListener('change', () => {
+          const a = AIRCRAFT.find(x => x.id === aircraftSelect.value) || AIRCRAFT[0];
+          setAircraftMeta(a);
+          loadCachedFlights();
+        });
+        btnSync.addEventListener('click', syncFlights);
+
+        connect();
+      })();
+    </script>
+  </body>
+</html>
+

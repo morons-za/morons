@@ -557,7 +557,7 @@ ${violationMarkers}
 async function convertSVGToPNG(svgContent, outputPath) {
   try {
     const pngBuffer = await sharp(Buffer.from(svgContent))
-      .png()
+      .png({ compressionLevel: 9, palette: true, quality: 80 })
       .toBuffer();
     
     fs.writeFileSync(outputPath, pngBuffer);
@@ -638,57 +638,76 @@ async function generateFlightImage(kmlFilename) {
 }
 
 function extractCoordinates(xml) {
-  const coordinates = [];
-  
-  // Try to find coordinates in various KML structures
-  function findCoordinates(obj) {
-    if (!obj || typeof obj !== 'object') return;
-    
-    // Handle gx:coord elements (format: "longitude latitude altitude")
-    if (obj['gx:coord']) {
-      const coordElements = Array.isArray(obj['gx:coord']) ? obj['gx:coord'] : [obj['gx:coord']];
-      
-      for (const coordStr of coordElements) {
-        if (typeof coordStr === 'string') {
-          const parts = coordStr.trim().split(/\s+/);
-          if (parts.length >= 2) {
-            const lon = parseFloat(parts[0]);
-            const lat = parseFloat(parts[1]);
-            if (!isNaN(lat) && !isNaN(lon)) {
-              coordinates.push({ lat, lon });
-            }
-          }
-        }
+  function parseCoordString(coordStr) {
+    const results = [];
+    for (const line of coordStr.trim().split(/\s+/)) {
+      const parts = line.split(',');
+      if (parts.length >= 2) {
+        const lon = parseFloat(parts[0]);
+        const lat = parseFloat(parts[1]);
+        if (!isNaN(lat) && !isNaN(lon)) results.push({ lat, lon });
       }
     }
-    
-    // Handle regular coordinates element (format: "longitude,latitude,altitude")
-    if (obj.coordinates) {
-      const coordStr = typeof obj.coordinates === 'string' ? obj.coordinates : obj.coordinates.toString();
-      const coordLines = coordStr.trim().split(/\s+/);
-      
-      for (const line of coordLines) {
-        const parts = line.split(',');
+    return results;
+  }
+
+  function parseGxCoord(elems) {
+    const results = [];
+    const arr = Array.isArray(elems) ? elems : [elems];
+    for (const coordStr of arr) {
+      if (typeof coordStr === 'string') {
+        const parts = coordStr.trim().split(/\s+/);
         if (parts.length >= 2) {
           const lon = parseFloat(parts[0]);
           const lat = parseFloat(parts[1]);
-          if (!isNaN(lat) && !isNaN(lon)) {
-            coordinates.push({ lat, lon });
-          }
+          if (!isNaN(lat) && !isNaN(lon)) results.push({ lat, lon });
         }
       }
     }
-    
-    // Recursively search in all object properties
+    return results;
+  }
+
+  function collectAll(obj) {
+    const coords = [];
+    if (!obj || typeof obj !== 'object') return coords;
+    if (obj['gx:coord']) coords.push(...parseGxCoord(obj['gx:coord']));
+    if (obj.coordinates) {
+      const s = typeof obj.coordinates === 'string' ? obj.coordinates : obj.coordinates.toString();
+      coords.push(...parseCoordString(s));
+    }
     for (const key in obj) {
-      if (typeof obj[key] === 'object') {
-        findCoordinates(obj[key]);
-      }
+      if (typeof obj[key] === 'object') coords.push(...collectAll(obj[key]));
+    }
+    return coords;
+  }
+
+  const SKIP_KEYS = new Set([
+    'Polygon', 'MultiGeometry', 'Point',
+    'outerBoundaryIs', 'innerBoundaryIs'
+  ]);
+
+  const targeted = [];
+
+  function walk(obj) {
+    if (!obj || typeof obj !== 'object') return;
+    if (obj.LineString) {
+      const ls = Array.isArray(obj.LineString) ? obj.LineString : [obj.LineString];
+      for (const item of ls) targeted.push(...collectAll(item));
+    }
+    if (obj['gx:Track']) {
+      const gt = Array.isArray(obj['gx:Track']) ? obj['gx:Track'] : [obj['gx:Track']];
+      for (const item of gt) targeted.push(...collectAll(item));
+    }
+    for (const key in obj) {
+      if (SKIP_KEYS.has(key) || key === 'LineString' || key === 'gx:Track') continue;
+      if (typeof obj[key] === 'object') walk(obj[key]);
     }
   }
-  
-  findCoordinates(xml);
-  return coordinates;
+
+  walk(xml);
+  if (targeted.length > 0) return targeted;
+
+  return collectAll(xml);
 }
 
 // Point-in-polygon detection using ray casting algorithm
@@ -801,9 +820,8 @@ function clusterViolations(violations, coordToPixel, maxDistance = 50) {
 async function processAllFiles() {
   console.log('Processing ALL KML files...');
   
-  // Define directories
-  const uploadsDir = path.join(__dirname, 'uploads');
-  const outputDir = path.join(__dirname, 'flight-maps');
+  const uploadsDir = path.join(__dirname, '..', 'uploads');
+  const outputDir = path.join(__dirname, '..', 'flight-maps');
   
   const kmlFiles = fs.readdirSync(uploadsDir).filter(f => f.endsWith('.kml'));
   console.log(`📁 Found ${kmlFiles.length} KML files to check`);
@@ -819,7 +837,7 @@ async function processAllFiles() {
       const pngFilename = filename.replace('.kml', '.png');
       const pngPath = path.join(outputDir, pngFilename);
       
-      if (fs.existsSync(pngPath)) {
+      if (!forceRegenerate && fs.existsSync(pngPath)) {
         skipped++;
         if (skipped % 50 === 0) {
           console.log(`⏭️  Skipped ${skipped} existing files...`);
@@ -851,9 +869,12 @@ async function processAllFiles() {
 }
 
 // Command line argument handling
-if (process.argv.length > 2) {
-  // Single file mode: node generate-flight-image.cjs filename.kml
-  const filename = process.argv[2];
+const cliArgs = process.argv.slice(2);
+const forceRegenerate = cliArgs.includes('--force');
+const positionalArgs = cliArgs.filter(a => !a.startsWith('--'));
+
+if (positionalArgs.length > 0) {
+  const filename = positionalArgs[0];
   console.log(`🎯 Single file mode: Processing ${filename}`);
   generateFlightImage(filename)
     .then(success => {
@@ -870,7 +891,7 @@ if (process.argv.length > 2) {
       process.exit(1);
     });
 } else {
-  // Bulk processing mode (no arguments)
+  if (forceRegenerate) console.log('🔄 Force mode: regenerating ALL PNGs (overwriting existing)');
   console.log('📁 Bulk processing mode: Processing ALL files');
   processAllFiles().catch(console.error);
 }
