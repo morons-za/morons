@@ -64,10 +64,10 @@ pdfFiles.forEach(pdfFile => {
 });
 
 // Note: Original KML files are served from GitHub raw URLs, not copied to static-site
-// The app.js references: https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/
+// The app.js references: https://raw.githubusercontent.com/morons-za/morons/main/backend/uploads/
 console.log('📁 Original KML files served from GitHub raw URLs (not copied locally)');
 // Note: PNG flight maps are served from GitHub media URLs, not copied to static-site
-// The app.js references: https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/
+// The app.js references: https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/
 console.log('📸 PNG flight maps served from GitHub media URLs (not copied locally)');
 
 // Ensure optimized KML directory exists (optimized files are created by separate process)

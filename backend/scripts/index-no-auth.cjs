@@ -66,7 +66,7 @@ app.use(cors({
 // Redirect uploads to GitHub LFS
 app.get('/uploads/:filename', (req, res) => {
   const filename = req.params.filename;
-  const githubUrl = `https://media.githubusercontent.com/media/werneravr/heli-map/main/server/uploads/${filename}`;
+  const githubUrl = `https://media.githubusercontent.com/media/morons-za/morons/main/server/uploads/${filename}`;
   
   res.redirect(301, githubUrl);
 });
@@ -74,7 +74,7 @@ app.get('/uploads/:filename', (req, res) => {
 // Redirect flight-maps to GitHub LFS
 app.get('/flight-maps/:filename', (req, res) => {
   const filename = req.params.filename;
-  const githubUrl = `https://media.githubusercontent.com/media/werneravr/heli-map/main/server/flight-maps/${filename}`;
+  const githubUrl = `https://media.githubusercontent.com/media/morons-za/morons/main/server/flight-maps/${filename}`;
   
   res.redirect(301, githubUrl);
 });

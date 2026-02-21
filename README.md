@@ -399,8 +399,8 @@ This is the **complete admin workflow** for processing new helicopter flight dat
 - **Build Scripts**: Updated to generate correct GitHub URLs
 
 **Key URLs:**
-- KML files: `https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/[filename]`
-- PNG images: `https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/[filename]`
+- KML files: `https://raw.githubusercontent.com/morons-za/morons/main/backend/uploads/[filename]`
+- PNG images: `https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/[filename]`
 
 ### Initial Setup
 **Admin starts the server:**
@@ -1210,7 +1210,7 @@ This project is open source and available under the [MIT License](LICENSE).
 For questions, suggestions, or collaboration opportunities:
 - **GitHub Issues**: Report bugs or request features
 - **Email**: [Contact through GitHub profile]
-- **Project Repository**: https://github.com/werneravr/heli-map
+- **Project Repository**: https://github.com/morons-za/morons
 
 ---
 

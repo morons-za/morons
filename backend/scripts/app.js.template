@@ -462,7 +462,7 @@ function renderTable() {
                         <td style="white-space: nowrap; min-width: 150px;">${flight.owner || '-'}</td>
                         <td style="font-size: 12px;">${flight.filename || '-'}</td>
                         <td style="text-align: center;">
-                            <a href="https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
+                            <a href="https://raw.githubusercontent.com/morons-za/morons/main/backend/uploads/${flight.filename}" download="${flight.filename}" title="Download KML" style="font-size: 1.3em; color: #007bff; text-decoration: none; cursor: pointer;" onclick="event.stopPropagation(); downloadKML('${flight.filename}'); return false;">⬇️</a>
                         </td>
                         <td style="text-align: center;">${flight.fileSizeMB ? flight.fileSizeMB + ' MB' : '-'}</td>
                         <td>
@@ -524,7 +524,7 @@ function loadFlightOnMap(filename) {
     // Try optimized KML first, fallback to original KML from GitHub
     const optimizedFilename = filename.replace('.kml', '-opt.kml');
     const optimizedUrl = './kml-optimised/' + optimizedFilename;
-    const originalUrl = 'https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/' + filename;
+    const originalUrl = 'https://raw.githubusercontent.com/morons-za/morons/main/backend/uploads/' + filename;
     
     console.log('📍 Checking optimized KML first:', optimizedUrl);
     
@@ -649,7 +649,7 @@ function reportFlight(filename) {
     const owner = flight.owner || 'Private owner';
     const date = flight.date || 'UNKNOWN DATE';
     const imageFilename = flight.filename ? flight.filename.replace('.kml', '.png') : null;
-    const imagePath = imageFilename ? 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/' + imageFilename : null;
+    const imagePath = imageFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + imageFilename : null;
     
     const reportText = 'It appears that a helicopter, registration ' + registration + ' (' + owner + '), entered restricted NP17 airspace over Table Mountain on ' + date + '.\n\nThe National Environmental Management Protected Areas Act (NEMPAA NP17) clearly states that aircraft are prohibited from flying over TMNP at any height below 6070FT (~1850m). Doing so without authorisation is an offense with fines up to R5 million or imprisonment for up to 10 years, and can result in the suspension of licenses by the Civil Aviation Authority.\n\nNEMPAA (NP17) and these penalties are in place to protect the park\'s natural environment and ensure compliance with airspace regulations.';
     
@@ -767,7 +767,7 @@ function copyReportText(text) {
 }
 
 function downloadPNG(filename) {
-    const url = 'https://media.githubusercontent.com/media/werneravr/heli-map/main/backend/flight-maps/' + filename;
+    const url = 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + filename;
     
     try {
         const button = event.target;
@@ -842,7 +842,7 @@ window.onclick = function(event) {
 
 // KML download function
 async function downloadKML(filename) {
-    const url = 'https://raw.githubusercontent.com/werneravr/heli-map/main/backend/uploads/' + filename;
+    const url = 'https://raw.githubusercontent.com/morons-za/morons/main/backend/uploads/' + filename;
     
     try {
         // Show loading indicator
