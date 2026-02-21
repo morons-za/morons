@@ -5,7 +5,7 @@ This is a static website generated from the TMNP Helicopter Tracking System.
 ## 🚀 Features
 
 - **Interactive Map**: View flight paths and TMNP boundary
-- **Flight Database**: Browse all 1651 detected flights
+- **Flight Database**: Browse all 1169 detected flights
 - **Search & Filter**: Find flights by registration, date range
 - **Download KML**: Get original flight data files
 - **Export CSV**: Export filtered data for analysis
@@ -14,12 +14,9 @@ This is a static website generated from the TMNP Helicopter Tracking System.
 ## 📁 Contents
 
 - `index.html` - Main website
-- `kml-optimised/` - Optimized KML flight files (for map display)
-- `aircraft-images/` - Aircraft registration photos
+- `kml/` - All KML flight files
+- `flight-maps/` - Generated PNG flight path images
 - `tmnp.kml` - Table Mountain National Park boundary
-- `master-metadata.json` - Flight metadata
-
-Original KML files and PNG flight maps are served from `backend/uploads/` and `backend/flight-maps/` via GitHub raw/media URLs.
 
 ## 🌐 Deployment
 
@@ -37,6 +34,6 @@ node build-static-site.cjs
 
 ## 📊 Data Source
 
-Generated from 1651 flights detected with NP17 airspace violations over Table Mountain National Park.
+Generated from 1169 flights detected with NP17 airspace violations over Table Mountain National Park.
 
-Last updated: 2026-02-17T07:44:53.905Z
+Last updated: 2026-02-21T16:22:08.271Z
