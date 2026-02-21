@@ -2,8 +2,8 @@ name: Daily Flight Sync
 
 on:
   schedule:
-    # Temporary: run at 20:00 UTC (22:00 SAST) for testing
-    - cron: '0 20 * * *'
+    # Run daily at 19:00 UTC (21:00 SAST)
+    - cron: '0 19 * * *'
   workflow_dispatch:
     inputs:
       hours:
@@ -79,6 +79,15 @@ jobs:
             git commit -m "daily-sync: $(date -u +%Y-%m-%d) — $CHANGES"
             git push
           fi
+
+      - name: Purge Cloudflare cache
+        if: success()
+        run: |
+          curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/zones/${{ secrets.CLOUDFLARE_ZONE_ID }}/purge_cache" \
+            -H "Authorization: Bearer ${{ secrets.CLOUDFLARE_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            --data '{"purge_everything":true}'
 
       - name: Clean up credentials
         if: always()
