@@ -8,6 +8,6 @@
   "transponder_gap_threshold_km": 15,
   "transponder_gap_ratio": 50,
   "token_expiry_days": 7,
-  "cloudflare_worker_url": "",
+  "cloudflare_worker_url": "https://morons.org.za",
   "site_url": "https://morons.org.za"
 }

@@ -1,0 +1,15 @@
+name = "heli-review"
+main = "src/worker.js"
+compatibility_date = "2024-12-01"
+
+routes = [
+  { pattern = "morons.org.za/review*", zone_name = "morons.org.za" }
+]
+
+[vars]
+GITHUB_REPO = "morons-za/morons"
+GITHUB_WORKFLOW_FILE = "process-decisions.yml"
+
+# Secrets (set via `wrangler secret put`):
+#   HMAC_SECRET       - shared with API/review-config.json
+#   GITHUB_TOKEN      - GitHub PAT with repo + actions:write scope
