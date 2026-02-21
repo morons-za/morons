@@ -21,7 +21,7 @@
  * Environment variables (or API/credentials.json):
  *   FR24_TOKEN, SENDGRID_API_KEY, HMAC_SECRET
  *
- * Config: API/review-config.json
+ * Config: API/review-config.json (copy from review-config.example.json)
  */
 
 const fs = require('fs');
@@ -194,7 +194,15 @@ function parseArgs(argv) {
 
 async function main() {
   const args = parseArgs(process.argv.slice(2));
-  const config = loadConfig();
+  let config;
+  try {
+    config = loadConfig();
+  } catch (err) {
+    console.error('[sync] Missing or invalid API/review-config.json');
+    console.error('        Copy API/review-config.example.json to API/review-config.json and set review_email.');
+    process.exitCode = 1;
+    return;
+  }
   const hmacSecret = getSecret('HMAC_SECRET');
   const sendgridKey = getSecret('SENDGRID_API_KEY');
 

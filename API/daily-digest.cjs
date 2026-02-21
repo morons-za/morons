@@ -10,7 +10,7 @@
  *
  * Reads:
  *   API/credentials.json       – SENDGRID_API_KEY
- *   API/digest-config.json     – from, subscribers[], siteUrl, timezone
+ *   API/digest-config.json     – from, subscribers[], siteUrl, timezone (copy from digest-config.example.json)
  *   API/cache/fr24-violations/ – violation results per flight
  *   API/cache/fr24-flight-meta/– registration + timestamps per flight
  *   backend/scripts/helicopters.json – owner lookup
@@ -301,7 +301,8 @@ async function main() {
 
   const config = readJsonFile(CONFIG_PATH);
   if (!config) {
-    console.error('❌ Missing or invalid digest-config.json');
+    console.error('❌ Missing or invalid API/digest-config.json');
+    console.error('   Copy API/digest-config.example.json to API/digest-config.json and add your subscriber emails.');
     process.exit(1);
   }
 

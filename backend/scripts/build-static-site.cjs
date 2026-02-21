@@ -172,12 +172,10 @@ console.log(`📅 Latest flight data: ${latestFlightDate}`);
 
 // UTC to South Africa time conversion
 function utcToSaTime(date, time) {
-  if (!date || !time) return '-';
-  // date: '2025-05-03', time: '07:31'
+  if (!date || !time || time === '00:00') return '-';
   const utc = new Date(`${date}T${time}:00Z`);
-  // South Africa is UTC+2
   const sa = new Date(utc.getTime() + 2 * 60 * 60 * 1000);
-  return sa.toISOString().slice(11, 16); // 'HH:MM'
+  return sa.toISOString().slice(11, 16);
 }
 
 // Generate the main HTML file

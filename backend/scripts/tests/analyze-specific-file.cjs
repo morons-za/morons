@@ -180,7 +180,7 @@ function extractAllCoordinates(filePath) {
 }
 
 // Analyze the specific file
-const targetFile = '/Users/werner/Downloads/KMLs to be uploaded/3be1939b.kml';
+const targetFile = path.join(__dirname, '..', '..', 'uploads', '3be1939b.kml');
 
 console.log('🔍 ANALYZING SPECIFIC FILE: 3be1939b.kml\n');
 

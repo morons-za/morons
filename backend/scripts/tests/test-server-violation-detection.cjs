@@ -265,7 +265,7 @@ async function checkForViolations(filePath) {
 }
 
 // Test the exact server function on our problematic file
-const targetFile = '/Users/werner/Downloads/KMLs to be uploaded/3be1939b.kml';
+const targetFile = path.join(__dirname, '..', '..', 'uploads', '3be1939b.kml');
 
 console.log('🔍 TESTING EXACT SERVER VIOLATION DETECTION FUNCTION');
 console.log('═══════════════════════════════════════════════════════\n');

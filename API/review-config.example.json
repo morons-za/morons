@@ -1,9 +1,6 @@
 {
-  "tracked_registrations": [
-    "ZS-HBO", "ZS-HGD", "ZS-HIE", "ZS-HIM", "ZS-HMB",
-    "ZS-RTG", "ZT-HOT", "ZT-REG", "ZT-RMS", "ZT-RNW"
-  ],
-  "review_email": "werneravr@gmail.com",
+  "tracked_registrations": ["ZS-HBO", "ZS-HGD", "ZS-HIE", "ZS-HIM", "ZS-HMB", "ZS-RTG", "ZT-HOT", "ZT-REG", "ZT-RMS", "ZT-RNW"],
+  "review_email": "your-email@example.com",
   "from_email": "reports@morons.org.za",
   "transponder_gap_threshold_km": 15,
   "transponder_gap_ratio": 50,

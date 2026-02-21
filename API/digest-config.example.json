@@ -1,8 +1,6 @@
 {
   "from": "reports@morons.org.za",
-  "subscribers": [
-    "werneravr@gmail.com"
-  ],
+  "subscribers": ["your-email@example.com"],
   "siteUrl": "https://morons.org.za",
   "timezone": "Africa/Johannesburg",
   "runAtLocalHour": 6,

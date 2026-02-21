@@ -268,7 +268,7 @@ async function checkForViolations(filePath) {
 console.log('🔬 Testing server logic on known violating file');
 console.log('==============================================\\n');
 
-const testFile = '/Users/werner/Downloads/KMLs to be uploaded/3bfd81ed.kml';
+const testFile = path.join(__dirname, '..', '..', 'uploads', '3bfd81ed.kml');
 
 checkForViolations(testFile).then(result => {
   console.log(`\\n🏁 Server logic result: ${result ? 'SHOULD ACCEPT (has violations)' : 'SHOULD REJECT (no violations)'}`);

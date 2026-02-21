@@ -8,22 +8,16 @@ const path = require('path');
 const FormData = require('form-data');
 const axios = require('axios');
 
+const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
 const filesToUpload = [
-  '/Users/werner/Downloads/KMLs to be uploaded/3bfd81ed.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3bfd2106.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3bfdba0f.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3c0bf893.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3c0c66b9.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3c0c461d.kml'
-];
+  '3bfd81ed.kml', '3bfd2106.kml', '3bfdba0f.kml', '3c0bf893.kml', '3c0c66b9.kml', '3c0c461d.kml'
+].map(f => path.join(process.env.HOME || process.env.USERPROFILE || '/tmp', 'Downloads', 'KMLs to be uploaded', f));
 
 console.log('🚀 Force uploading KML files...');
 console.log('⚠️  This bypasses violation checking temporarily');
 
 async function forceUpload() {
   // First, let's copy these files directly to the uploads folder
-  const uploadsDir = '/Users/werner/Dev/heli/heli-map/backend/uploads';
-  
   for (const filePath of filesToUpload) {
     try {
       if (!fs.existsSync(filePath)) {
@@ -32,7 +26,7 @@ async function forceUpload() {
       }
       
       const fileName = path.basename(filePath);
-      const destPath = path.join(uploadsDir, fileName);
+      const destPath = path.join(UPLOADS_DIR, fileName);
       
       // Copy the file
       fs.copyFileSync(filePath, destPath);

@@ -1,8 +1,9 @@
 const fs = require('fs');
+const path = require('path');
 const { XMLParser } = require('fast-xml-parser');
 
 // Test coordinate extraction on the failing KML file
-const testFile = '/Users/werner/Downloads/KMLs to be uploaded/3bfd81ed.kml';
+const testFile = path.join(__dirname, '..', '..', 'uploads', '3bfd81ed.kml');
 
 console.log('🔍 Debugging coordinate extraction for:', testFile);
 

@@ -1,7 +1,8 @@
 const fs = require('fs');
+const path = require('path');
 const { XMLParser } = require('fast-xml-parser');
 
-const targetFile = '/Users/werner/Downloads/KMLs to be uploaded/3be1939b.kml';
+const targetFile = path.join(__dirname, '..', '..', 'uploads', '3be1939b.kml');
 
 console.log('🔍 DEBUGGING TIMESTAMP EXTRACTION\n');
 

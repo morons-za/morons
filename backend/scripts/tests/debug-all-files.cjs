@@ -2,14 +2,10 @@ const fs = require('fs');
 const path = require('path');
 const { XMLParser } = require('fast-xml-parser');
 
+const UPLOADS_DIR = path.join(__dirname, '..', '..', 'uploads');
 const filesToAnalyze = [
-  '/Users/werner/Downloads/KMLs to be uploaded/3bfd81ed.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3bfd2106.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3bfdba0f.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3c0bf893.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3c0c66b9.kml',
-  '/Users/werner/Downloads/KMLs to be uploaded/3c0c461d.kml'
-];
+  '3bfd81ed.kml', '3bfd2106.kml', '3bfdba0f.kml', '3c0bf893.kml', '3c0c66b9.kml', '3c0c461d.kml'
+].map(f => path.join(UPLOADS_DIR, f));
 
 // Load TMNP boundary coordinates from KML file
 function loadTMNPCoordinates() {

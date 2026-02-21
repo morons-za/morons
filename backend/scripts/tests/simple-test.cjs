@@ -1,7 +1,8 @@
 const fs = require('fs');
+const path = require('path');
 const { XMLParser } = require('fast-xml-parser');
 
-const testFile = '/Users/werner/Downloads/KMLs to be uploaded/3bfd81ed.kml';
+const testFile = path.join(__dirname, '..', '..', 'uploads', '3bfd81ed.kml');
 console.log('🔍 Parsing KML structure...');
 
 const xmlData = fs.readFileSync(testFile, 'utf8');

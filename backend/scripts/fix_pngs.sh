@@ -21,8 +21,11 @@ png_files=(
     "2025-07-31-ZT-HOT-test"
 )
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+UPLOADS_DIR="${SCRIPT_DIR}/../uploads"
+
 echo "🔧 Starting PNG regeneration for ${#png_files[@]} files..."
-echo "📁 Looking for KML files in: /Users/werner/Dev/heli/heli-map/backend/uploads/"
+echo "📁 Looking for KML files in: ${UPLOADS_DIR}/"
 
 successful=0
 failed=0
@@ -30,7 +33,7 @@ not_found=0
 
 for base_name in "${png_files[@]}"; do
     kml_file="${base_name}.kml"
-    kml_path="/Users/werner/Dev/heli/heli-map/backend/uploads/${kml_file}"
+    kml_path="${UPLOADS_DIR}/${kml_file}"
     
     echo ""
     echo "🔍 Processing: ${base_name}"

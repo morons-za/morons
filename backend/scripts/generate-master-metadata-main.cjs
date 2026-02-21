@@ -148,6 +148,33 @@ function extractKmlInfoFromFile(filePath, filename) {
       }
     }
 
+    // Fallback: search raw content for Start (SAST) timestamp (server-generated KMLs
+    // embed this deep in the file, after a large TMNP boundary polygon)
+    if (!time || time === '00:00') {
+      const sastMatch = xmlData.match(/Start \(SAST\):\s*(\d{4}-\d{2}-\d{2})\s+(\d{2}):(\d{2})/);
+      if (sastMatch) {
+        if (!date) date = sastMatch[1];
+        const hSast = parseInt(sastMatch[2], 10);
+        const mSast = parseInt(sastMatch[3], 10);
+        const hUtc = ((hSast - 2) + 24) % 24;
+        time = `${String(hUtc).padStart(2, '0')}:${String(mSast).padStart(2, '0')}`;
+        console.log(`[KML REGEX] Matched Start (SAST) in raw content: ${date} ${time} UTC`);
+      }
+    }
+
+    // Fallback: search for Entry into TMNP timestamp
+    if (!time || time === '00:00') {
+      const entryMatch = xmlData.match(/Entry into TMNP.*?at (\d{4}-\d{2}-\d{2}) (\d{2}):(\d{2})/);
+      if (entryMatch) {
+        if (!date) date = entryMatch[1];
+        const hSast = parseInt(entryMatch[2], 10);
+        const mSast = parseInt(entryMatch[3], 10);
+        const hUtc = ((hSast - 2) + 24) % 24;
+        time = `${String(hUtc).padStart(2, '0')}:${String(mSast).padStart(2, '0')}`;
+        console.log(`[KML REGEX] Matched Entry into TMNP in raw content: ${date} ${time} UTC`);
+      }
+    }
+
     // Fallback: extract date from filename
     if (!date) {
       const dateMatch = filename.match(/(\d{4}-\d{2}-\d{2})/);

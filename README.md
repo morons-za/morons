@@ -212,7 +212,7 @@ All tracked helicopters have local images:
 
 **🏃 Want to start immediately?** Just run:
 ```bash
-cd /Users/werner/Dev/heli/heli-map
+cd <project-root>
 ./launch.sh
 ```
 This starts both servers and opens both interfaces automatically!
@@ -235,6 +235,13 @@ The project is split into two parts: a static site and a backend. You can work w
 - When done, push updates so the static site reflects the new flights
 
 ### Development Setup
+
+**Optional – stay anonymous:** To avoid your system username appearing in commit messages, set a local Git identity for this repo:
+```bash
+git config user.name "Your Preferred Name"
+git config user.email "your-email@example.com"
+```
+Use `git config` (without `--global`) so it applies only to this project.
 
 1. **Install backend dependencies:**
    ```bash
@@ -269,7 +276,11 @@ The project is split into two parts: a static site and a backend. You can work w
 5. **Process flow:**
    - Upload KMLs via web interface → Smart KML Manager organizes files → PNG generation → Refresh Metadata → Build static site
 
-6. **Deploy updates:**
+6. **Local config (optional):** Copy example configs and add your details (both are gitignored):
+   - `API/digest-config.example.json` → `API/digest-config.json` (subscriber emails for daily digest)
+   - `API/review-config.example.json` → `API/review-config.json` (review email for sync pipeline)
+
+7. **Deploy updates:**
    ```bash
    git add .
    git commit -m "Process new flights"
@@ -301,7 +312,7 @@ This automatically:
 **Troubleshooting:**
 - If port 8080 is in use: `lsof -ti:8080 | xargs kill -9`
 - Server logs show: "🌐 Static site server running at http://localhost:8080"
-- Verify files are served from: `/Users/werner/Dev/heli/heli-map/static-site`
+- Verify files are served from: `<project-root>/static-site`
 
 
 ## 📂 Project Structure

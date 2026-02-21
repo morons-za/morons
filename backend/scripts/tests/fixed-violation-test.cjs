@@ -187,9 +187,10 @@ if (allBoundaryPoints.length > 0) {
 console.log('\n🧪 Testing BOTH files:');
 
 // Test files
+const UPLOADS = path.join(__dirname, '..', '..', 'uploads');
 const files = [
-  { name: '✅ Accepted file', path: 'uploads/2025-03-26-ZS-HBO-399fed56.kml', expected: 'Should have violations' },
-  { name: '❌ Rejected file', path: '/Users/werner/Downloads/KMLs to be uploaded/3bfd81ed.kml', expected: 'Being rejected (no violations?)' }
+  { name: '✅ Accepted file', path: path.join(UPLOADS, '2025-03-26-ZS-HBO-399fed56.kml'), expected: 'Should have violations' },
+  { name: '❌ Rejected file', path: path.join(UPLOADS, '3bfd81ed.kml'), expected: 'Being rejected (no violations?)' }
 ];
 
 for (const file of files) {

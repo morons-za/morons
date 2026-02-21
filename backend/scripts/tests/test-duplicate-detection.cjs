@@ -158,7 +158,7 @@ async function testFile() {
   console.log('🔍 TESTING DUPLICATE DETECTION');
   console.log('════════════════════════════════\\n');
 
-  const targetFile = '/Users/werner/Downloads/KMLs to be uploaded/3be1939b.kml';
+  const targetFile = path.join(__dirname, '..', '..', 'uploads', '3be1939b.kml');
   
   // Load existing metadata
   await loadMetadata();

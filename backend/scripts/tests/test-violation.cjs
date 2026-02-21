@@ -1,9 +1,11 @@
 const fs = require('fs');
+const path = require('path');
 const { XMLParser } = require('fast-xml-parser');
 
 // Test both files
-const rejectedFile = '/Users/werner/Downloads/KMLs to be uploaded/3bfd81ed.kml';
-const acceptedFile = 'uploads/2025-03-26-ZS-HBO-399fed56.kml';
+const UPLOADS = path.join(__dirname, '..', '..', 'uploads');
+const rejectedFile = path.join(UPLOADS, '3bfd81ed.kml');
+const acceptedFile = path.join(UPLOADS, '2025-03-26-ZS-HBO-399fed56.kml');
 
 console.log('🔍 Testing violation detection...\n');
 
