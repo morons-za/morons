@@ -1,0 +1,13 @@
+{
+  "tracked_registrations": [
+    "ZS-HBO", "ZS-HGD", "ZS-HIE", "ZS-HIM", "ZS-HMB",
+    "ZS-RTG", "ZT-HOT", "ZT-REG", "ZT-RMS", "ZT-RNW"
+  ],
+  "review_email": "werneravr@gmail.com",
+  "from_email": "reports@morons.org.za",
+  "transponder_gap_threshold_km": 15,
+  "transponder_gap_ratio": 50,
+  "token_expiry_days": 7,
+  "cloudflare_worker_url": "https://morons.org.za",
+  "site_url": "https://morons.org.za"
+}

@@ -45,5 +45,3 @@ server/.env
 # Digest config (contains subscriber emails – copy from digest-config.example.json)
 API/digest-config.json
 
-# Review config (contains review email – copy from review-config.example.json)
-API/review-config.json
