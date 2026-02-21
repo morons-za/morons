@@ -1,0 +1,10 @@
+{
+  "from": "reports@morons.org.za",
+  "subscribers": [
+    "werneravr@gmail.com"
+  ],
+  "siteUrl": "https://morons.org.za",
+  "timezone": "Africa/Johannesburg",
+  "runAtLocalHour": 6,
+  "minViolationPoints": 1
+}

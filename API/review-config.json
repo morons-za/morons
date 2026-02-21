@@ -1,0 +1,12 @@
+{
+  "tracked_registrations": [
+    "ZS-HBO", "ZS-HGD", "ZS-HIE", "ZS-HIM", "ZS-HMB",
+    "ZS-RTG", "ZT-HOT", "ZT-REG", "ZT-RMS", "ZT-RNW"
+  ],
+  "review_email": "",
+  "from_email": "noreply@heli-tracker.co.za",
+  "transponder_gap_threshold_km": 15,
+  "transponder_gap_ratio": 5,
+  "token_expiry_days": 7,
+  "cloudflare_worker_url": ""
+}
