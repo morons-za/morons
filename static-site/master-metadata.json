@@ -1,8 +1,44 @@
 {
-  "generated": "2026-02-22T08:26:17.121Z",
-  "totalFiles": 1386,
-  "validFlights": 1386,
+  "generated": "2026-02-22T16:35:39.419Z",
+  "totalFiles": 1391,
+  "validFlights": 1391,
   "flights": [
+    {
+      "filename": "2026-02-22-ZT-REG-3e71a811.kml",
+      "registration": "ZT-REG",
+      "date": "2026-02-22",
+      "time": "13:00",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-02-22-ZS-HBO-3e71a3fe.kml",
+      "registration": "ZS-HBO",
+      "date": "2026-02-22",
+      "time": "12:54",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 0.03
+    },
+    {
+      "filename": "2026-02-22-ZT-RNW-3e7100e4.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-02-22",
+      "time": "07:49",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.05
+    },
+    {
+      "filename": "2026-02-21-ZT-RMS-3e6dd7ff.kml",
+      "registration": "ZT-RMS",
+      "date": "2026-02-21",
+      "time": "10:58",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RMS.jpg",
+      "fileSizeMB": 0.01
+    },
     {
       "filename": "2026-02-21-ZS-HGD-3e6d64e8.kml",
       "registration": "ZS-HGD",
@@ -11,6 +47,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HGD.jpg",
       "fileSizeMB": 0.06
+    },
+    {
+      "filename": "2026-02-21-ZT-REG-3e6d5c06.kml",
+      "registration": "ZT-REG",
+      "date": "2026-02-21",
+      "time": "06:48",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.01
     },
     {
       "filename": "2026-02-20-ZS-HGD-3e69b297.kml",
