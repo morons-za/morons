@@ -64,7 +64,7 @@ function analyseTrackForGaps(trackResponse, opts = {}) {
     .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon));
 
   if (pts.length < 2) {
-    return { suspicious: false, maxGapKm: 0, avgSegmentKm: 0, totalSegments: 0, gaps: [] };
+    return { suspicious: true, noTrackData: true, maxGapKm: 0, avgSegmentKm: 0, totalSegments: 0, gaps: [] };
   }
 
   const segments = [];
@@ -114,6 +114,7 @@ function classifyViolation(trackResponse, gapResult, opts = {}) {
 
   if (!gapResult) gapResult = analyseTrackForGaps(trackResponse, opts);
   if (!gapResult.suspicious) return { classification: 'clean', realViolationCount: 0, gapViolationCount: 0 };
+  if (gapResult.noTrackData) return { classification: 'no_track_data', realViolationCount: 0, gapViolationCount: 0 };
 
   const tracks = extractTracks(trackResponse);
   const pts = (Array.isArray(tracks) ? tracks : [])
@@ -174,4 +175,31 @@ if (require.main === module) {
   }
 }
 
-module.exports = { analyseTrackForGaps, classifyViolation, haversineKm, extractTracks };
+/**
+ * Parse a KML file's LineString coordinates into the same format as FR24 tracks,
+ * so analyseTrackForGaps can be called on KML data as a fallback.
+ */
+function kmlToTrackPoints(kmlContent) {
+  const fs = require('fs');
+  const lsMatch = kmlContent.match(/<LineString>[\s\S]*?<coordinates>([\s\S]*?)<\/coordinates>[\s\S]*?<\/LineString>/);
+  if (!lsMatch) return [];
+  return lsMatch[1].trim().split(/\s+/).map((pt) => {
+    const [lon, lat, alt] = pt.split(',').map(Number);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+    return { lat, lon };
+  }).filter(Boolean);
+}
+
+/**
+ * Analyse a KML file for transponder gaps (fallback when FR24 track API is unavailable).
+ * Wraps the track points in the format expected by analyseTrackForGaps.
+ */
+function analyseKmlForGaps(kmlContent, opts = {}) {
+  const points = kmlToTrackPoints(kmlContent);
+  if (points.length < 2) {
+    return { suspicious: true, noTrackData: true, maxGapKm: 0, avgSegmentKm: 0, totalSegments: 0, gaps: [] };
+  }
+  return analyseTrackForGaps({ tracks: points }, opts);
+}
+
+module.exports = { analyseTrackForGaps, analyseKmlForGaps, classifyViolation, haversineKm, extractTracks, kmlToTrackPoints };

@@ -27,7 +27,7 @@
 const fs = require('fs');
 const path = require('path');
 const { spawn } = require('child_process');
-const { analyseTrackForGaps, classifyViolation } = require('./detect-transponder-gaps.cjs');
+const { analyseTrackForGaps, analyseKmlForGaps, classifyViolation } = require('./detect-transponder-gaps.cjs');
 const { addPendingFlight, readPendingReview } = require('./pending-review.cjs');
 const { sendReviewDigest } = require('./review-email.cjs');
 
@@ -325,16 +325,30 @@ async function main() {
       const trackJson = await fetchJson(`${BASE_URL}/api/fr24/flight-tracks?flight_id=${id8}`, {}, 120000);
       const trackResponse = trackJson?.response || trackJson;
 
-      // Run transponder gap check
       const gapOpts = {
         thresholdKm: config.transponder_gap_threshold_km,
         ratioThreshold: config.transponder_gap_ratio
       };
-      const gapResult = analyseTrackForGaps(trackResponse, gapOpts);
+      let gapResult = analyseTrackForGaps(trackResponse, gapOpts);
 
-      // Classify: 'clean' (no gaps), 'mixed' (gaps + real violations), 'gap_only' (false positive)
+      // If FR24 API returned no tracks, fall back to analysing the KML file
+      if (gapResult.noTrackData) {
+        console.log(`[sync] No FR24 track data for ${id8}, falling back to KML-based gap analysis`);
+        const kmlUrl = `${BASE_URL}/api/fr24/flight-tracks.kml?flight_id=${id8}`;
+        const kml = await fetchText(kmlUrl, 10 * 60 * 1000);
+        if (kml.ok && kml.body) {
+          gapResult = analyseKmlForGaps(kml.body, gapOpts);
+          if (gapResult.noTrackData) {
+            console.log(`[sync] KML also has no coordinates for ${id8} — flagging for review`);
+          }
+        }
+      }
+
+      // Classify: 'clean', 'mixed', 'gap_only', or 'no_track_data'
       let classification = 'clean';
-      if (gapResult.suspicious) {
+      if (gapResult.noTrackData) {
+        classification = 'no_track_data';
+      } else if (gapResult.suspicious) {
         const cv = classifyViolation(trackResponse, gapResult, gapOpts);
         classification = cv.classification;
       }
@@ -352,13 +366,15 @@ async function main() {
         gapCount: gapResult.gaps.length
       };
 
+      const needsReview = classification === 'gap_only' || classification === 'no_track_data';
+
       if (args.dryRun) {
         console.log(`[sync] [DRY] ${id8} ${reg} ${ymd} — ${classification.toUpperCase()} (max gap: ${gapResult.maxGapKm} km)`);
-        (classification === 'gap_only' ? suspicious : autoPublished).push(flightInfo);
+        (needsReview ? suspicious : autoPublished).push(flightInfo);
         continue;
       }
 
-      // Download KML
+      // Download KML (may already have been fetched for fallback analysis)
       const kmlUrl = `${BASE_URL}/api/fr24/flight-tracks.kml?flight_id=${id8}`;
       const kml = await fetchText(kmlUrl, 10 * 60 * 1000);
       if (!kml.ok) {
@@ -369,7 +385,7 @@ async function main() {
       const kmlPath = path.join(UPLOADS_DIR, filename);
       fs.writeFileSync(kmlPath, kml.body, 'utf8');
 
-      // Generate PNG via the standalone image generator
+      // Generate PNG
       try {
         const { execSync } = require('child_process');
         execSync(`node backend/scripts/generate-flight-image.cjs "${filename}"`, {
@@ -381,11 +397,12 @@ async function main() {
         console.warn(`[sync] PNG generation failed for ${id8}: ${e.message}`);
       }
 
-      if (classification === 'gap_only') {
-        console.log(`[sync] GAP-ONLY ${id8} ${reg} ${ymd} — max gap: ${gapResult.maxGapKm} km → pending review`);
+      if (needsReview) {
+        const reason = classification === 'no_track_data' ? 'no_track_data' : 'gap_only_violation';
+        console.log(`[sync] ${classification.toUpperCase()} ${id8} ${reg} ${ymd} — max gap: ${gapResult.maxGapKm} km → pending review`);
         addPendingFlight({
           ...flightInfo,
-          reason: 'gap_only_violation'
+          reason
         }, hmacSecret, config.token_expiry_days);
         suspicious.push(flightInfo);
       } else {
