@@ -983,7 +983,7 @@ const htmlContent = `<!DOCTYPE html>
         <!-- Summary cards -->
         <div class="summary-cards" id="summaryCards">
             <div class="summary-card">
-                <div class="summary-label">FLIGHTS</div>
+                <div class="summary-label">VIOLATING FLIGHTS</div>
                 <div class="summary-value" id="flightsCount">${flightData.length}</div>
             </div>
             <div class="summary-card">

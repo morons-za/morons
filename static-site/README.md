@@ -36,4 +36,4 @@ node build-static-site.cjs
 
 Generated from 1386 flights detected with NP17 airspace violations over Table Mountain National Park.
 
-Last updated: 2026-02-22T08:31:57.294Z
+Last updated: 2026-02-22T08:33:48.368Z
