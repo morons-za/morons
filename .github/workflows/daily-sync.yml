@@ -2,8 +2,8 @@ name: Daily Flight Sync
 
 on:
   schedule:
-    # Run daily at 19:00 UTC (21:00 SAST)
-    - cron: '0 19 * * *'
+    # Run 5x daily at 08:00, 12:00, 15:00, 18:00, 21:00 SAST
+    - cron: '0 6,10,13,16,19 * * *'
   workflow_dispatch:
     inputs:
       hours:
