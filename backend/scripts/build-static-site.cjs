@@ -324,18 +324,6 @@ const htmlContent = `<!DOCTYPE html>
             line-height: 1;
         }
         
-        /* Update schedule notification */
-        .update-schedule-notification {
-            background: rgba(0, 123, 255, 0.08);
-            border: 1px solid rgba(0, 123, 255, 0.2);
-            color: #0056b3;
-            padding: 12px 18px;
-            border-radius: 6px;
-            margin: 20px 0;
-            text-align: center;
-            font-size: 13px;
-            font-weight: 500;
-        }
         
         #map {
             height: 400px;
@@ -1012,11 +1000,6 @@ const htmlContent = `<!DOCTYPE html>
             </div>
         </div>
         
-        <!-- Update schedule notification -->
-        <div class="update-schedule-notification">
-            ℹ️ This site is updated on weekends, once per month
-        </div>
-
         <div class="filters-container">
             <div id="filtersCard" class="filters">
                 <div class="filters-header">
