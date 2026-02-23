@@ -22,6 +22,7 @@ const { XMLParser } = require('fast-xml-parser');
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 const helicoptersFile = path.join(__dirname, 'helicopters.json');
 const masterMetadataFile = path.join(__dirname, 'master-metadata.json');
+const staticMasterMetadataFile = path.join(__dirname, '..', '..', 'static-site', 'master-metadata.json');
 
 // Load helicopter metadata
 function loadHelicopterMetadata() {
@@ -340,6 +341,13 @@ if (require.main === module) {
 //     (skips KML parsing entirely — used by daily-sync which already has all metadata)
 async function updateMasterMetadataIncremental(newFilenames = null, { flightRecords } = {}) {
   console.log('🔄 Incrementally updating master metadata...');
+  const persistMetadata = (metadata) => {
+    const serverDir = path.dirname(masterMetadataFile);
+    if (!fs.existsSync(serverDir)) {
+      fs.mkdirSync(serverDir, { recursive: true });
+    }
+    fs.writeFileSync(masterMetadataFile, JSON.stringify(metadata, null, 2));
+  };
 
   let existingMetadata = {
     generated: new Date().toISOString(),
@@ -348,13 +356,28 @@ async function updateMasterMetadataIncremental(newFilenames = null, { flightReco
     flights: []
   };
 
-  if (fs.existsSync(masterMetadataFile)) {
-    try {
-      existingMetadata = JSON.parse(fs.readFileSync(masterMetadataFile, 'utf8'));
-      console.log(`📋 Loaded existing metadata with ${existingMetadata.flights.length} flights`);
-    } catch (error) {
-      console.log(`⚠️ Could not load existing metadata: ${error.message}, starting fresh`);
-    }
+  // Choose the freshest metadata baseline (largest flight set) to avoid
+  // regressions when one metadata file is stale.
+  const metadataCandidates = [masterMetadataFile, staticMasterMetadataFile]
+    .filter((p) => fs.existsSync(p))
+    .map((p) => {
+      try {
+        const parsed = JSON.parse(fs.readFileSync(p, 'utf8'));
+        const flights = Array.isArray(parsed?.flights) ? parsed.flights : [];
+        return { path: p, parsed, count: flights.length };
+      } catch {
+        return null;
+      }
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.count - a.count);
+
+  if (metadataCandidates.length > 0) {
+    existingMetadata = metadataCandidates[0].parsed;
+    const sourceLabel = metadataCandidates[0].path === staticMasterMetadataFile
+      ? 'static-site/master-metadata.json'
+      : 'backend/scripts/master-metadata.json';
+    console.log(`📋 Loaded existing metadata from ${sourceLabel} with ${existingMetadata.flights.length} flights`);
   }
 
   const existingFilenames = new Set(existingMetadata.flights.map(f => f.filename));
@@ -363,19 +386,44 @@ async function updateMasterMetadataIncremental(newFilenames = null, { flightReco
   const newFlights = [];
 
   if (flightRecords && flightRecords.length > 0) {
-    // Fast path: pre-computed metadata from daily-sync (no KML parsing needed)
+    // Fast path with safety net: trust pre-computed records, but fill missing
+    // fields from KML so time/registration regressions cannot creep back in.
     for (const rec of flightRecords) {
       if (existingFilenames.has(rec.filename)) continue;
-      const heliData = helicopterMetadata[rec.registration] || {};
       const filePath = path.join(uploadsDir, rec.filename);
+
+      let parsed = null;
+      const hasWeakRecord =
+        !rec.registration ||
+        !rec.date ||
+        !rec.time ||
+        String(rec.time).trim() === '00:00';
+      if (hasWeakRecord && fs.existsSync(filePath)) {
+        parsed = extractKmlInfoFromFile(filePath, rec.filename);
+      }
+
+      const filenameRegMatch = String(rec.filename || '').match(/-(?:[0-9]{8}-)?([A-Z]{2}-[A-Z0-9]{3})-/);
+      const registration = rec.registration || parsed?.registration || (filenameRegMatch ? filenameRegMatch[1] : '');
+      if (!registration) {
+        console.log(`⚠️ Excluded flightRecord ${rec.filename} (no registration)`);
+        continue;
+      }
+
+      const filenameDateMatch = String(rec.filename || '').match(/^(\d{4}-\d{2}-\d{2})-/);
+      const date = rec.date || parsed?.date || (filenameDateMatch ? filenameDateMatch[1] : '');
+      const time = (rec.time && String(rec.time).trim() !== '00:00')
+        ? rec.time
+        : (parsed?.time || '00:00');
+
+      const heliData = helicopterMetadata[registration] || {};
       let fileSizeMB = 0;
       try { fileSizeMB = parseFloat((fs.statSync(filePath).size / (1024 * 1024)).toFixed(2)); } catch {}
       newFlights.push({
         filename: rec.filename,
-        registration: rec.registration,
-        date: rec.date,
-        time: rec.time || '00:00',
-        owner: heliData.owner || rec.owner || '',
+        registration,
+        date,
+        time,
+        owner: heliData.owner || rec.owner || parsed?.owner || '',
         imageUrl: heliData.imageUrl || '',
         fileSizeMB
       });
@@ -398,6 +446,7 @@ async function updateMasterMetadataIncremental(newFilenames = null, { flightReco
 
     if (filesToProcess.length === 0) {
       console.log('✅ No new files to process - metadata is up to date');
+      persistMetadata(existingMetadata);
       return existingMetadata;
     }
 
@@ -431,6 +480,7 @@ async function updateMasterMetadataIncremental(newFilenames = null, { flightReco
 
   if (newFlights.length === 0) {
     console.log('✅ No new flights to add');
+    persistMetadata(existingMetadata);
     return existingMetadata;
   }
 
@@ -456,4 +506,4 @@ async function updateMasterMetadataIncremental(newFilenames = null, { flightReco
   return updatedMetadata;
 }
 
-module.exports = { generateMasterMetadata, updateMasterMetadataIncremental }; 
+module.exports = { generateMasterMetadata, updateMasterMetadataIncremental, extractKmlInfoFromFile };
