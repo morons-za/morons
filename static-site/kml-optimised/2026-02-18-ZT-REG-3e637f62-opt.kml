@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>FR24 3e637f62 - Optimised</name>
+    <description><![CDATA[Optimised flight path with 79 points (decimated from 391 original points). Source format: Standard KML]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ffff0000</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[Park boundary / NP17 restricted airspace. Red track segments show flight inside this area.]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.43283,-33.87623,274.32 18.3937,-33.88551,426.72 18.38035,-33.89879,457.20000000000005 18.36041,-33.91515,548.64 18.33667,-34.00917,762 18.33741,-34.01729,792.48 18.33905,-34.02468,792.48 18.33958,-34.03118,822.96 18.34073,-34.03735,792.48 18.34177,-34.04386,792.48 18.34248,-34.05051,762 18.34289,-34.05775,762 18.34221,-34.06522,762 18.34963,-34.10455,640.08 18.35437,-34.10909,640.08 18.36113,-34.11273,609.6 18.36917,-34.11601,609.6 18.37718,-34.11851,609.6 18.38582,-34.12093,609.6 18.39403,-34.1234,609.6 18.40282,-34.12586,609.6 18.41146,-34.12867,609.6 18.42088,-34.13163,609.6 18.42896,-34.13415,609.6 18.43759,-34.13634,609.6 18.44597,-34.13716,609.6 18.45641,-34.13502,609.6 18.46577,-34.13056,609.6 18.47385,-34.12334,609.6 18.4776,-34.11602,609.6 18.47868,-34.10856,609.6 18.47847,-34.10191,609.6 18.47677,-34.09487,609.6 18.47565,-34.08912,609.6 18.47601,-34.08116,579.12 18.47527,-34.07393,609.6 18.47422,-34.06689,609.6 18.4743,-34.05972,609.6 18.47542,-34.05273,640.08 18.47608,-34.04535,640.08 18.47604,-34.03851,609.6 18.47649,-34.03156,609.6 18.47743,-34.0249,609.6 18.47779,-34.01792,609.6 18.47805,-34.01099,579.12 18.47935,-34.00319,548.64 18.4801,-33.99548,518.1600000000001 18.48085,-33.98894,518.1600000000001 18.48217,-33.98189,487.68 18.48223,-33.97522,457.20000000000005 18.48348,-33.96648,426.72 18.48339,-33.96049,426.72 18.48323,-33.95337,396.24 18.4817,-33.94523,396.24 18.4779,-33.93388,365.76 18.46445,-33.9242,335.28000000000003 18.45957,-33.91544,304.8 18.41562,-33.87503,335.28000000000003 18.35958,-33.90231,548.64 18.3524,-33.91235,609.6 18.3929,-33.88871,670.5600000000001 18.41691,-33.87498,396.24 18.39571,-33.88671,487.68 18.36693,-33.89492,548.64 18.36703,-33.90646,609.6 18.36307,-33.91277,670.5600000000001 18.37587,-33.91357,609.6 18.39021,-33.90097,548.64 18.40439,-33.88704,457.20000000000005 18.41246,-33.86862,365.76 18.40575,-33.86976,396.24 18.41344,-33.88064,457.20000000000005 18.40209,-33.88579,487.68 18.39022,-33.89,518.1600000000001 18.3621,-33.90648,579.12 18.35149,-33.91232,640.08 18.37485,-33.90947,548.64 18.38622,-33.89729,518.1600000000001 18.40765,-33.88384,396.24
+        </coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Entry 1</name>
+      <description><![CDATA[Entry into TMNP (incursion 1) at 2026-02-18 16:34:21 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff00ff00</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.33904894645283,-34.024672223818506,792.48</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Exit 1</name>
+      <description><![CDATA[Exit from TMNP (incursion 1) at 2026-02-18 16:34:42 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff0000ff</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.340282879522704,-34.03548128479947,792.48</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Entry 2</name>
+      <description><![CDATA[Entry into TMNP (incursion 2) at 2026-02-18 16:35:24 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff00ff00</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.34285628695434,-34.058424260913206,762</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Exit 2</name>
+      <description><![CDATA[Exit from TMNP (incursion 2) at 2026-02-18 16:35:27 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff0000ff</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.34266946902644,-34.06085601770036,762</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Entry 3</name>
+      <description><![CDATA[Entry into TMNP (incursion 3) at 2026-02-18 16:36:56 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff00ff00</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.352894417164624,-34.10723884712419,640.08</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Exit 3</name>
+      <description><![CDATA[Exit from TMNP (incursion 3) at 2026-02-18 16:37:35 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff0000ff</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.374824921448155,-34.117743143909124,609.6</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>

@@ -93,37 +93,45 @@ try {
 // Load flight metadata
 console.log('\n📊 Loading flight metadata...');
 let flightData = [];
+let selectedMetadataPath = null;
 
 try {
-  // Try to load from master metadata first
-  const metadataPath = path.join(__dirname, 'master-metadata.json');
-  if (fs.existsSync(metadataPath)) {
-    const masterMetadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
-    console.log('✅ Loaded master metadata');
-    
-    // Handle both array and object formats
-    if (Array.isArray(masterMetadata.flights)) {
-      flightData = masterMetadata.flights.filter(flight => 
-        flight && flight.filename && flight.registration
-      );
-    } else {
-      // Convert to flat array format for object-based metadata
-      flightData = Object.values(masterMetadata).filter(flight => 
-        flight && flight.filename && flight.registration
-      );
-    }
-    
+  // Prefer the metadata file with the most flights to avoid clobbering
+  // fresh cron updates when backend/scripts/master-metadata.json is stale.
+  const metadataCandidates = [
+    path.join(PROJECT_ROOT, 'backend', 'scripts', 'master-metadata.json'),
+    path.join(PROJECT_ROOT, 'static-site', 'master-metadata.json')
+  ];
+
+  const parsedCandidates = metadataCandidates
+    .filter((p) => fs.existsSync(p))
+    .map((p) => {
+      const data = JSON.parse(fs.readFileSync(p, 'utf8'));
+      const flights = Array.isArray(data?.flights)
+        ? data.flights
+        : Object.values(data || {});
+      const validFlights = flights.filter((flight) => flight && flight.filename && flight.registration);
+      return { path: p, flights: validFlights };
+    })
+    .sort((a, b) => b.flights.length - a.flights.length);
+
+  if (parsedCandidates.length > 0) {
+    selectedMetadataPath = parsedCandidates[0].path;
+    flightData = parsedCandidates[0].flights;
+    const sourceLabel = selectedMetadataPath.includes(path.join('static-site', 'master-metadata.json'))
+      ? 'static-site/master-metadata.json'
+      : 'backend/scripts/master-metadata.json';
+    console.log(`✅ Loaded master metadata from ${sourceLabel} (${flightData.length} flights)`);
+
     // Remove duplicate entries based on filename (most reliable method)
     const seenFilenames = new Set();
     const filteredFlights = [];
-    
     for (const flight of flightData) {
       if (!seenFilenames.has(flight.filename)) {
         filteredFlights.push(flight);
         seenFilenames.add(flight.filename);
       }
     }
-    
     flightData = filteredFlights;
   } else if (fs.existsSync('backend/scripts/kml-metadata-cache.json')) {
     const cacheMetadata = JSON.parse(fs.readFileSync('backend/scripts/kml-metadata-cache.json', 'utf8'));
@@ -1147,10 +1155,9 @@ fs.writeFileSync(path.join(jsDir, 'app.js'), appJsContent);
 console.log('📄 Generated app.js');
 
 // Copy master-metadata.json to static site for external loading
-const metadataPath = path.join(__dirname, 'master-metadata.json');
 const staticMetadataPath = path.join(BUILD_DIR, 'master-metadata.json');
-if (fs.existsSync(metadataPath)) {
-    fs.copyFileSync(metadataPath, staticMetadataPath);
+if (selectedMetadataPath && fs.existsSync(selectedMetadataPath)) {
+    fs.copyFileSync(selectedMetadataPath, staticMetadataPath);
     console.log('📄 Copied master-metadata.json for external loading');
 }
 

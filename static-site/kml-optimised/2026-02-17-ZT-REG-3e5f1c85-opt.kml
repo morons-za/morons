@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>FR24 3e5f1c85 - Optimised</name>
+    <description><![CDATA[Optimised flight path with 96 points (decimated from 479 original points). Source format: Standard KML]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ffff0000</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[Park boundary / NP17 restricted airspace. Red track segments show flight inside this area.]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.40424,-33.88524,335.28000000000003 18.3819,-33.88945,518.1600000000001 18.36708,-33.90408,579.12 18.35177,-33.91741,609.6 18.3471,-34.02319,701.0400000000001 18.34581,-34.02914,731.52 18.34405,-34.03522,731.52 18.34102,-34.04126,731.52 18.33993,-34.04781,762 18.34947,-34.05043,762 18.35761,-34.04641,762 18.35907,-34.04027,762 18.3566,-34.03393,731.52 18.35355,-34.02726,701.0400000000001 18.35065,-34.02084,670.5600000000001 18.3441,-34.01181,640.08 18.35887,-33.91523,518.1600000000001 18.36668,-33.90659,457.20000000000005 18.38482,-33.89127,396.24 18.4116,-33.88615,396.24 18.36981,-33.89068,548.64 18.42189,-33.8861,396.24 18.42327,-33.87775,243.84 18.43532,-33.88198,304.8 18.38276,-33.88471,487.68 18.39062,-33.89177,487.68 18.38496,-33.86901,274.32 18.44223,-33.88442,365.76 18.41888,-33.89026,487.68 18.40459,-33.89169,518.1600000000001 18.37828,-33.91003,731.52 18.37165,-33.9113,457.20000000000005 18.37773,-33.88948,396.24 18.40818,-33.88476,335.28000000000003 18.41288,-33.88697,457.20000000000005 18.39629,-33.89331,579.12 18.36869,-33.8976,670.5600000000001 18.35949,-33.90824,731.52 18.36094,-33.92145,762 18.33202,-34.01645,731.52 18.36715,-33.92025,548.64 18.36965,-33.91272,548.64 18.38862,-33.89656,518.1600000000001 18.408,-33.88033,426.72 18.39305,-33.88353,579.12 18.38704,-33.88591,609.6 18.37755,-33.89123,731.52 18.37129,-33.89761,762 18.36454,-33.90392,792.48 18.35784,-33.90895,853.44 18.35455,-33.91708,883.9200000000001 18.33869,-33.93088,944.88 18.33506,-33.96362,1036.3200000000002 18.32321,-33.97429,1066.8 18.31834,-33.98195,1066.8 18.31563,-33.98814,1036.3200000000002 18.31296,-33.99405,1036.3200000000002 18.30743,-34.00254,1005.84 18.30463,-34.01024,975.36 18.30129,-34.01745,944.88 18.30339,-34.02491,914.4000000000001 18.30126,-34.03374,853.44 18.30458,-34.04155,822.96 18.30559,-34.04945,822.96 18.3088,-34.06082,762 18.30865,-34.06936,762 18.31028,-34.07779,792.48 18.31,-34.08678,762 18.30931,-34.09523,792.48 18.30942,-34.10216,822.96 18.30871,-34.11129,822.96 18.30273,-34.12664,792.48 18.30231,-34.13363,762 18.30356,-34.1415,701.0400000000001 18.31187,-34.14734,640.08 18.31862,-34.15255,609.6 18.3253,-34.15793,579.12 18.33086,-34.16398,548.64 18.33449,-34.17017,548.64 18.34071,-34.1784,548.64 18.34587,-34.18545,548.64 18.37995,-34.21006,487.68 18.36248,-34.21521,426.72 18.34708,-34.18476,426.72 18.32359,-34.17414,365.76 18.28047,-34.09881,640.08 18.3076,-34.06358,640.08 18.29814,-34.04984,640.08 18.30987,-34.02446,731.52 18.31333,-34.01774,731.52 18.32564,-34.00717,731.52 18.35333,-33.90549,487.68 18.36577,-33.89532,518.1600000000001 18.38726,-33.88412,518.1600000000001 18.39462,-33.86724,487.68 18.44717,-33.88386,396.24
+        </coordinates>
+      </LineString>
+    </Placemark>
+    <Placemark>
+      <name>Entry 1</name>
+      <description><![CDATA[Entry into TMNP (incursion 1) at 2026-02-17 11:59:49 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff00ff00</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.34790725935828,-34.01750331106504,701.0400000000001</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Exit 1</name>
+      <description><![CDATA[Exit from TMNP (incursion 1) at 2026-02-17 11:59:51 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff0000ff</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.347807782291213,-34.01872686163096,701.0400000000001</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Entry 2</name>
+      <description><![CDATA[Entry into TMNP (incursion 2) at 2026-02-17 12:02:06 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff00ff00</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.347833608756233,-34.018409200586134,670.5600000000001</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Exit 2</name>
+      <description><![CDATA[Exit from TMNP (incursion 2) at 2026-02-17 12:02:19 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff0000ff</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.343768256553634,-34.01117415839447,640.08</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Entry 3</name>
+      <description><![CDATA[Entry into TMNP (incursion 3) at 2026-02-17 16:41:42 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff00ff00</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.37019247736849,-34.2093166984145,487.68</coordinates>
+      </Point>
+    </Placemark>
+    <Placemark>
+      <name>Exit 3</name>
+      <description><![CDATA[Exit from TMNP (incursion 3) at 2026-02-17 16:42:17 SAST]]></description>
+      <Style>
+        <IconStyle>
+          <color>ff0000ff</color>
+          <scale>0.8</scale>
+          <Icon><href>http://maps.google.com/mapfiles/kml/shapes/placemark_circle.png</href></Icon>
+        </IconStyle>
+      </Style>
+      <Point>
+        <coordinates>18.37290157679308,-34.21698603204299,476.2559341286123</coordinates>
+      </Point>
+    </Placemark>
+  </Document>
+</kml>

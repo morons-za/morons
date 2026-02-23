@@ -1,8 +1,26 @@
 {
-  "generated": "2026-02-22T08:26:17.121Z",
-  "totalFiles": 1386,
-  "validFlights": 1386,
+  "generated": "2026-02-23T21:22:31.648Z",
+  "totalFiles": 1393,
+  "validFlights": 1393,
   "flights": [
+    {
+      "filename": "2026-02-22-ZS-HBO-3e71a3fe.kml",
+      "registration": "ZS-HBO",
+      "date": "2026-02-22",
+      "time": "00:00",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 0.03
+    },
+    {
+      "filename": "2026-02-22-ZT-REG-3e71a811.kml",
+      "registration": "ZT-REG",
+      "date": "2026-02-22",
+      "time": "00:00",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.01
+    },
     {
       "filename": "2026-02-21-ZS-HGD-3e6d64e8.kml",
       "registration": "ZS-HGD",
@@ -13,6 +31,33 @@
       "fileSizeMB": 0.06
     },
     {
+      "filename": "2026-02-21-ZT-REG-3e6d5c06.kml",
+      "registration": "ZT-REG",
+      "date": "2026-02-21",
+      "time": "00:00",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-02-21-ZT-RMS-3e6dd7ff.kml",
+      "registration": "ZT-RMS",
+      "date": "2026-02-21",
+      "time": "00:00",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RMS.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-02-20-ZT-REG-3e6abd8b.kml",
+      "registration": "ZT-REG",
+      "date": "2026-02-20",
+      "time": "14:26",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.13
+    },
+    {
       "filename": "2026-02-20-ZS-HGD-3e69b297.kml",
       "registration": "ZS-HGD",
       "date": "2026-02-20",
@@ -20,6 +65,24 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HGD.jpg",
       "fileSizeMB": 0.06
+    },
+    {
+      "filename": "2026-02-18-ZT-REG-3e637f62.kml",
+      "registration": "ZT-REG",
+      "date": "2026-02-18",
+      "time": "14:28",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.14
+    },
+    {
+      "filename": "2026-02-17-ZT-REG-3e5f1c85.kml",
+      "registration": "ZT-REG",
+      "date": "2026-02-17",
+      "time": "09:54",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.14
     },
     {
       "filename": "2026-02-15-ZS-HIE-3e57fdfd.kml",
