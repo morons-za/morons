@@ -1,4 +1,23 @@
 {
-  "pending": [],
+  "pending": [
+    {
+      "flight_id": "3e8008f6",
+      "filename": "2026-02-26-ZT-HOT-3e8008f6.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-02-26",
+      "time": "08:35",
+      "classification": "gap_only",
+      "maxGapKm": 32.03,
+      "avgSegmentKm": 0.18,
+      "totalSegments": 1404,
+      "gapCount": 4,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-02-26T14:13:35.181Z",
+      "approve_token": "a68b258e8a74b28a1afd47cec105159563404481af031410c8f429ce2748dd2a",
+      "approve_expires": "2026-03-05T14:13:35.180Z",
+      "reject_token": "5c3f365cf86dfb0c57b563f0b1d6d527148d02bfcc4c901caa183d7ca99706f3",
+      "reject_expires": "2026-03-05T14:13:35.181Z"
+    }
+  ],
   "decisions": []
 }
