@@ -388,27 +388,6 @@ async function generateSquareMapSVG(coordinates, tmnpCoords, bounds, zoom, metad
   const violationClusters = clusterViolations(violations, coordToPixel);
   console.log(`📍 Clustered into ${violationClusters.length} violation markers`);
 
-  // Load and convert warning PNG to base64
-  function loadWarningPNG() {
-    const warningPath = path.join(__dirname, '..', 'images', 'warning.png');
-    
-    if (!fs.existsSync(warningPath)) {
-      console.log('⚠️ Warning PNG not found at:', warningPath);
-      console.log('⚠️ Please ensure warning.png is in the /backend/images folder');
-      return null;
-    }
-    
-    try {
-      const pngBuffer = fs.readFileSync(warningPath);
-      const base64 = pngBuffer.toString('base64');
-      console.log('✅ Loaded warning PNG icon');
-      return `data:image/png;base64,${base64}`;
-    } catch (error) {
-      console.log('❌ Error loading warning PNG:', error.message);
-      return null;
-    }
-  }
-  
   // Project TMNP boundary to pixel coordinates
   const tmnpElements = [];
   if (tmnpCoords && tmnpCoords.length > 0) {
@@ -461,8 +440,8 @@ async function generateSquareMapSVG(coordinates, tmnpCoords, bounds, zoom, metad
     }
   }
   
-  // Create violation markers with improved error handling
-  const violationMarkers = violationClusters.map((cluster, index) => {
+  // Compute marker anchor points for later PNG compositing with warning.png.
+  const markerPixels = violationClusters.map((cluster, index) => {
     // Use the first point in the cluster as the marker position
     const representative = cluster[0];
     const pixel = coordToPixel(representative.lat, representative.lon);
@@ -473,28 +452,10 @@ async function generateSquareMapSVG(coordinates, tmnpCoords, bounds, zoom, metad
       return '';
     }
     
-    // Load the user's warning PNG
-    const warningPNG = loadWarningPNG();
-    
-    if (!warningPNG) {
-      console.log('⚠️ Warning PNG not available, skipping violation marker');
-      return '';
-    }
-    
-    // Use the user's PNG image with proper XML escaping
-    const size = 24; // Size for the warning icon
-    const x = Math.round(pixel.x - size/2);
-    const y = Math.round(pixel.y - size/2);
-    const shadowX = Math.round(pixel.x - size/2 + 1);
-    const shadowY = Math.round(pixel.y - size/2 + 1);
-    
-    return `    <g class="violation-marker">
-      <!-- Drop shadow -->
-      <image href="${warningPNG}" x="${shadowX}" y="${shadowY}" width="${size}" height="${size}" opacity="0.3"/>
-      <!-- Warning PNG icon -->
-      <image href="${warningPNG}" x="${x}" y="${y}" width="${size}" height="${size}"/>
-    </g>`;
-  }).filter(marker => marker !== '').join('\n');
+    const x = Math.round(pixel.x);
+    const y = Math.round(pixel.y);
+    return { x, y };
+  }).filter(Boolean);
   
   // Create simplified text with proper XML escaping
   const ownerText = metadata.owner !== 'Unknown Owner' ? ` (${metadata.owner})` : '';
@@ -547,18 +508,42 @@ async function generateSquareMapSVG(coordinates, tmnpCoords, bounds, zoom, metad
   </text>
   
   <!-- Violation Markers -->
-${violationMarkers}
+  
 </svg>`;
 
-  return svgContent;
+  return { svgContent, markerPixels };
 }
 
-// Convert SVG to PNG using Sharp
-async function convertSVGToPNG(svgContent, outputPath) {
+// Convert SVG to PNG using Sharp and overlay warning.png markers.
+async function convertSVGToPNG(svgContent, outputPath, markerPixels = []) {
   try {
-    const pngBuffer = await sharp(Buffer.from(svgContent))
+    let pngBuffer = await sharp(Buffer.from(svgContent))
       .png({ compressionLevel: 9, palette: true, quality: 80 })
       .toBuffer();
+
+    if (markerPixels.length > 0) {
+      const warningPath = path.join(__dirname, '..', 'images', 'warning.png');
+      if (fs.existsSync(warningPath)) {
+        const iconSize = 24;
+        const iconBuffer = await sharp(warningPath)
+          .resize(iconSize, iconSize, { fit: 'contain' })
+          .png()
+          .toBuffer();
+
+        const composites = markerPixels.map((p) => ({
+          input: iconBuffer,
+          left: Math.round(p.x - iconSize / 2),
+          top: Math.round(p.y - iconSize / 2)
+        }));
+
+        pngBuffer = await sharp(pngBuffer)
+          .composite(composites)
+          .png({ compressionLevel: 9, palette: true, quality: 80 })
+          .toBuffer();
+      } else {
+        console.log('⚠️ warning.png not found, skipping marker overlay');
+      }
+    }
     
     fs.writeFileSync(outputPath, pngBuffer);
     return outputPath;
@@ -614,7 +599,7 @@ async function generateFlightImage(kmlFilename) {
     console.log(`🔍 Using zoom level: ${zoom}`);
     
     // Generate square SVG map (this will download tiles)
-    const svgContent = await generateSquareMapSVG(coordinates, tmnpCoords, bounds, zoom, metadata);
+    const { svgContent, markerPixels } = await generateSquareMapSVG(coordinates, tmnpCoords, bounds, zoom, metadata);
     
     // Create flight-maps directory if it doesn't exist
     const mapsDir = path.join(__dirname, '..', 'flight-maps');
@@ -626,7 +611,7 @@ async function generateFlightImage(kmlFilename) {
     const baseName = path.basename(kmlFilename, '.kml');
     const pngPath = path.join(mapsDir, `${baseName}.png`);
     
-    const savedPath = await convertSVGToPNG(svgContent, pngPath);
+    const savedPath = await convertSVGToPNG(svgContent, pngPath, markerPixels);
     console.log(`✅ Flight map saved: ${savedPath}`);
     
     return true;
