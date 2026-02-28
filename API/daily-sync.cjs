@@ -289,6 +289,9 @@ async function main() {
     }
 
     const results = Array.isArray(viol.results) ? viol.results : [];
+    const violationById = new Map(
+      results.map((r) => [String(r?.flight_id || '').trim(), r])
+    );
     const violatingIds = results
       .filter((r) => r?.violation === true)
       .map((r) => String(r.flight_id || '').trim())
@@ -359,6 +362,9 @@ async function main() {
         registration: reg,
         date: ymd,
         time: hhmm,
+        incursions: Number.isFinite(Number(violationById.get(id)?.incursions))
+          ? Number(violationById.get(id).incursions)
+          : null,
         classification,
         maxGapKm: gapResult.maxGapKm,
         avgSegmentKm: gapResult.avgSegmentKm,

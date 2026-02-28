@@ -439,17 +439,21 @@ function readFr24ViolationFromDisk(flightId) {
   if (isExpired(Number(cached.ts))) return null;
   if (TMNP_KML_SHA1 && cached.tmnpKmlSha1 && cached.tmnpKmlSha1 !== TMNP_KML_SHA1) return null;
   if (!('violation' in cached) || !('reason' in cached)) return null;
-  return { violation: cached.violation, reason: cached.reason };
+  // If incursions were not stored in older cache entries, force recompute once.
+  // This lets daily-sync emails show real incursion counts instead of "?".
+  if (!('incursions' in cached)) return null;
+  return { violation: cached.violation, reason: cached.reason, incursions: cached.incursions };
 }
 
-function writeFr24ViolationToDisk(flightId, { violation, reason }) {
+function writeFr24ViolationToDisk(flightId, { violation, reason, incursions }) {
   const key = safeFileKey(flightId);
   const p = path.join(FR24_VIOLATIONS_DIR, `${key}.json`);
   return writeJsonFile(p, {
     ts: Date.now(),
     tmnpKmlSha1: TMNP_KML_SHA1 || null,
     violation,
-    reason
+    reason,
+    incursions: Number.isFinite(Number(incursions)) ? Number(incursions) : 0
   });
 }
 
@@ -788,14 +792,20 @@ function trackViolatesTMNP(trackPath, tmnpPolygons) {
     .map((p) => ({ lat: Number(p?.[1]), lon: Number(p?.[2]) }))
     .filter((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon));
 
-  if (pts.length === 0) return { violation: null, reason: 'no-track-points' };
+  if (pts.length === 0) return { violation: null, reason: 'no-track-points', incursions: 0 };
 
-  // Point check
-  for (const p of pts) {
-    if (pointInTMNP(p.lat, p.lon, tmnpPolygons)) return { violation: true, reason: 'point-in-tmnp' };
+  const insideFlags = pts.map((p) => pointInTMNP(p.lat, p.lon, tmnpPolygons));
+  let entryCount = 0;
+  let sawInsidePoint = insideFlags.some(Boolean);
+
+  // Count direct in->out transitions.
+  if (insideFlags[0]) entryCount++;
+  for (let i = 1; i < insideFlags.length; i++) {
+    if (!insideFlags[i - 1] && insideFlags[i]) entryCount++;
   }
 
-  // Segment + midpoint check for sparse tracks
+  // Segment + midpoint check for sparse tracks (endpoints both outside).
+  let sparseSegmentCrossing = false;
   for (let i = 0; i < pts.length - 1; i++) {
     const a = [pts[i].lon, pts[i].lat];
     const b = [pts[i + 1].lon, pts[i + 1].lat];
@@ -803,11 +813,20 @@ function trackViolatesTMNP(trackPath, tmnpPolygons) {
       if (!segmentIntersectsRing(a, b, poly.outer)) continue;
       const midLat = (pts[i].lat + pts[i + 1].lat) / 2;
       const midLon = (pts[i].lon + pts[i + 1].lon) / 2;
-      if (pointInTMNP(midLat, midLon, tmnpPolygons)) return { violation: true, reason: 'segment-cross-midpoint-in-tmnp' };
+      if (pointInTMNP(midLat, midLon, tmnpPolygons)) {
+        sparseSegmentCrossing = true;
+        if (!insideFlags[i] && !insideFlags[i + 1]) entryCount++;
+      }
     }
   }
 
-  return { violation: false, reason: 'no-intersection-detected' };
+  if (sawInsidePoint) {
+    return { violation: true, reason: 'point-in-tmnp', incursions: Math.max(1, entryCount) };
+  }
+  if (sparseSegmentCrossing) {
+    return { violation: true, reason: 'segment-cross-midpoint-in-tmnp', incursions: Math.max(1, entryCount) };
+  }
+  return { violation: false, reason: 'no-intersection-detected', incursions: 0 };
 }
 
 const TMNP_POLYGONS = (() => {
@@ -1233,7 +1252,7 @@ const server = http.createServer(async (req, res) => {
         const loopStartedAt = Date.now();
         const cachedV = readFr24ViolationFromDisk(flight_id);
         if (cachedV) {
-          results.push({ flight_id, violation: cachedV.violation, reason: cachedV.reason, cached: true });
+          results.push({ flight_id, violation: cachedV.violation, reason: cachedV.reason, incursions: cachedV.incursions, cached: true });
           continue;
         }
 
@@ -1251,8 +1270,8 @@ const server = http.createServer(async (req, res) => {
         const lonLat = extractLonLatFromFr24TrackResponse(track.response);
         const coords = lonLat.map(([lon, lat], idx) => [idx, lat, lon]); // [time, lat, lon]
         const v = trackViolatesTMNP(coords, TMNP_POLYGONS);
-        results.push({ flight_id, violation: v.violation, reason: v.reason });
-        writeFr24ViolationToDisk(flight_id, { violation: v.violation, reason: v.reason });
+        results.push({ flight_id, violation: v.violation, reason: v.reason, incursions: v.incursions });
+        writeFr24ViolationToDisk(flight_id, { violation: v.violation, reason: v.reason, incursions: v.incursions });
 
         // Ensure we have per-aircraft flight meta for listing/filtering.
         const meta = extractTrackMetaFromFr24TrackResponse(track.response);
@@ -1359,7 +1378,7 @@ const server = http.createServer(async (req, res) => {
         // If we already computed a violation for this flight (same TMNP KML), return it without using quota.
         const cachedV = readFr24ViolationFromDisk(flight_id);
         if (cachedV) {
-          results.push({ flight_id, violation: cachedV.violation, reason: cachedV.reason });
+          results.push({ flight_id, violation: cachedV.violation, reason: cachedV.reason, incursions: cachedV.incursions });
           continue;
         }
 
@@ -1377,9 +1396,9 @@ const server = http.createServer(async (req, res) => {
         const coords = lonLat.map(([lon, lat], idx) => [idx, lat, lon]); // [time, lat, lon]
 
         const v = trackViolatesTMNP(coords, TMNP_POLYGONS);
-        results.push({ flight_id, violation: v.violation, reason: v.reason });
+        results.push({ flight_id, violation: v.violation, reason: v.reason, incursions: v.incursions });
         // Persist derived result (tiny, and saves quota on re-check).
-        writeFr24ViolationToDisk(flight_id, { violation: v.violation, reason: v.reason });
+        writeFr24ViolationToDisk(flight_id, { violation: v.violation, reason: v.reason, incursions: v.incursions });
 
         // Small pacing helps avoid rate limiting when checking many flights
         const waitMs = Math.max(0, FR24_VIOLATIONS_LOOP_DELAY_MS - (Date.now() - loopStartedAt));

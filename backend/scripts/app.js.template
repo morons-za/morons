@@ -20,20 +20,9 @@ let lastViewedFilename = null;
 // Load flight data from external JSON file
 async function loadFlightData() {
     console.log('🚀 Starting to load flight data...');
-    
-    // Check for embedded flight data first (for file:// protocol compatibility)
-    if (window.embeddedFlightData && Array.isArray(window.embeddedFlightData)) {
-        console.log('📊 Using embedded flight data');
-        flightData = window.embeddedFlightData;
-        console.log('📊 Loaded', flightData.length, 'flights from embedded data');
-        
-        // Initialize the application after data is loaded
-        console.log('🎯 Calling initializeApp() with embedded data...');
-        initializeApp();
-        return;
-    }
-    
-    // Try to load from external JSON file
+
+    // Always prefer live metadata from external JSON.
+    // Embedded data is only a fallback for file:// use or fetch failures.
     try {
         console.log('📡 Fetching /master-metadata.json...');
         const response = await fetch('/master-metadata.json');
@@ -49,8 +38,17 @@ async function loadFlightData() {
         initializeApp();
     } catch (error) {
         console.error('Error loading flight data:', error);
+        if (window.embeddedFlightData && Array.isArray(window.embeddedFlightData)) {
+            console.log('📊 Falling back to embedded flight data');
+            flightData = window.embeddedFlightData;
+            console.log('📊 Loaded', flightData.length, 'flights from embedded data');
+            console.log('🎯 Calling initializeApp() with embedded fallback...');
+            initializeApp();
+            return;
+        }
+
         // Use empty dataset and still initialize for graceful degradation
-        console.log('Could not load external data, using empty dataset for local viewing');
+        console.log('Could not load external or embedded data, using empty dataset');
         flightData = [];
         console.log('🎯 Calling initializeApp() with empty data...');
         initializeApp();

@@ -88,6 +88,14 @@ function escapeHtml(s) {
   return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
+function buildFr24AircraftUrl(registration, flightId) {
+  const reg = String(registration || '').trim().toLowerCase();
+  const slug = reg.replace(/[^a-z0-9]+/g, '-');
+  const id = String(flightId || '').trim().toLowerCase();
+  if (!slug || !id) return '';
+  return `https://www.flightradar24.com/data/aircraft/${slug}#${id}`;
+}
+
 /**
  * Build the HTML for the daily review digest email.
  *
@@ -117,15 +125,22 @@ function buildReviewDigestEmail({ autoPublished = [], suspicious = [], workerUrl
 <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
   <tr style="background: #f0f0f0;">
     <th style="padding: 6px 8px; text-align: left; border-bottom: 1px solid #ddd;">Date</th>
+    <th style="padding: 6px 8px; text-align: left; border-bottom: 1px solid #ddd;">Time (UTC)</th>
     <th style="padding: 6px 8px; text-align: left; border-bottom: 1px solid #ddd;">Registration</th>
     <th style="padding: 6px 8px; text-align: left; border-bottom: 1px solid #ddd;">Incursions</th>
+    <th style="padding: 6px 8px; text-align: left; border-bottom: 1px solid #ddd;">Flight</th>
+    <th style="padding: 6px 8px; text-align: left; border-bottom: 1px solid #ddd;">FR24</th>
   </tr>`;
     for (const f of autoPublished) {
+      const fr24Url = buildFr24AircraftUrl(f.registration, f.flight_id);
       html += `
   <tr>
     <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${escapeHtml(f.date)}</td>
+    <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${escapeHtml(f.time || '—')}</td>
     <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${escapeHtml(f.registration)}</td>
-    <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${escapeHtml(f.incursions ?? '?')}</td>
+    <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${escapeHtml(f.incursions ?? '—')}</td>
+    <td style="padding: 6px 8px; border-bottom: 1px solid #eee;"><code>${escapeHtml(f.flight_id || '—')}</code></td>
+    <td style="padding: 6px 8px; border-bottom: 1px solid #eee;">${fr24Url ? `<a href="${escapeHtml(fr24Url)}">FR24</a>` : '—'}</td>
   </tr>`;
     }
     html += `</table>`;
