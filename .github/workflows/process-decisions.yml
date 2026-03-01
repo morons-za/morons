@@ -133,9 +133,9 @@ jobs:
             echo "No changes to commit"
           else
             if [ "$ACTION" = "approve" ]; then
-              git commit -m "review: approve flight $FLIGHT_ID as violation"
+              git commit -m "review: approve flight $FLIGHT_ID as violation [skip netlify]"
             else
-              git commit -m "review: reject flight $FLIGHT_ID — not a violation"
+              git commit -m "review: reject flight $FLIGHT_ID — not a violation [skip netlify]"
             fi
             git fetch origin main
             git rebase origin/main
