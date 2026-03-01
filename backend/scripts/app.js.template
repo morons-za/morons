@@ -443,7 +443,7 @@ function renderTable() {
                     <th>Takeoff time (SA)</th>
                     <th>Registration</th>
                     <th>Owner</th>
-                    <th>Filename</th>
+                    <th>Flight ID</th>
                     <th>KML</th>
                     <th>Size</th>
                     <th>View Flight</th>
@@ -811,7 +811,7 @@ function downloadPNG(filename) {
 }
 
 function exportCSV() {
-    const headers = ['Date', 'UTC Time', 'SA Time', 'Registration', 'Owner', 'Filename', 'Size (MB)'];
+    const headers = ['Date', 'UTC Time', 'SA Time', 'Registration', 'Owner', 'Flight ID', 'Size (MB)'];
     const csvContent = [
         headers.join(','),
         ...filteredData.map(flight => [

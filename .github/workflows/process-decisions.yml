@@ -30,10 +30,20 @@ jobs:
         working-directory: backend
         run: npm ci
 
+      - name: Capture pre-decision flight count
+        run: |
+          if [ -f static-site/master-metadata.json ]; then
+            BEFORE_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
+          else
+            BEFORE_FLIGHT_COUNT=0
+          fi
+          echo "BEFORE_FLIGHT_COUNT=$BEFORE_FLIGHT_COUNT" >> "$GITHUB_ENV"
+          echo "Pre-decision flights: $BEFORE_FLIGHT_COUNT"
+
       - name: Process decision
         run: |
           node -e "
-          const { recordDecision, getApprovedFlights, getRejectedFlights, clearProcessedDecisions } = require('./API/pending-review.cjs');
+          const { recordDecision, clearProcessedDecisions } = require('./API/pending-review.cjs');
           const { execSync } = require('child_process');
           const fs = require('fs');
           const path = require('path');
@@ -41,52 +51,73 @@ jobs:
           const flightId = '${{ github.event.client_payload.flight_id }}';
           const action = '${{ github.event.client_payload.action }}';
 
-          console.log('Processing decision:', { flightId, action });
+          try {
+            console.log('Processing decision:', { flightId, action });
 
-          const flight = recordDecision(flightId, action);
-          if (!flight) {
-            console.log('Flight not found in pending review, may already be processed');
-            process.exit(0);
-          }
-
-          console.log('Recorded decision for flight:', flight.flight_id, '->', action);
-
-          if (action === 'approve') {
-            // Flight is a real violation: run optimiser + metadata update to add to static site
-            console.log('Approved — adding to static site...');
-            try {
-              execSync('python3 backend/scripts/optimise_kml.py', { cwd: process.cwd(), stdio: 'inherit', timeout: 120000 });
-            } catch (e) { console.warn('Optimiser warning:', e.message); }
-            try {
-              execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
-            } catch (e) { console.warn('Metadata warning:', e.message); }
-            clearProcessedDecisions([flightId]);
-          }
-
-          if (action === 'reject') {
-            // Flight is not a real violation: remove all artifacts
-            console.log('Rejected — removing artifacts...');
-            const uploadsDir = path.join(process.cwd(), 'backend', 'uploads');
-            const optimisedDir = path.join(process.cwd(), 'static-site', 'kml-optimised');
-            const mapsDir = path.join(process.cwd(), 'backend', 'flight-maps');
-
-            const kmlFiles = fs.readdirSync(uploadsDir).filter(f => f.includes(flightId) && f.endsWith('.kml'));
-            for (const f of kmlFiles) {
-              const kmlPath = path.join(uploadsDir, f);
-              const optPath = path.join(optimisedDir, f.replace('.kml', '-opt.kml'));
-              const pngPath = path.join(mapsDir, f.replace('.kml', '.png'));
-              [kmlPath, optPath, pngPath].forEach(p => {
-                if (fs.existsSync(p)) { fs.unlinkSync(p); console.log('Deleted:', p); }
-              });
+            const flight = recordDecision(flightId, action);
+            if (!flight) {
+              console.log('Flight not found in pending review, may already be processed');
+              process.exit(0);
             }
 
-            // Re-run metadata to reflect removal
-            try {
-              execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
-            } catch (e) { console.warn('Metadata warning:', e.message); }
-            clearProcessedDecisions([flightId]);
+            console.log('Recorded decision for flight:', flight.flight_id, '->', action);
+
+            if (action === 'approve') {
+              console.log('Approved — adding to static site...');
+              try {
+                execSync('python3 backend/scripts/optimise_kml.py', { cwd: process.cwd(), stdio: 'inherit', timeout: 120000 });
+              } catch (e) { console.warn('Optimiser warning:', e.message); }
+              try {
+                execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
+              } catch (e) { console.warn('Metadata warning:', e.message); }
+              clearProcessedDecisions([flightId]);
+            } else if (action === 'reject') {
+              console.log('Rejected — removing artifacts...');
+              const uploadsDir = path.join(process.cwd(), 'backend', 'uploads');
+              const optimisedDir = path.join(process.cwd(), 'static-site', 'kml-optimised');
+              const mapsDir = path.join(process.cwd(), 'backend', 'flight-maps');
+
+              let kmlFiles = [];
+              if (fs.existsSync(uploadsDir)) {
+                kmlFiles = fs.readdirSync(uploadsDir).filter(f => f.includes(flightId) && f.endsWith('.kml'));
+              }
+              for (const f of kmlFiles) {
+                const kmlPath = path.join(uploadsDir, f);
+                const optPath = path.join(optimisedDir, f.replace('.kml', '-opt.kml'));
+                const pngPath = path.join(mapsDir, f.replace('.kml', '.png'));
+                [kmlPath, optPath, pngPath].forEach(p => {
+                  if (fs.existsSync(p)) { fs.unlinkSync(p); console.log('Deleted:', p); }
+                });
+              }
+
+              try {
+                execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
+              } catch (e) { console.warn('Metadata warning:', e.message); }
+              clearProcessedDecisions([flightId]);
+            }
+          } catch (err) {
+            console.error('Process decision failed:', err.message);
+            console.error(err.stack);
+            process.exit(1);
           }
           "
+
+      - name: Rebuild static site if new flight approved
+        if: ${{ github.event.client_payload.action == 'approve' }}
+        run: |
+          if [ -f static-site/master-metadata.json ]; then
+            AFTER_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
+          else
+            AFTER_FLIGHT_COUNT=0
+          fi
+          BEFORE="${BEFORE_FLIGHT_COUNT:-0}"
+          echo "Post-decision flights: $AFTER_FLIGHT_COUNT"
+          if [ "$AFTER_FLIGHT_COUNT" -gt "$BEFORE" ]; then
+            echo "New approved flight detected ($BEFORE -> $AFTER_FLIGHT_COUNT). Rebuilding static site..."
+            node backend/scripts/build-static-site.cjs
+          else
+            echo "No new flight added ($BEFORE -> $AFTER_FLIGHT_COUNT). Skipping static site rebuild."
+          fi
 
       - name: Commit and push
         run: |
@@ -106,5 +137,7 @@ jobs:
             else
               git commit -m "review: reject flight $FLIGHT_ID — not a violation"
             fi
-            git push
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
           fi

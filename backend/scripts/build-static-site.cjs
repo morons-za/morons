@@ -913,7 +913,7 @@ const htmlContent = `<!DOCTYPE html>
                 display: none;
             }
             
-            th:nth-child(5), td:nth-child(5) { /* Filename */
+            th:nth-child(5), td:nth-child(5) { /* Flight ID */
                 display: none;
             }
             
@@ -960,7 +960,7 @@ const htmlContent = `<!DOCTYPE html>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">SA Time</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Registration</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Owner</th>
-                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Filename</th>
+                            <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Flight ID</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">KML</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Size</th>
                             <th style="padding: 8px 12px; text-align: left; font-weight: 600; color: #495057;">Take action</th>

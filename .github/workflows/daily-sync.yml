@@ -54,6 +54,17 @@ jobs:
           }
           CREDS_EOF
 
+      - name: Capture pre-sync flight count
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          if [ -f static-site/master-metadata.json ]; then
+            BEFORE_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
+          else
+            BEFORE_FLIGHT_COUNT=0
+          fi
+          echo "BEFORE_FLIGHT_COUNT=$BEFORE_FLIGHT_COUNT" >> "$GITHUB_ENV"
+          echo "Pre-sync flights: $BEFORE_FLIGHT_COUNT"
+
       - name: Run daily sync
         env:
           FR24_TOKEN: ${{ secrets.FR24_TOKEN }}
@@ -65,6 +76,23 @@ jobs:
             ARGS="$ARGS --dry-run"
           fi
           node API/daily-sync.cjs $ARGS
+
+      - name: Rebuild static site if new flights added
+        if: ${{ github.event.inputs.dry_run != 'true' }}
+        run: |
+          if [ -f static-site/master-metadata.json ]; then
+            AFTER_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
+          else
+            AFTER_FLIGHT_COUNT=0
+          fi
+          BEFORE="${BEFORE_FLIGHT_COUNT:-0}"
+          echo "Post-sync flights: $AFTER_FLIGHT_COUNT"
+          if [ "$AFTER_FLIGHT_COUNT" -gt "$BEFORE" ]; then
+            echo "New flights detected ($BEFORE -> $AFTER_FLIGHT_COUNT). Rebuilding static site..."
+            node backend/scripts/build-static-site.cjs
+          else
+            echo "No new flights added ($BEFORE -> $AFTER_FLIGHT_COUNT). Skipping static site rebuild."
+          fi
 
       - name: Commit and push changes
         if: ${{ github.event.inputs.dry_run != 'true' }}
