@@ -1,5 +1,6 @@
 {
-  "pending": [
+  "pending": [],
+  "decisions": [
     {
       "flight_id": "3e8bd959",
       "filename": "2026-03-01-ZS-HBO-3e8bd959.kml",
@@ -17,8 +18,9 @@
       "approve_token": "899c48d24ae3a685233c1bc6b806acf4aadb73fa652c14dc14408d0f36976ec3",
       "approve_expires": "2026-03-09T19:40:17.405Z",
       "reject_token": "9085d67f7c2ddee4f2d890c1834ddada1dec340fd424b56afc2051048050042f",
-      "reject_expires": "2026-03-09T19:40:17.406Z"
+      "reject_expires": "2026-03-09T19:40:17.406Z",
+      "action": "reject",
+      "decided_at": "2026-03-02T20:07:59.872Z"
     }
-  ],
-  "decisions": []
+  ]
 }
