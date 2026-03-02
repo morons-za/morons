@@ -671,8 +671,11 @@ function reportFlight(filename) {
     const registration = flight.registration || 'UNKNOWN';
     const owner = flight.owner || 'Private owner';
     const date = flight.date || 'UNKNOWN DATE';
-    const imageFilename = flight.filename ? flight.filename.replace('.kml', '.png') : null;
-    const imagePath = imageFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + imageFilename : null;
+    const imageBase = flight.filename ? flight.filename.replace('.kml', '') : null;
+    const pngFilename = imageBase ? `${imageBase}.png` : null;
+    const svgFilename = imageBase ? `${imageBase}.svg` : null;
+    const imagePath = pngFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + pngFilename : null;
+    const imageFallbackPath = svgFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + svgFilename : null;
     
     const reportText = 'It appears that a helicopter, registration ' + registration + ' (' + owner + '), entered restricted NP17 airspace over Table Mountain on ' + date + '.\n\nThe National Environmental Management Protected Areas Act (NEMPAA NP17) clearly states that aircraft are prohibited from flying over TMNP at any height below 6070FT (~1850m). Doing so without authorisation is an offense with fines up to R5 million or imprisonment for up to 10 years, and can result in the suspension of licenses by the Civil Aviation Authority.\n\nNEMPAA (NP17) and these penalties are in place to protect the park\'s natural environment and ensure compliance with airspace regulations.';
     
@@ -689,11 +692,11 @@ function reportFlight(filename) {
                         src="${imagePath}"
                         alt="Flight map for ${registration}"
                         style="width: 320px; height: 320px; object-fit: contain; border-radius: 8px; border: 1px solid #ddd;"
-                        onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                        onerror="if (!this.dataset.fallbackTried && '${imageFallbackPath || ''}') { this.dataset.fallbackTried = '1'; this.src = '${imageFallbackPath || ''}'; return; } this.style.display='none'; this.nextElementSibling.style.display='block';"
                     />
                     <div style="display: none; color: #666; font-style: italic;">Flight map image not available</div>
                     <button
-                        onclick="downloadPNG('${imageFilename}')"
+                        onclick="downloadFlightImage('${pngFilename || ''}', '${svgFilename || ''}')"
                         style="position: absolute; bottom: 8px; right: 8px; padding: 6px 12px; background-color: rgba(40, 167, 69, 0.9); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 600; backdrop-filter: blur(4px); box-shadow: 0 2px 4px rgba(0,0,0,0.3);"
                         title="Save flight map image"
                     >
@@ -789,45 +792,49 @@ function copyReportText(text) {
     }
 }
 
-function downloadPNG(filename) {
-    const url = 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + filename;
-    
+async function downloadFlightImage(pngFilename, svgFilename) {
+    const pngUrl = pngFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + pngFilename : null;
+    const svgUrl = svgFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + svgFilename : null;
+
     try {
         const button = event.target;
         const originalText = button.innerHTML;
         button.innerHTML = '⬇️ Downloading...';
         button.disabled = true;
-        
-        fetch(url)
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('HTTP error! status: ' + response.status);
-                }
-                return response.blob();
-            })
-            .then(blob => {
-                const blobUrl = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.href = blobUrl;
-                link.download = filename;
-                link.click();
-                URL.revokeObjectURL(blobUrl);
-                
-                button.innerHTML = '✅ Downloaded!';
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                }, 2000);
-            })
-            .catch(error => {
-                console.error('Download error:', error);
-                alert('Failed to download image. Please try again.');
-                button.innerHTML = '💾 Save Image';
-                button.disabled = false;
-            });
+
+        let response = null;
+        let downloadName = pngFilename;
+        if (pngUrl) {
+            response = await fetch(pngUrl);
+        }
+        if ((!response || !response.ok) && svgUrl) {
+            response = await fetch(svgUrl);
+            downloadName = svgFilename;
+        }
+        if (!response || !response.ok) {
+            throw new Error('Image not found in PNG or SVG format');
+        }
+
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = downloadName || 'flight-map';
+        link.click();
+        URL.revokeObjectURL(blobUrl);
+
+        button.innerHTML = '✅ Downloaded!';
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.disabled = false;
+        }, 2000);
     } catch (error) {
         console.error('Download error:', error);
         alert('Failed to download image. Please try again.');
+        if (event && event.target) {
+            event.target.innerHTML = '💾 Save Image';
+            event.target.disabled = false;
+        }
     }
 }
 

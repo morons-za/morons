@@ -402,6 +402,16 @@ async function main() {
       } catch (e) {
         console.warn(`[sync] PNG generation failed for ${id8}: ${e.message}`);
       }
+      const mapsDir = path.join(__dirname, '..', 'backend', 'flight-maps');
+      const pngPath = path.join(mapsDir, filename.replace('.kml', '.png'));
+      const svgPath = path.join(mapsDir, filename.replace('.kml', '.svg'));
+      if (!fs.existsSync(pngPath)) {
+        if (fs.existsSync(svgPath)) {
+          console.warn(`[sync] PNG missing for ${id8}; SVG fallback created (${path.basename(svgPath)}). UI will use SVG fallback.`);
+        } else {
+          console.warn(`[sync] PNG missing for ${id8}; no SVG fallback found.`);
+        }
+      }
 
       if (needsReview) {
         const reason = classification === 'no_track_data' ? 'no_track_data' : 'gap_only_violation';

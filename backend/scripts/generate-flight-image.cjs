@@ -517,9 +517,17 @@ async function generateSquareMapSVG(coordinates, tmnpCoords, bounds, zoom, metad
 // Convert SVG to PNG using Sharp and overlay warning.png markers.
 async function convertSVGToPNG(svgContent, outputPath, markerPixels = []) {
   try {
-    let pngBuffer = await sharp(Buffer.from(svgContent))
-      .png({ compressionLevel: 9, palette: true, quality: 80 })
-      .toBuffer();
+    let pngBuffer;
+    try {
+      pngBuffer = await sharp(Buffer.from(svgContent))
+        .png({ compressionLevel: 9, palette: true, quality: 80 })
+        .toBuffer();
+    } catch (primaryError) {
+      console.log(`⚠️ Primary PNG conversion failed, retrying without palette: ${primaryError.message}`);
+      pngBuffer = await sharp(Buffer.from(svgContent))
+        .png({ compressionLevel: 9 })
+        .toBuffer();
+    }
 
     if (markerPixels.length > 0) {
       const warningPath = path.join(__dirname, '..', 'images', 'warning.png');
@@ -536,10 +544,18 @@ async function convertSVGToPNG(svgContent, outputPath, markerPixels = []) {
           top: Math.round(p.y - iconSize / 2)
         }));
 
-        pngBuffer = await sharp(pngBuffer)
-          .composite(composites)
-          .png({ compressionLevel: 9, palette: true, quality: 80 })
-          .toBuffer();
+        try {
+          pngBuffer = await sharp(pngBuffer)
+            .composite(composites)
+            .png({ compressionLevel: 9, palette: true, quality: 80 })
+            .toBuffer();
+        } catch (overlayError) {
+          console.log(`⚠️ Marker overlay PNG write failed, retrying without palette: ${overlayError.message}`);
+          pngBuffer = await sharp(pngBuffer)
+            .composite(composites)
+            .png({ compressionLevel: 9 })
+            .toBuffer();
+        }
       } else {
         console.log('⚠️ warning.png not found, skipping marker overlay');
       }
