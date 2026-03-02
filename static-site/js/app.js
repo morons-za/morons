@@ -9,6 +9,8 @@
 
 // Flight data loaded from external JSON file
 let flightData = [];
+let liveMetadataGenerated = null;
+let liveLatestFlightDate = null;
 
 // Global variables for app state
 let map = null;
@@ -31,7 +33,10 @@ async function loadFlightData() {
         }
         const data = await response.json();
         flightData = data.flights || data; // Handle both {flights: [...]} and [...] formats
+        liveMetadataGenerated = data.generated || null;
+        liveLatestFlightDate = data.latestFlightDate || getLatestFlightDate(flightData);
         console.log('📊 Loaded', flightData.length, 'flights from external JSON');
+        updateTimestampDisplay(liveMetadataGenerated, liveLatestFlightDate);
         
         // Initialize the application after data is loaded
         console.log('🎯 Calling initializeApp() with real data...');
@@ -41,7 +46,10 @@ async function loadFlightData() {
         if (window.embeddedFlightData && Array.isArray(window.embeddedFlightData)) {
             console.log('📊 Falling back to embedded flight data');
             flightData = window.embeddedFlightData;
+            liveMetadataGenerated = window.buildTimestamp || null;
+            liveLatestFlightDate = window.latestFlightDate || getLatestFlightDate(flightData);
             console.log('📊 Loaded', flightData.length, 'flights from embedded data');
+            updateTimestampDisplay(liveMetadataGenerated, liveLatestFlightDate);
             console.log('🎯 Calling initializeApp() with embedded fallback...');
             initializeApp();
             return;
@@ -50,9 +58,22 @@ async function loadFlightData() {
         // Use empty dataset and still initialize for graceful degradation
         console.log('Could not load external or embedded data, using empty dataset');
         flightData = [];
+        liveMetadataGenerated = window.buildTimestamp || null;
+        liveLatestFlightDate = window.latestFlightDate || null;
+        updateTimestampDisplay(liveMetadataGenerated, liveLatestFlightDate);
         console.log('🎯 Calling initializeApp() with empty data...');
         initializeApp();
     }
+}
+
+function getLatestFlightDate(flights) {
+    if (!Array.isArray(flights) || flights.length === 0) return null;
+    const validDates = flights
+        .map((flight) => flight.date)
+        .filter((date) => typeof date === 'string' && date.length > 0);
+    if (validDates.length === 0) return null;
+    validDates.sort();
+    return validDates[validDates.length - 1];
 }
 
 // UTC to South Africa time conversion
@@ -1134,21 +1155,31 @@ function formatFlightDate(dateString) {
     });
 }
 
-// Update timestamp display
-document.addEventListener('DOMContentLoaded', function() {
+function updateTimestampDisplay(siteTimestamp, latestFlightDate) {
     const siteUpdateEl = document.getElementById('siteUpdateTime');
     const flightDataEl = document.getElementById('flightDataTime');
-    
-    if (siteUpdateEl && window.buildTimestamp) {
-        const relativeTime = formatRelativeTime(window.buildTimestamp);
+    if (!siteUpdateEl || !flightDataEl) return;
+
+    if (siteTimestamp) {
+        const relativeTime = formatRelativeTime(siteTimestamp);
         siteUpdateEl.textContent = `Site updated ${relativeTime}`;
+    } else {
+        siteUpdateEl.textContent = 'Site updated recently';
     }
-    
-    if (flightDataEl && window.latestFlightDate) {
-        const flightDate = formatFlightDate(window.latestFlightDate);
+
+    if (latestFlightDate) {
+        const flightDate = formatFlightDate(latestFlightDate);
         flightDataEl.textContent = ` • Flight data up to ${flightDate}`;
+    } else {
+        flightDataEl.textContent = '';
     }
-    
+}
+
+// Update timestamp display
+document.addEventListener('DOMContentLoaded', function() {
+    // Render initial fallback values immediately, then overwrite with live metadata.
+    updateTimestampDisplay(window.buildTimestamp, window.latestFlightDate);
+
     // Load flight data and initialize the app
     loadFlightData();
 });
