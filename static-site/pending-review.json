@@ -1,24 +1,4 @@
 {
-  "pending": [
-    {
-      "flight_id": "3e8f7468",
-      "filename": "2026-03-02-ZT-RMS-3e8f7468.kml",
-      "registration": "ZT-RMS",
-      "date": "2026-03-02",
-      "time": "09:01",
-      "incursions": 2,
-      "classification": "gap_only",
-      "maxGapKm": 25.24,
-      "avgSegmentKm": 0.38,
-      "totalSegments": 620,
-      "gapCount": 15,
-      "reason": "gap_only_violation",
-      "detected_at": "2026-03-02T10:48:07.992Z",
-      "approve_token": "4d832fd4ff9fbb1d9c0faa3b1ff5ce6d84efb89a2e9c946d1a568cc1b3389514",
-      "approve_expires": "2026-03-09T10:48:07.992Z",
-      "reject_token": "82acb3e3531949927941ce9536cce0f8aad3df47995eb5140185d2c3b1d2f25d",
-      "reject_expires": "2026-03-09T10:48:07.992Z"
-    }
-  ],
+  "pending": [],
   "decisions": []
 }
