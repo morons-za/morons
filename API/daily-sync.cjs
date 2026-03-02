@@ -406,11 +406,12 @@ async function main() {
       if (needsReview) {
         const reason = classification === 'no_track_data' ? 'no_track_data' : 'gap_only_violation';
         console.log(`[sync] ${classification.toUpperCase()} ${id8} ${reg} ${ymd} — max gap: ${gapResult.maxGapKm} km → pending review`);
-        addPendingFlight({
+        const pendingEntry = addPendingFlight({
           ...flightInfo,
           reason
         }, hmacSecret, config.token_expiry_days);
-        suspicious.push(flightInfo);
+        // Use the persisted pending entry so email links have valid tokens/expires.
+        suspicious.push(pendingEntry || { ...flightInfo, reason });
       } else {
         console.log(`[sync] ${classification === 'mixed' ? 'MIXED' : 'CLEAN'} ${id8} ${reg} ${ymd} — publishing (real violations on non-gap segments)`);
         autoPublished.push(flightInfo);

@@ -169,8 +169,17 @@ function buildReviewDigestEmail({ autoPublished = [], suspicious = [], workerUrl
         });
       }
 
-      const approveUrl = `${workerUrl}/review?id=${encodeURIComponent(f.flight_id)}&action=approve&token=${encodeURIComponent(f.approve_token)}&expires=${encodeURIComponent(f.approve_expires)}`;
-      const rejectUrl = `${workerUrl}/review?id=${encodeURIComponent(f.flight_id)}&action=reject&token=${encodeURIComponent(f.reject_token)}&expires=${encodeURIComponent(f.reject_expires)}`;
+      const approveToken = String(f.approve_token || '').trim();
+      const approveExpires = String(f.approve_expires || '').trim();
+      const rejectToken = String(f.reject_token || '').trim();
+      const rejectExpires = String(f.reject_expires || '').trim();
+      const hasReviewLinks = Boolean(approveToken && approveExpires && rejectToken && rejectExpires);
+      const approveUrl = hasReviewLinks
+        ? `${workerUrl}/review?id=${encodeURIComponent(f.flight_id)}&action=approve&token=${encodeURIComponent(approveToken)}&expires=${encodeURIComponent(approveExpires)}`
+        : '';
+      const rejectUrl = hasReviewLinks
+        ? `${workerUrl}/review?id=${encodeURIComponent(f.flight_id)}&action=reject&token=${encodeURIComponent(rejectToken)}&expires=${encodeURIComponent(rejectExpires)}`
+        : '';
 
       html += `
 <div style="border: 1px solid #ddd; border-radius: 8px; padding: 16px; margin: 16px 0; background: #fafafa;">
@@ -181,8 +190,10 @@ function buildReviewDigestEmail({ autoPublished = [], suspicious = [], workerUrl
   </p>
   ${pngBase64 ? `<img src="cid:${cid}" alt="Flight map" style="max-width: 100%; border-radius: 4px; margin-bottom: 12px;">` : '<p style="color: #999; font-style: italic;">Flight map image not available</p>'}
   <div style="margin-top: 12px;">
-    <a href="${escapeHtml(approveUrl)}" style="display: inline-block; padding: 10px 24px; background: #006600; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: bold; margin-right: 12px;">Approve &mdash; Violating Flight</a>
-    <a href="${escapeHtml(rejectUrl)}" style="display: inline-block; padding: 10px 24px; background: #cc0000; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: bold;">Reject &mdash; Not a Violation</a>
+    ${hasReviewLinks
+      ? `<a href="${escapeHtml(approveUrl)}" style="display: inline-block; padding: 10px 24px; background: #006600; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: bold; margin-right: 12px;">Approve &mdash; Violating Flight</a>
+    <a href="${escapeHtml(rejectUrl)}" style="display: inline-block; padding: 10px 24px; background: #cc0000; color: #fff; text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: bold;">Reject &mdash; Not a Violation</a>`
+      : '<p style="font-size: 13px; color: #cc0000; margin: 0;">Review links unavailable for this item. Please rerun sync.</p>'}
   </div>
 </div>`;
     }

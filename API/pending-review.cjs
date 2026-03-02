@@ -63,26 +63,29 @@ function validateReviewToken(flightId, action, token, expires, secret) {
  * @param {object} flight - { flight_id, filename, registration, date, reason, maxGapKm, ... }
  * @param {string} secret - HMAC secret for token generation
  * @param {number} [expiryDays=7]
+ * @returns {object|null} Created pending entry, or null if skipped
  */
 function addPendingFlight(flight, secret, expiryDays = 7) {
   const data = readPendingReview();
 
-  if (data.pending.some((f) => f.flight_id === flight.flight_id)) return;
-  if (data.decisions.some((d) => d.flight_id === flight.flight_id)) return;
+  if (data.pending.some((f) => f.flight_id === flight.flight_id)) return null;
+  if (data.decisions.some((d) => d.flight_id === flight.flight_id)) return null;
 
   const approve = generateReviewToken(flight.flight_id, 'approve', secret, expiryDays);
   const reject = generateReviewToken(flight.flight_id, 'reject', secret, expiryDays);
 
-  data.pending.push({
+  const entry = {
     ...flight,
     detected_at: new Date().toISOString(),
     approve_token: approve.token,
     approve_expires: approve.expires,
     reject_token: reject.token,
     reject_expires: reject.expires
-  });
+  };
+  data.pending.push(entry);
 
   writePendingReview(data);
+  return entry;
 }
 
 /**
