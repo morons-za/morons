@@ -1,4 +1,24 @@
 {
-  "pending": [],
+  "pending": [
+    {
+      "flight_id": "3e8bd959",
+      "filename": "2026-03-01-ZS-HBO-3e8bd959.kml",
+      "registration": "ZS-HBO",
+      "date": "2026-03-01",
+      "time": "08:42",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 23.26,
+      "avgSegmentKm": 0.24,
+      "totalSegments": 367,
+      "gapCount": 2,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-03-02T14:03:51.206Z",
+      "approve_token": "f6d7747b467053799cc5a17d6b82107bf37291d2036878ea36ab9b0f98070567",
+      "approve_expires": "2026-03-09T14:03:51.205Z",
+      "reject_token": "177a20fed431f3c211a69653382ec81edf35b3c3827972ae892d14d9d39cd274",
+      "reject_expires": "2026-03-09T14:03:51.206Z"
+    }
+  ],
   "decisions": []
 }
