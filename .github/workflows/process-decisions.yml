@@ -102,7 +102,9 @@ jobs:
               try {
                 execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
               } catch (e) { console.warn('Metadata warning:', e.message); }
-              clearProcessedDecisions([flightId]);
+              // Keep rejected decisions as a durable "do-not-requeue" list.
+              // daily-sync checks pending.decisions and will skip these flight IDs.
+              console.log('Retaining rejected decision to prevent future re-queueing');
             }
           } catch (err) {
             console.error('Process decision failed:', err.message);
