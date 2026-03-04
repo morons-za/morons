@@ -280,9 +280,15 @@ Use `git config` (without `--global`) so it applies only to this project.
    - `API/digest-config.example.json` → `API/digest-config.json` (subscriber emails for daily digest)
    - `API/review-config.example.json` → `API/review-config.json` (review email for sync pipeline)
 
-7. **Daily Flight Sync (GitHub Actions):** The `.github/workflows/daily-sync.yml` workflow runs at 21:00 SAST. Required secrets: `FR24_TOKEN`, `SENDGRID_API_KEY`, `HMAC_SECRET`, and `REVIEW_EMAIL` (email for violation digest).
+7. **Daily Flight Sync (GitHub Actions):** The `.github/workflows/daily-sync.yml` workflow runs 5× daily. Required secrets: `FR24_TOKEN`, `SENDGRID_API_KEY`, `HMAC_SECRET`, `REVIEW_EMAIL`. Commits include `[skip netlify]` to avoid Netlify builds on every push.
 
-8. **Deploy updates:**
+8. **Weekly Netlify Deploy:** Netlify (backup site) deploys once per week (Sunday 04:00 SAST) via `.github/workflows/daily-netlify-deploy.yml` — ~4 deploys/month ≈ 60 credits of 300 limit. Add `NETLIFY_BUILD_HOOK_URL` secret to enable.
+
+9. **Admin area (passwordless, Cloudflare Worker):**
+   - Routes: `/admin`, `/admin/request-link`, `/admin/auth`, `/admin/api/summary`
+   - Setup and rollout checklist: `cloudflare-worker/ADMIN.md`
+
+10. **Deploy updates:**
    ```bash
    git add .
    git commit -m "Process new flights"

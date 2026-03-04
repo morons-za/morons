@@ -1,0 +1,20 @@
+name: Weekly Netlify Deploy
+
+on:
+  schedule:
+    # Run weekly: Sunday 02:00 UTC (04:00 SAST) — 4 deploys/month ≈ 60 credits
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Netlify build
+        run: |
+          if [ -z "${{ secrets.NETLIFY_BUILD_HOOK_URL }}" ]; then
+            echo "::warning::NETLIFY_BUILD_HOOK_URL secret not set. Add it in Settings > Secrets to enable weekly deploys."
+            exit 0
+          fi
+          curl -sS -X POST "${{ secrets.NETLIFY_BUILD_HOOK_URL }}"
+          echo "Netlify build triggered."
