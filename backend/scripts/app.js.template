@@ -675,7 +675,7 @@ function reportFlight(filename) {
     const pngFilename = imageBase ? `${imageBase}.png` : null;
     const svgFilename = imageBase ? `${imageBase}.svg` : null;
     const imagePath = pngFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + pngFilename : null;
-    const imageFallbackPath = svgFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + svgFilename : null;
+    const imageFallbackPath = svgFilename ? 'https://raw.githubusercontent.com/morons-za/morons/main/backend/flight-maps/' + svgFilename : null;
     
     const reportText = 'It appears that a helicopter, registration ' + registration + ' (' + owner + '), entered restricted NP17 airspace over Table Mountain on ' + date + '.\n\nThe National Environmental Management Protected Areas Act (NEMPAA NP17) clearly states that aircraft are prohibited from flying over TMNP at any height below 6070FT (~1850m). Doing so without authorisation is an offense with fines up to R5 million or imprisonment for up to 10 years, and can result in the suspension of licenses by the Civil Aviation Authority.\n\nNEMPAA (NP17) and these penalties are in place to protect the park\'s natural environment and ensure compliance with airspace regulations.';
     
@@ -794,7 +794,7 @@ function copyReportText(text) {
 
 async function downloadFlightImage(pngFilename, svgFilename) {
     const pngUrl = pngFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + pngFilename : null;
-    const svgUrl = svgFilename ? 'https://media.githubusercontent.com/media/morons-za/morons/main/backend/flight-maps/' + svgFilename : null;
+    const svgUrl = svgFilename ? 'https://raw.githubusercontent.com/morons-za/morons/main/backend/flight-maps/' + svgFilename : null;
 
     try {
         const button = event.target;
