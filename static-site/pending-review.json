@@ -56,6 +56,25 @@
       "approve_expires": "2026-03-15T10:29:05.458Z",
       "reject_token": "0569b46cf2e110850d68f90c8c3788ef79c25fb3ba1d9b492a509cceb2c79ff5",
       "reject_expires": "2026-03-15T10:29:05.459Z"
+    },
+    {
+      "flight_id": "3ea92ad9",
+      "filename": "2026-03-09-ZS-HBO-3ea92ad9.kml",
+      "registration": "ZS-HBO",
+      "date": "2026-03-09",
+      "time": "08:07",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 11.94,
+      "avgSegmentKm": 0.19,
+      "totalSegments": 342,
+      "gapCount": 1,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-03-09T10:50:33.806Z",
+      "approve_token": "8c3617440bebb453195bfc8730cc0b9352ce9599b4cbfdab45b391ca7db17cbc",
+      "approve_expires": "2026-03-16T10:50:33.805Z",
+      "reject_token": "1dace3f67bed1503d80edda91f68277342ff83c1bc72931f4ff21c586a86cdd1",
+      "reject_expires": "2026-03-16T10:50:33.806Z"
     }
   ],
   "decisions": [
