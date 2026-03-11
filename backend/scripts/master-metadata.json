@@ -1,8 +1,17 @@
 {
-  "generated": "2026-03-11T14:09:07.981Z",
-  "totalFiles": 1402,
-  "validFlights": 1402,
+  "generated": "2026-03-11T16:57:48.148Z",
+  "totalFiles": 1403,
+  "validFlights": 1403,
   "flights": [
+    {
+      "filename": "2026-03-11-ZT-REG-3eb1e021.kml",
+      "registration": "ZT-REG",
+      "date": "2026-03-11",
+      "time": "13:33",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0.02
+    },
     {
       "filename": "2026-03-11-ZT-HOT-3eb16d70.kml",
       "registration": "ZT-HOT",
