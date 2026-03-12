@@ -1,8 +1,26 @@
 {
-  "generated": "2026-03-11T16:57:48.148Z",
-  "totalFiles": 1403,
-  "validFlights": 1403,
+  "generated": "2026-03-12T10:43:51.361Z",
+  "totalFiles": 1405,
+  "validFlights": 1405,
   "flights": [
+    {
+      "filename": "2026-03-12-ZS-HMB-3eb5183b.kml",
+      "registration": "ZS-HMB",
+      "date": "2026-03-12",
+      "time": "10:02",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-03-12-ZT-REG-3eb4b68a.kml",
+      "registration": "ZT-REG",
+      "date": "2026-03-12",
+      "time": "07:10",
+      "owner": "NAC",
+      "imageUrl": "./aircraft-images/ZT-REG.jpg",
+      "fileSizeMB": 0
+    },
     {
       "filename": "2026-03-11-ZT-REG-3eb1e021.kml",
       "registration": "ZT-REG",
