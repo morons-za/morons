@@ -1,7 +1,7 @@
 {
-  "generated": "2026-03-12T17:03:49.236Z",
-  "totalFiles": 1406,
-  "validFlights": 1406,
+  "generated": "2026-03-12T19:47:51.589Z",
+  "totalFiles": 1407,
+  "validFlights": 1407,
   "flights": [
     {
       "filename": "2026-03-12-ZS-HMB-3eb58609.kml",
@@ -11,6 +11,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HMB.jpg",
       "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-03-12-ZT-RNW-3eb5756c.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-03-12",
+      "time": "12:10",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0
     },
     {
       "filename": "2026-03-12-ZS-HMB-3eb5183b.kml",
