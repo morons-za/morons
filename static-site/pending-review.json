@@ -75,6 +75,25 @@
       "approve_expires": "2026-04-07T19:58:00.589Z",
       "reject_token": "28e327833222ce5b0243a5588dcd27665f21a491ee4abb6a0e95ad243a8a9046",
       "reject_expires": "2026-04-07T19:58:00.590Z"
+    },
+    {
+      "flight_id": "3f06ccca",
+      "filename": "2026-04-02-ZT-HOT-3f06ccca.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-04-02",
+      "time": "07:39",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 18.21,
+      "avgSegmentKm": 0.15,
+      "totalSegments": 1506,
+      "gapCount": 7,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-04-02T17:00:09.116Z",
+      "approve_token": "73a97c57644e0990600ca83689ff4b0d4d87b45b3e40bd1bf9d6553d9fcfc784",
+      "approve_expires": "2026-04-09T17:00:09.115Z",
+      "reject_token": "ad06fc71ff965d49f1d081d4ad2d6359866c8e8b3ef74102cec81e07bb0288af",
+      "reject_expires": "2026-04-09T17:00:09.116Z"
     }
   ],
   "decisions": [
