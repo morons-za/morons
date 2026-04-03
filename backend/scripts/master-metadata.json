@@ -1,7 +1,7 @@
 {
-  "generated": "2026-04-03T09:07:02.869Z",
-  "totalFiles": 1431,
-  "validFlights": 1431,
+  "generated": "2026-04-03T09:12:04.957Z",
+  "totalFiles": 1439,
+  "validFlights": 1439,
   "flights": [
     {
       "filename": "2026-04-02-ZS-HBO-3f07efd6.kml",
@@ -3532,6 +3532,15 @@
       "fileSizeMB": 5.16
     },
     {
+      "filename": "2025-12-02-ZT-RMP-3d57d169.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-12-02",
+      "time": "15:32",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.73
+    },
+    {
       "filename": "2025-12-02-ZS-HMB-3d57a10c.kml",
       "registration": "ZS-HMB",
       "date": "2025-12-02",
@@ -3557,6 +3566,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZT-RNW.jpg",
       "fileSizeMB": 5.71
+    },
+    {
+      "filename": "2025-12-02-ZT-RMP-3d56d145.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-12-02",
+      "time": "08:36",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.33
     },
     {
       "filename": "2025-12-02-ZS-HGD-3d56be80.kml",
@@ -3593,6 +3611,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HIM.jpg",
       "fileSizeMB": 0.9
+    },
+    {
+      "filename": "2025-12-01-ZT-RMP-3d534dab.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-12-01",
+      "time": "08:21",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.98
     },
     {
       "filename": "2025-12-01-ZS-HMB-3d534d07.kml",
@@ -3638,6 +3665,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HGD.jpg",
       "fileSizeMB": 3.67
+    },
+    {
+      "filename": "2025-11-29-ZT-RMP-3d4e324f.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-11-29",
+      "time": "16:18",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.41
     },
     {
       "filename": "2025-11-29-ZS-HIM-3d4df840.kml",
@@ -3701,6 +3737,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HGD.jpg",
       "fileSizeMB": 1.34
+    },
+    {
+      "filename": "2025-11-29-ZT-RMP-3d4cf820.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-11-29",
+      "time": "07:08",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.82
     },
     {
       "filename": "2025-11-29-ZT-HOT-3d4cf0b0.kml",
@@ -3892,6 +3937,24 @@
       "fileSizeMB": 3.96
     },
     {
+      "filename": "2025-11-25-ZT-RMP-3d3fcc24.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-11-25",
+      "time": "05:59",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 1.53
+    },
+    {
+      "filename": "2025-11-24-ZT-RMP-3d3d67f9.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-11-24",
+      "time": "14:54",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.44
+    },
+    {
       "filename": "2025-11-24-ZS-RTG-cbda5c46.kml",
       "registration": "ZS-RTG",
       "date": "2025-11-24",
@@ -3917,6 +3980,15 @@
       "owner": "Sport Helicopters",
       "imageUrl": "./aircraft-images/ZS-HGD.jpg",
       "fileSizeMB": 6.93
+    },
+    {
+      "filename": "2025-11-24-ZT-RMP-3d3c54e8.kml",
+      "registration": "ZT-RMP",
+      "date": "2025-11-24",
+      "time": "07:13",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.48
     },
     {
       "filename": "2025-11-24-ZS-HBO-3d3c4811.kml",

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>-/ZTRMP - Optimised</name>
+    <description><![CDATA[Optimised flight path with 108 points (decimated from 536 original points). Source format: Standard KML]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ffff0000</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[<div style="width:220px; text-align:center;">
+<div style="width:210px; text-align:center;">
+<div style=" background: #000; color: #fff; font-size: 14px; text-align:left; border: 1px solid #000; padding: 2px 6px; text-shadow: 0 1px 0 #000; box-shadow: 0 1px 3px rgba(0,0,0,0.6); background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#808080), color-stop(2%,#303030), color-stop(100%,#0c0c0c));"><span style="font-size: 14px; font-weight: bold;"><a href="javascript:void(0);" style="color: #fff; cursor: pointer;text-decoration: none;">-</a></span> / ZTRMP<br/>Private owner</div>
+<div>
+<span style="margin: 125px 0 0 10px; color: #f0f0f0; font-size: 0.7em !important; padding: 2px 3px; position: absolute; text-align: right; text-shadow: 0 1px 0 #000; width: 194px; background: -moz-linear-gradient(left,  rgba(0,0,0,0) 0%, rgba(0,0,0,0.45) 65%, rgba(0,0,0,0.45) 100%);  background: -webkit-gradient(linear, left top, right top, color-stop(0%,rgba(0,0,0,0)), color-stop(65%,rgba(0,0,0,0.45)), color-stop(100%,rgba(0,0,0,0.45)));  background: -webkit-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); background: -o-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%);  background: -ms-linear-gradient(left,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); background: linear-gradient(to right,  rgba(0,0,0,0) 0%,rgba(0,0,0,0.45) 65%,rgba(0,0,0,0.45) 100%); ">&copy; Rafael Marti</span>
+<a title="View bigger image of ZT-RMP at Jetphotos.com" target="_blank" href="https://www.flightradar24.com/redir.php?url=https%3A%2F%2Fwww.jetphotos.com%2Fphoto%2F11284350">
+<img style="width:210px;" src="https://cdn.jetphotos.com/200/6/979430_1711904077_tb.jpg?v=0"/>
+</a>
+</div>
+<div style="border-top: 1px solid #005c90; color: #fff; padding-bottom: 5px; box-shadow: 0 0 1px #9BE3F6 inset, 0 1px 0 #9BE3F6 inset, 0 -1px 3px rgba(0,0,0,0.4); background:rgba(43,114,173,1); background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,rgba(92,184,229,1)), color-stop(100%,rgba(43,114,173,1)));">
+<a style="text-decoration: none; color: rgb(255, 255, 255); font-size: 12px; width:77px; display: inline-block;" title=" Airport" href="javascript:void(0);/departures"><h3 style="padding: 0px; margin: 10px 0px 0px; font-size: 16px; ">?</h3></a>
+<span style="background: url(https://www.flightradar24.com/static/images/userUI_sprite.png?14) no-repeat scroll 0 -464px rgba(0, 0, 0, 0); border: medium none; display: inline-block; height: 16px; width: 45px;"></span>
+<a style="text-decoration: none; color: rgb(255, 255, 255); font-size: 12px; width:77px; display: inline-block;" title="Cape Town Airport" href="https://www.flightradar24.com/airport/cpt/arrivals"><h3 style="padding: 0px; margin: 10px 0px 0px; font-size: 16px;">CPT</h3>Cape Town</a>
+<div style=" margin-top:10px;">
+<div style="display: inline-block; font-size: 12px; padding: 0 5px;">
+<div>
+<span style="color: #c1eaff;" title="Actual Time of Departure">ATD </span>
+<span title="2025-11-29 16:18">16:18</span> <span title="Coordinated Universal Time">UTC</span>
+</div>
+</div>
+<div style="display: inline-block; font-size: 12px; padding: 0 5px;">
+<div>
+<span style="color: #c1eaff;" title="Estimated Time of Arrival">ETA </span>
+<span title="2025-11-29 16:35">16:35</span> <span title="Coordinated Universal Time">UTC</span>
+</div>
+</div>
+</div>
+<br style="clear: both;"/>
+</div>
+
+<div style="display: block;">
+<table style="border-collapse: collapse; width: 100%;">
+<tr style="border-right: 1px solid #dadada; ">
+<td style="background: none repeat scroll 0 0 #dadada; padding: 0; width: 31px;">
+<span style="background: url(https://www.flightradar24.com/static/images/userUI_sprite.png?14) no-repeat scroll -208px -464px rgba(0, 0, 0, 0); height: 26px; margin: 8px 0 0 4px; width: 23px; display: block;"></span>
+</td>
+<td colspan="2" style="border-bottom: 1px solid #dadada; border-left: 1px solid #dadada; color: #666; line-height: 1.1em; padding: 3px 6px; vertical-align: top; font-size: 14px;">
+Aircraft<span style="float: right; font-size: 12px;">(EC45)</span><br>
+<span style="color: #333; font-size: 16px; font-weight: bold; line-height: 1.3em;">Airbus Helicopters H145</span>
+</td>
+</tr>
+<tr style="border-right: 1px solid #dadada; ">
+<td style="background: none repeat scroll 0 0 #dadada; padding: 0; width: 31px;">
+<td colspan="2" style="border-bottom: 1px solid #dadada; border-left: 1px solid #dadada; color: #666; line-height: 1.1em; padding: 3px 6px; vertical-align: top; font-size: 14px;">
+Registration<br>
+<span style="color: #333; font-size: 16px; font-weight: bold; line-height: 1.3em;"><a href="https://www.flightradar24.com/reg/zt-rmp" style="text-decoration: none; color: #333;">ZT-RMP</a></span>
+</td>
+</tr>
+</table>
+</div>
+
+</div>
+</div>]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.343693,-34.12088,121.92 18.353334,-34.116211,144.78 18.355694,-34.115204,152.4 18.358784,-34.113853,167.64 18.359871,-34.113388,167.64 18.363255,-34.11145,167.64 18.364769,-34.110168,175.26 18.366337,-34.108219,167.64 18.36701,-34.106735,167.64 18.36673,-34.104492,175.26 18.365778,-34.102936,175.26 18.363983,-34.101242,182.88 18.362446,-34.100307,182.88 18.359667,-34.099548,190.5 18.357929,-34.09964,190.5 18.355465,-34.100864,198.12 18.354607,-34.102119,198.12 18.354399,-34.104126,198.12 18.355295,-34.105682,205.74 18.357538,-34.106827,205.74 18.359331,-34.106781,205.74 18.361855,-34.105499,205.74 18.362806,-34.103806,220.98 18.362413,-34.100967,228.6 18.361187,-34.099422,220.98 18.357819,-34.097855,220.98 18.35552,-34.097305,213.36 18.351746,-34.095837,220.98 18.349857,-34.094345,213.36 18.348122,-34.091034,213.36 18.347897,-34.088791,213.36 18.362961,-34.017723,358.14 18.365105,-34.015732,365.76 18.369814,-34.012527,388.62 18.372459,-34.011112,388.62 18.375587,-34.009689,388.62 18.377953,-34.008644,373.38 18.380911,-34.007492,365.76 18.38253,-34.006828,365.76 18.384836,-34.00589,358.14 18.386181,-34.005432,350.52 18.388086,-34.005386,320.04 18.388983,-34.005707,304.8 18.390255,-34.00655,281.94 18.391113,-34.007294,266.7 18.392178,-34.008316,251.46 18.39283,-34.008968,243.84 18.393917,-34.010086,228.6 18.394489,-34.010693,220.98 18.395765,-34.011887,198.12 18.396606,-34.0126,190.5 18.397121,-34.013348,304.8 18.39728,-34.013992,350.52 18.398094,-34.014977,403.86 18.398624,-34.015503,426.72 18.399969,-34.016739,457.2 18.401241,-34.017349,457.2 18.403931,-34.017723,464.82 18.406359,-34.017517,457.2 18.409538,-34.016743,449.58 18.411713,-34.016094,441.96 18.415489,-34.014835,419.1 18.41785,-34.014084,411.48 18.421383,-34.012882,403.86 18.424015,-34.012043,396.24 18.438892,-34.007389,320.04 18.449184,-34.004608,289.56 18.463421,-34.001038,266.7 18.471828,-33.99884,266.7 18.476032,-33.99765,266.7 18.478668,-33.996918,266.7 18.483009,-33.995701,266.7 18.486067,-33.994812,259.08 18.490438,-33.99353,251.46 18.493195,-33.992722,259.08 18.501663,-33.990116,266.7 18.507534,-33.988129,266.7 18.511402,-33.986755,266.7 18.520145,-33.983601,274.32 18.533207,-33.978928,266.7 18.544807,-33.9748,266.7 18.553162,-33.972054,274.32 18.556021,-33.971191,274.32 18.560392,-33.969864,281.94 18.563061,-33.96917,281.94 18.566614,-33.968262,289.56 18.569126,-33.96777,274.32 18.572617,-33.967167,266.7 18.574966,-33.966934,259.08 18.578339,-33.966656,243.84 18.580456,-33.966515,236.22 18.583429,-33.966339,220.98 18.585392,-33.966293,213.36 18.587894,-33.96656,198.12 18.589439,-33.96698,182.88 18.591389,-33.96785,160.02 18.592342,-33.968536,152.4 18.593559,-33.96954,137.16 18.594303,-33.970333,121.92 18.595219,-33.971169,114.3 18.595818,-33.971695,106.68 18.596592,-33.972286,91.44 18.597336,-33.972847,83.82 18.59808,-33.973358,76.2 18.598824,-33.974056,60.96 18.599237,-33.974854,45.72 18.599461,-33.975311,0 18.599686,-33.976089,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>
