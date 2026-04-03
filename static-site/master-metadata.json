@@ -1,7 +1,7 @@
 {
-  "generated": "2026-04-02T17:00:09.756Z",
-  "totalFiles": 1423,
-  "validFlights": 1423,
+  "generated": "2026-04-03T09:07:02.869Z",
+  "totalFiles": 1431,
+  "validFlights": 1431,
   "flights": [
     {
       "filename": "2026-04-02-ZS-HBO-3f07efd6.kml",
@@ -103,6 +103,51 @@
       "fileSizeMB": 0
     },
     {
+      "filename": "2026-03-26-ZT-RMP-3eed2616.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-26",
+      "time": "17:07",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.02
+    },
+    {
+      "filename": "2026-03-26-ZT-RMP-3eecfb24.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-26",
+      "time": "15:58",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.02
+    },
+    {
+      "filename": "2026-03-26-ZT-RMP-3eebb2a8.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-26",
+      "time": "09:38",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.03
+    },
+    {
+      "filename": "2026-03-26-ZT-RMP-3eeb9706.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-26",
+      "time": "08:49",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-03-26-ZT-RMP-3eeb6d53.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-26",
+      "time": "07:34",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.03
+    },
+    {
       "filename": "2026-03-26-ZT-RMS-3eeb2e0b.kml",
       "registration": "ZT-RMS",
       "date": "2026-03-26",
@@ -110,6 +155,33 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZT-RMS.jpg",
       "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-03-25-ZT-RMP-3ee8b953.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-25",
+      "time": "15:26",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.02
+    },
+    {
+      "filename": "2026-03-22-ZT-RMP-3edcad5a.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-22",
+      "time": "15:37",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.03
+    },
+    {
+      "filename": "2026-03-22-ZT-RMP-3edb9cb3.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-03-22",
+      "time": "09:57",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.06
     },
     {
       "filename": "2026-03-15-ZT-RMS-3ec0ea2e.kml",

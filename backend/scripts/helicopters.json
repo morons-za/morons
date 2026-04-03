@@ -65,6 +65,12 @@
     "contact": "Cape Town Helicopters\nPhone: +27 21 418 9462\nEmail: adventure@helicopterscapetown.co.za\nWebsite: www.helicopterscapetown.co.za",
     "imageUrl": "./aircraft-images/ZT-RNW.jpg"
   },
+  "ZT-RMP": {
+    "registration": "ZT-RMP",
+    "owner": "Aerios Global Aviation",
+    "contact": "Aerios Global Aviation\nEmail: opsmanager@aeriosglobal.co.za",
+    "imageUrl": "./aircraft-images/ZT-RMP.jpg"
+  },
   "ZT-RPG": {
     "registration": "ZT-RPG",
     "owner": "NAC",

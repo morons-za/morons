@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>FR24 3eed2616 - Optimised</name>
+    <description><![CDATA[Optimised flight path with 40 points (decimated from 199 original points). Source format: Standard KML]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ffff0000</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[Optimized flight path]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.34605,-34.15503,0 18.34521,-34.13177,0 18.34425,-34.12242,0 18.34419,-34.11613,0 18.34482,-34.10952,0 18.34577,-34.1033,0 18.34785,-34.09132,0 18.36588,-34.01707,0 18.38482,-34.00636,0 18.38825,-34.00626,0 18.391,-34.00772,0 18.39319,-34.00946,0 18.3954,-34.01134,0 18.39678,-34.01251,0 18.39767,-34.01317,0 18.39947,-34.01232,0 18.40313,-34.01102,0 18.40845,-34.00967,0 18.41398,-34.0085,0 18.42007,-34.00743,0 18.42653,-34.00622,0 18.43924,-34.0038,0 18.46109,-33.9998,0 18.48616,-33.99477,0 18.51157,-33.98886,0 18.5214,-33.98574,0 18.52856,-33.98309,0 18.54235,-33.97783,0 18.56701,-33.96935,0 18.57356,-33.96762,0 18.57861,-33.96693,0 18.58332,-33.96666,0 18.58698,-33.96684,0 18.59024,-33.96763,0 18.59245,-33.96881,0 18.59414,-33.97046,0 18.59526,-33.97211,0 18.59621,-33.9738,0 18.59699,-33.9754,0 18.59772,-33.97701,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>
