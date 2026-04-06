@@ -151,6 +151,25 @@
       "approve_expires": "2026-04-13T14:13:22.832Z",
       "reject_token": "6de3a1fbc632fa08e1b7afda2877846fa98882e4d7facb3f87b83b427e4705d1",
       "reject_expires": "2026-04-13T14:13:22.833Z"
+    },
+    {
+      "flight_id": "3f156a26",
+      "filename": "2026-04-06-ZT-RNW-3f156a26.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-04-06",
+      "time": "08:35",
+      "incursions": 2,
+      "classification": "no_track_data",
+      "maxGapKm": 0,
+      "avgSegmentKm": 0,
+      "totalSegments": 0,
+      "gapCount": 0,
+      "reason": "no_track_data",
+      "detected_at": "2026-04-06T16:54:02.889Z",
+      "approve_token": "686beccc82d8de63312b09d94719cd1b45c24d1bcfdd66262c0c9a5e11c42d75",
+      "approve_expires": "2026-04-13T16:54:02.889Z",
+      "reject_token": "7ca6c452e489a3c7bd292c0c00e0d416349482b72b1f88a86783404bbdfad152",
+      "reject_expires": "2026-04-13T16:54:02.889Z"
     }
   ],
   "decisions": [
