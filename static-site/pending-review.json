@@ -246,6 +246,25 @@
       "approve_expires": "2026-05-04T08:30:46.854Z",
       "reject_token": "44ae97ce0ef86b840edcbb99e4f5b153e90fd6e15af9d22a1a9b13d53013ee12",
       "reject_expires": "2026-05-04T08:30:46.855Z"
+    },
+    {
+      "flight_id": "3f73c6a8",
+      "filename": "2026-04-29-ZS-HIE-3f73c6a8.kml",
+      "registration": "ZS-HIE",
+      "date": "2026-04-29",
+      "time": "10:16",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 12.56,
+      "avgSegmentKm": 0.18,
+      "totalSegments": 537,
+      "gapCount": 5,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-04-29T15:18:29.235Z",
+      "approve_token": "d3a6d991b3f46c5f33d9eb92aa48a60d4f0cb93c7d8c4ae994ac760a8fbd2e22",
+      "approve_expires": "2026-05-06T15:18:29.234Z",
+      "reject_token": "7c41a8f7a2dc80a6dc70c90b2c4142e7a2198052812731aaef003aeb8e64fede",
+      "reject_expires": "2026-05-06T15:18:29.235Z"
     }
   ],
   "decisions": [
