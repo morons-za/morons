@@ -1,8 +1,17 @@
 {
-  "generated": "2026-06-04T12:49:50.344Z",
-  "totalFiles": 1533,
-  "validFlights": 1533,
+  "generated": "2026-06-05T12:41:10.782Z",
+  "totalFiles": 1534,
+  "validFlights": 1534,
   "flights": [
+    {
+      "filename": "2026-06-05-ZS-HIE-40099c49.kml",
+      "registration": "ZS-HIE",
+      "date": "2026-06-05",
+      "time": "07:25",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.03
+    },
     {
       "filename": "2026-06-04-ZT-HOT-40053abe.kml",
       "registration": "ZT-HOT",
