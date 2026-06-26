@@ -417,6 +417,25 @@
       "approve_expires": "2026-06-24T21:10:22.341Z",
       "reject_token": "dd6aa2c7da51bd383a52cad16cf77015a5e7ca500f1d27bc39a87950e3bf476c",
       "reject_expires": "2026-06-24T21:10:22.342Z"
+    },
+    {
+      "flight_id": "405b1b35",
+      "filename": "2026-06-25-ZS-RTG-405b1b35.kml",
+      "registration": "ZS-RTG",
+      "date": "2026-06-25",
+      "time": "10:29",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 13.43,
+      "avgSegmentKm": 0.17,
+      "totalSegments": 274,
+      "gapCount": 1,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-06-26T20:49:38.997Z",
+      "approve_token": "e09b59a4c3bc1700ed59c5f616d25c245d097c39e9c401387d7e6e83f40536ce",
+      "approve_expires": "2026-07-03T20:49:38.996Z",
+      "reject_token": "b29d3c7c1e8b8ca2c16e05f67ac559ff8e7c933267e6fe305c986e971d5f9be1",
+      "reject_expires": "2026-07-03T20:49:38.997Z"
     }
   ],
   "decisions": [
