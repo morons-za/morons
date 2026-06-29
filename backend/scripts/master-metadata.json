@@ -1,7 +1,7 @@
 {
-  "generated": "2026-06-29T11:03:36.997Z",
-  "totalFiles": 1566,
-  "validFlights": 1566,
+  "generated": "2026-06-29T20:50:29.462Z",
+  "totalFiles": 1567,
+  "validFlights": 1567,
   "flights": [
     {
       "filename": "2026-06-29-ZS-HBO-406a7725.kml",
@@ -11,6 +11,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HBO.jpg",
       "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-06-29-ZT-RNW-406a6ba2.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-06-29",
+      "time": "07:07",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.06
     },
     {
       "filename": "2026-06-26-ZS-HIE-405ff1b3.kml",
