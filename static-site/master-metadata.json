@@ -1,8 +1,17 @@
 {
-  "generated": "2026-07-04T20:10:42.889Z",
-  "totalFiles": 1588,
-  "validFlights": 1588,
+  "generated": "2026-07-05T08:55:29.869Z",
+  "totalFiles": 1589,
+  "validFlights": 1589,
   "flights": [
+    {
+      "filename": "2026-07-05-ZS-HMB-40832516.kml",
+      "registration": "ZS-HMB",
+      "date": "2026-07-05",
+      "time": "08:23",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 0.01
+    },
     {
       "filename": "2026-07-04-ZS-RTG-40807c2b.kml",
       "registration": "ZS-RTG",
