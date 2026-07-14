@@ -105,7 +105,7 @@ jobs:
             cp static-site/master-metadata.json backend/scripts/master-metadata.json
           fi
 
-          git add -A backend/uploads/ static-site/kml-optimised/ backend/flight-maps/ static-site/pending-review.json static-site/master-metadata.json backend/scripts/master-metadata.json backend/scripts/sync-health-state.json static-site/index.html
+          git add -A backend/uploads/ static-site/kml-optimised/ backend/flight-maps/ static-site/pending-review.json static-site/master-metadata.json backend/scripts/master-metadata.json static-site/index.html
           
           if git diff --cached --quiet; then
             echo "No changes to commit"
