@@ -276,19 +276,30 @@ async function main() {
     }
 
     // Step 3: Compute violations
+    // Sent in batches: the server checks each flight against FR24 with a
+    // pacing delay, and a single request covering a large batch can run
+    // past undici's 5-minute default headers timeout, killing the whole
+    // run with no results saved. Chunking keeps each request well under that.
     console.log('[sync] Computing violations...');
-    const viol = await fetchJson(`${BASE_URL}/api/fr24/violations`, {
-      method: 'POST',
-      body: { flight_ids: allIds }
-    }, 60 * 60 * 1000);
+    const VIOLATIONS_BATCH_SIZE = 20;
+    const results = [];
+    for (let i = 0; i < allIds.length; i += VIOLATIONS_BATCH_SIZE) {
+      const batchIds = allIds.slice(i, i + VIOLATIONS_BATCH_SIZE);
+      const batchNum = Math.floor(i / VIOLATIONS_BATCH_SIZE) + 1;
+      const batchTotal = Math.ceil(allIds.length / VIOLATIONS_BATCH_SIZE);
+      console.log(`[sync] Violations batch ${batchNum}/${batchTotal} (${batchIds.length} flight(s))`);
+      const viol = await fetchJson(`${BASE_URL}/api/fr24/violations`, {
+        method: 'POST',
+        body: { flight_ids: batchIds }
+      }, 4 * 60 * 1000);
 
-    if (!viol.ok) {
-      console.error('[sync] Violations endpoint failed:', viol);
-      process.exitCode = 3;
-      return;
+      if (!viol.ok) {
+        console.error('[sync] Violations endpoint failed:', viol);
+        process.exitCode = 3;
+        return;
+      }
+      results.push(...(Array.isArray(viol.results) ? viol.results : []));
     }
-
-    const results = Array.isArray(viol.results) ? viol.results : [];
     const violationById = new Map(
       results.map((r) => [String(r?.flight_id || '').trim(), r])
     );
