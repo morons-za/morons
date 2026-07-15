@@ -244,13 +244,27 @@ async function main() {
     const flightsById = new Map();
     for (const w of windows14Days(rangeStart, now)) {
       for (const reg of regs) {
-        const json = await fetchJson(`${BASE_URL}/api/fr24/flight-summary/light`, {
+        const fetchSummary = () => fetchJson(`${BASE_URL}/api/fr24/flight-summary/light`, {
           method: 'POST',
           body: { registrations: reg, flight_datetime_from: w.from, flight_datetime_to: w.to, limit: 5000 }
         }, 120000);
 
+        let json = await fetchSummary();
+        let attempts = 1;
+        // A registration hitting FR24's rate limit here silently lost its
+        // whole window with no retry — e.g. ZT-RMP was dropped from every
+        // 2026-07 backfill attempt. Retry a couple of times, honoring
+        // retry-after when FR24 provides it.
+        while (!json.ok && attempts < 3) {
+          const retryAfterSec = Number(json?.headers?.['retry-after']) || 10;
+          console.warn(`[sync] flight-summary failed for ${reg} (attempt ${attempts}/3), retrying in ${retryAfterSec}s:`, json.error || json.status || json);
+          await sleep(retryAfterSec * 1000);
+          attempts += 1;
+          json = await fetchSummary();
+        }
+
         if (!json.ok) {
-          console.error(`[sync] flight-summary failed for ${reg}:`, json.error || json);
+          console.error(`[sync] flight-summary failed for ${reg} after ${attempts} attempt(s):`, json.error || json);
           continue;
         }
 
@@ -265,6 +279,7 @@ async function main() {
             last_seen: f?.last_seen || null
           });
         }
+        await sleep(400);
       }
     }
 
@@ -391,11 +406,24 @@ async function main() {
         continue;
       }
 
-      // Download KML (may already have been fetched for fallback analysis)
+      // Download KML (may already have been fetched for fallback analysis).
+      // A single failure here used to drop the flight permanently (no retry,
+      // no pending-review entry) and, with no delay before the next
+      // iteration, one rate-limited request would cascade into every
+      // subsequent flight in the batch failing too. Retry with backoff.
       const kmlUrl = `${BASE_URL}/api/fr24/flight-tracks.kml?flight_id=${id8}`;
-      const kml = await fetchText(kmlUrl, 10 * 60 * 1000);
+      let kml = await fetchText(kmlUrl, 10 * 60 * 1000);
+      let kmlAttempts = 1;
+      while (!kml.ok && kmlAttempts < 3) {
+        const backoffMs = kmlAttempts * 5000;
+        console.warn(`[sync] KML download failed for ${id8} (HTTP ${kml.status}, attempt ${kmlAttempts}/3), retrying in ${backoffMs / 1000}s`);
+        await sleep(backoffMs);
+        kmlAttempts += 1;
+        kml = await fetchText(kmlUrl, 10 * 60 * 1000);
+      }
       if (!kml.ok) {
-        console.error(`[sync] Failed to download KML for ${id8}: HTTP ${kml.status}`);
+        console.error(`[sync] Failed to download KML for ${id8} after ${kmlAttempts} attempt(s): HTTP ${kml.status}`);
+        await sleep(3000);
         continue;
       }
 
