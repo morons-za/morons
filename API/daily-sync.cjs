@@ -336,137 +336,147 @@ async function main() {
     for (const id of violatingIds) {
       const id8 = safeId8(id);
       if (!id8) continue;
-      const meta = flightsById.get(id) || {};
-      const ymd = isoToYmd(meta.first_seen) || isoToYmd(meta.last_seen) || 'UNKNOWN';
-      const hhmm = isoToHHMM(meta.first_seen) || isoToHHMM(meta.last_seen) || '00:00';
-      const reg = normalizeReg(meta.registration) || 'UNKNOWN';
-      const filename = `${ymd}-${reg}-${id8}.kml`;
 
-      // Skip if already in uploads
-      if (existingUploads.has(filename)) continue;
+      // Any unexpected failure below (a thrown network error, not just a
+      // handled bad status code) used to propagate all the way up and kill
+      // the whole run, discarding every flight already processed in this
+      // batch. One flaky flight should never cost the rest of the batch.
+      try {
+        const meta = flightsById.get(id) || {};
+        const ymd = isoToYmd(meta.first_seen) || isoToYmd(meta.last_seen) || 'UNKNOWN';
+        const hhmm = isoToHHMM(meta.first_seen) || isoToHHMM(meta.last_seen) || '00:00';
+        const reg = normalizeReg(meta.registration) || 'UNKNOWN';
+        const filename = `${ymd}-${reg}-${id8}.kml`;
 
-      // Also skip if already in pending review
-      const pending = readPendingReview();
-      if (pending.pending.some((f) => f.flight_id === id8)) continue;
-      if (pending.decisions.some((d) => d.flight_id === id8)) continue;
+        // Skip if already in uploads
+        if (existingUploads.has(filename)) continue;
 
-      // Fetch track data for gap analysis
-      const trackJson = await fetchJson(`${BASE_URL}/api/fr24/flight-tracks?flight_id=${id8}`, {}, 120000);
-      const trackResponse = trackJson?.response || trackJson;
+        // Also skip if already in pending review
+        const pending = readPendingReview();
+        if (pending.pending.some((f) => f.flight_id === id8)) continue;
+        if (pending.decisions.some((d) => d.flight_id === id8)) continue;
 
-      const gapOpts = {
-        thresholdKm: config.transponder_gap_threshold_km,
-        ratioThreshold: config.transponder_gap_ratio
-      };
-      let gapResult = analyseTrackForGaps(trackResponse, gapOpts);
+        // Fetch track data for gap analysis
+        const trackJson = await fetchJson(`${BASE_URL}/api/fr24/flight-tracks?flight_id=${id8}`, {}, 120000);
+        const trackResponse = trackJson?.response || trackJson;
 
-      // If FR24 API returned no tracks, fall back to analysing the KML file
-      if (gapResult.noTrackData) {
-        console.log(`[sync] No FR24 track data for ${id8}, falling back to KML-based gap analysis`);
-        const kmlUrl = `${BASE_URL}/api/fr24/flight-tracks.kml?flight_id=${id8}`;
-        const kml = await fetchText(kmlUrl, 10 * 60 * 1000);
-        if (kml.ok && kml.body) {
-          gapResult = analyseKmlForGaps(kml.body, gapOpts);
-          if (gapResult.noTrackData) {
-            console.log(`[sync] KML also has no coordinates for ${id8} — flagging for review`);
+        const gapOpts = {
+          thresholdKm: config.transponder_gap_threshold_km,
+          ratioThreshold: config.transponder_gap_ratio
+        };
+        let gapResult = analyseTrackForGaps(trackResponse, gapOpts);
+
+        // If FR24 API returned no tracks, fall back to analysing the KML file
+        if (gapResult.noTrackData) {
+          console.log(`[sync] No FR24 track data for ${id8}, falling back to KML-based gap analysis`);
+          const kmlUrl = `${BASE_URL}/api/fr24/flight-tracks.kml?flight_id=${id8}`;
+          const kml = await fetchText(kmlUrl, 10 * 60 * 1000);
+          if (kml.ok && kml.body) {
+            gapResult = analyseKmlForGaps(kml.body, gapOpts);
+            if (gapResult.noTrackData) {
+              console.log(`[sync] KML also has no coordinates for ${id8} — flagging for review`);
+            }
           }
         }
-      }
 
-      // Classify: 'clean', 'mixed', 'gap_only', or 'no_track_data'
-      let classification = 'clean';
-      if (gapResult.noTrackData) {
-        classification = 'no_track_data';
-      } else if (gapResult.suspicious) {
-        const cv = classifyViolation(trackResponse, gapResult, gapOpts);
-        classification = cv.classification;
-      }
-
-      const flightInfo = {
-        flight_id: id8,
-        filename,
-        registration: reg,
-        date: ymd,
-        time: hhmm,
-        incursions: Number.isFinite(Number(violationById.get(id)?.incursions))
-          ? Number(violationById.get(id).incursions)
-          : null,
-        classification,
-        maxGapKm: gapResult.maxGapKm,
-        avgSegmentKm: gapResult.avgSegmentKm,
-        totalSegments: gapResult.totalSegments,
-        gapCount: gapResult.gaps.length
-      };
-
-      const needsReview = classification === 'gap_only' || classification === 'no_track_data';
-
-      if (args.dryRun) {
-        console.log(`[sync] [DRY] ${id8} ${reg} ${ymd} — ${classification.toUpperCase()} (max gap: ${gapResult.maxGapKm} km)`);
-        (needsReview ? suspicious : autoPublished).push(flightInfo);
-        continue;
-      }
-
-      // Download KML (may already have been fetched for fallback analysis).
-      // A single failure here used to drop the flight permanently (no retry,
-      // no pending-review entry) and, with no delay before the next
-      // iteration, one rate-limited request would cascade into every
-      // subsequent flight in the batch failing too. Retry with backoff.
-      const kmlUrl = `${BASE_URL}/api/fr24/flight-tracks.kml?flight_id=${id8}`;
-      let kml = await fetchText(kmlUrl, 10 * 60 * 1000);
-      let kmlAttempts = 1;
-      while (!kml.ok && kmlAttempts < 3) {
-        const backoffMs = kmlAttempts * 5000;
-        console.warn(`[sync] KML download failed for ${id8} (HTTP ${kml.status}, attempt ${kmlAttempts}/3), retrying in ${backoffMs / 1000}s`);
-        await sleep(backoffMs);
-        kmlAttempts += 1;
-        kml = await fetchText(kmlUrl, 10 * 60 * 1000);
-      }
-      if (!kml.ok) {
-        console.error(`[sync] Failed to download KML for ${id8} after ${kmlAttempts} attempt(s): HTTP ${kml.status}`);
-        await sleep(3000);
-        continue;
-      }
-
-      const kmlPath = path.join(UPLOADS_DIR, filename);
-      fs.writeFileSync(kmlPath, kml.body, 'utf8');
-
-      // Generate PNG
-      try {
-        const { execSync } = require('child_process');
-        execSync(`node backend/scripts/generate-flight-image.cjs "${filename}"`, {
-          cwd: path.join(__dirname, '..'),
-          stdio: 'pipe',
-          timeout: 120000
-        });
-      } catch (e) {
-        console.warn(`[sync] PNG generation failed for ${id8}: ${e.message}`);
-      }
-      const mapsDir = path.join(__dirname, '..', 'backend', 'flight-maps');
-      const pngPath = path.join(mapsDir, filename.replace('.kml', '.png'));
-      const svgPath = path.join(mapsDir, filename.replace('.kml', '.svg'));
-      if (!fs.existsSync(pngPath)) {
-        if (fs.existsSync(svgPath)) {
-          console.warn(`[sync] PNG missing for ${id8}; SVG fallback created (${path.basename(svgPath)}). UI will use SVG fallback.`);
-        } else {
-          console.warn(`[sync] PNG missing for ${id8}; no SVG fallback found.`);
+        // Classify: 'clean', 'mixed', 'gap_only', or 'no_track_data'
+        let classification = 'clean';
+        if (gapResult.noTrackData) {
+          classification = 'no_track_data';
+        } else if (gapResult.suspicious) {
+          const cv = classifyViolation(trackResponse, gapResult, gapOpts);
+          classification = cv.classification;
         }
-      }
 
-      if (needsReview) {
-        const reason = classification === 'no_track_data' ? 'no_track_data' : 'gap_only_violation';
-        console.log(`[sync] ${classification.toUpperCase()} ${id8} ${reg} ${ymd} — max gap: ${gapResult.maxGapKm} km → pending review`);
-        const pendingEntry = addPendingFlight({
-          ...flightInfo,
-          reason
-        }, hmacSecret, config.token_expiry_days);
-        // Use the persisted pending entry so email links have valid tokens/expires.
-        suspicious.push(pendingEntry || { ...flightInfo, reason });
-      } else {
-        console.log(`[sync] ${classification === 'mixed' ? 'MIXED' : 'CLEAN'} ${id8} ${reg} ${ymd} — publishing (real violations on non-gap segments)`);
-        autoPublished.push(flightInfo);
-      }
+        const flightInfo = {
+          flight_id: id8,
+          filename,
+          registration: reg,
+          date: ymd,
+          time: hhmm,
+          incursions: Number.isFinite(Number(violationById.get(id)?.incursions))
+            ? Number(violationById.get(id).incursions)
+            : null,
+          classification,
+          maxGapKm: gapResult.maxGapKm,
+          avgSegmentKm: gapResult.avgSegmentKm,
+          totalSegments: gapResult.totalSegments,
+          gapCount: gapResult.gaps.length
+        };
 
-      await sleep(500);
+        const needsReview = classification === 'gap_only' || classification === 'no_track_data';
+
+        if (args.dryRun) {
+          console.log(`[sync] [DRY] ${id8} ${reg} ${ymd} — ${classification.toUpperCase()} (max gap: ${gapResult.maxGapKm} km)`);
+          (needsReview ? suspicious : autoPublished).push(flightInfo);
+          continue;
+        }
+
+        // Download KML (may already have been fetched for fallback analysis).
+        // A single failure here used to drop the flight permanently (no retry,
+        // no pending-review entry) and, with no delay before the next
+        // iteration, one rate-limited request would cascade into every
+        // subsequent flight in the batch failing too. Retry with backoff.
+        const kmlUrl = `${BASE_URL}/api/fr24/flight-tracks.kml?flight_id=${id8}`;
+        let kml = await fetchText(kmlUrl, 10 * 60 * 1000);
+        let kmlAttempts = 1;
+        while (!kml.ok && kmlAttempts < 3) {
+          const backoffMs = kmlAttempts * 5000;
+          console.warn(`[sync] KML download failed for ${id8} (HTTP ${kml.status}, attempt ${kmlAttempts}/3), retrying in ${backoffMs / 1000}s`);
+          await sleep(backoffMs);
+          kmlAttempts += 1;
+          kml = await fetchText(kmlUrl, 10 * 60 * 1000);
+        }
+        if (!kml.ok) {
+          console.error(`[sync] Failed to download KML for ${id8} after ${kmlAttempts} attempt(s): HTTP ${kml.status}`);
+          await sleep(3000);
+          continue;
+        }
+
+        const kmlPath = path.join(UPLOADS_DIR, filename);
+        fs.writeFileSync(kmlPath, kml.body, 'utf8');
+
+        // Generate PNG
+        try {
+          const { execSync } = require('child_process');
+          execSync(`node backend/scripts/generate-flight-image.cjs "${filename}"`, {
+            cwd: path.join(__dirname, '..'),
+            stdio: 'pipe',
+            timeout: 120000
+          });
+        } catch (e) {
+          console.warn(`[sync] PNG generation failed for ${id8}: ${e.message}`);
+        }
+        const mapsDir = path.join(__dirname, '..', 'backend', 'flight-maps');
+        const pngPath = path.join(mapsDir, filename.replace('.kml', '.png'));
+        const svgPath = path.join(mapsDir, filename.replace('.kml', '.svg'));
+        if (!fs.existsSync(pngPath)) {
+          if (fs.existsSync(svgPath)) {
+            console.warn(`[sync] PNG missing for ${id8}; SVG fallback created (${path.basename(svgPath)}). UI will use SVG fallback.`);
+          } else {
+            console.warn(`[sync] PNG missing for ${id8}; no SVG fallback found.`);
+          }
+        }
+
+        if (needsReview) {
+          const reason = classification === 'no_track_data' ? 'no_track_data' : 'gap_only_violation';
+          console.log(`[sync] ${classification.toUpperCase()} ${id8} ${reg} ${ymd} — max gap: ${gapResult.maxGapKm} km → pending review`);
+          const pendingEntry = addPendingFlight({
+            ...flightInfo,
+            reason
+          }, hmacSecret, config.token_expiry_days);
+          // Use the persisted pending entry so email links have valid tokens/expires.
+          suspicious.push(pendingEntry || { ...flightInfo, reason });
+        } else {
+          console.log(`[sync] ${classification === 'mixed' ? 'MIXED' : 'CLEAN'} ${id8} ${reg} ${ymd} — publishing (real violations on non-gap segments)`);
+          autoPublished.push(flightInfo);
+        }
+
+        await sleep(500);
+      } catch (e) {
+        console.error(`[sync] Skipping ${id8} due to unexpected error: ${e.message}`);
+        await sleep(2000);
+      }
     }
 
     // Step 5: Run optimiser for all new KMLs (clean + suspicious; suspicious need it ready for when approved)
