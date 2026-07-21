@@ -1,8 +1,26 @@
 {
-  "generated": "2026-07-20T15:14:54.995Z",
-  "totalFiles": 1623,
-  "validFlights": 1623,
+  "generated": "2026-07-21T08:34:14.719Z",
+  "totalFiles": 1625,
+  "validFlights": 1625,
   "flights": [
+    {
+      "filename": "2026-07-21-ZS-HIM-40c5f63a.kml",
+      "registration": "ZS-HIM",
+      "date": "2026-07-21",
+      "time": "08:10",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-07-21-ZT-RNW-40c5e759.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-07-21",
+      "time": "07:47",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.01
+    },
     {
       "filename": "2026-07-20-ZS-HIM-40c2ff47.kml",
       "registration": "ZS-HIM",
