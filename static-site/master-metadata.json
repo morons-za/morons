@@ -1,8 +1,17 @@
 {
-  "generated": "2026-07-31T12:04:18.466Z",
-  "totalFiles": 1653,
-  "validFlights": 1653,
+  "generated": "2026-07-31T15:24:34.052Z",
+  "totalFiles": 1654,
+  "validFlights": 1654,
   "flights": [
+    {
+      "filename": "2026-07-31-ZS-HBO-40f166cf.kml",
+      "registration": "ZS-HBO",
+      "date": "2026-07-31",
+      "time": "12:41",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 0.02
+    },
     {
       "filename": "2026-07-31-ZS-HIM-40f13132.kml",
       "registration": "ZS-HIM",
