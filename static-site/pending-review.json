@@ -683,6 +683,25 @@
       "approve_expires": "2026-08-12T15:17:00.261Z",
       "reject_token": "5657a9f783ac21387a2c7ceebd68ff548f0a4b749bd3598d0750d8e955eb0062",
       "reject_expires": "2026-08-12T15:17:00.261Z"
+    },
+    {
+      "flight_id": "410a66f3",
+      "filename": "2026-08-06-ZS-HIM-410a66f3.kml",
+      "registration": "ZS-HIM",
+      "date": "2026-08-06",
+      "time": "14:20",
+      "incursions": 7,
+      "classification": "no_track_data",
+      "maxGapKm": 0,
+      "avgSegmentKm": 0,
+      "totalSegments": 0,
+      "gapCount": 0,
+      "reason": "no_track_data",
+      "detected_at": "2026-08-07T00:44:02.422Z",
+      "approve_token": "1643d3962834ffec76fd7f4aa71fd9b8a68a520e929f25e01e8869ed3ac3e736",
+      "approve_expires": "2026-08-14T00:44:02.421Z",
+      "reject_token": "acfa2af77acee2e8fc37a3f571ce598084d2597d50b3069ac33c05244aa49ee3",
+      "reject_expires": "2026-08-14T00:44:02.422Z"
     }
   ],
   "decisions": [
