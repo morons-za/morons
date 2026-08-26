@@ -36,6 +36,8 @@ const OPTIMISED_DIR = path.join(__dirname, '..', 'static-site', 'kml-optimised')
 const FLIGHT_MAPS_DIR = path.join(__dirname, '..', 'backend', 'flight-maps');
 const CONFIG_PATH = path.join(__dirname, 'review-config.json');
 const CREDENTIALS_PATH = path.join(__dirname, 'credentials.json');
+const CHECKED_CACHE_PATH = path.join(__dirname, 'checked-flights-cache.json');
+const CHECKED_CACHE_MAX_AGE_MS = 45 * 24 * 60 * 60 * 1000; // keep entries longer than any realistic lookback/backfill window
 
 const SERVER_PORT = 4698;
 const BASE_URL = `http://localhost:${SERVER_PORT}`;
@@ -85,6 +87,32 @@ function safeId8(id) {
 }
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// A candidate flight typically falls inside several overlapping lookback
+// windows across a day before it ages out, so without this cache the same
+// flight gets re-checked against FR24's violations endpoint on every run
+// that still sees it — burning credits for a result that can't have
+// changed. Persisting the outcome once means each flight is only ever
+// checked the first time it's discovered.
+function loadCheckedFlightsCache() {
+  try {
+    return JSON.parse(fs.readFileSync(CHECKED_CACHE_PATH, 'utf8'));
+  } catch {
+    return {};
+  }
+}
+
+function saveCheckedFlightsCache(cache) {
+  const now = Date.now();
+  const pruned = {};
+  for (const [id, entry] of Object.entries(cache)) {
+    const checkedAtMs = Date.parse(entry?.checkedAt || '');
+    if (Number.isFinite(checkedAtMs) && now - checkedAtMs < CHECKED_CACHE_MAX_AGE_MS) {
+      pruned[id] = entry;
+    }
+  }
+  fs.writeFileSync(CHECKED_CACHE_PATH, JSON.stringify(pruned, null, 2) + '\n', 'utf8');
+}
 
 async function fetchJson(url, { method = 'GET', body } = {}, timeoutMs = 180000) {
   const controller = new AbortController();
@@ -227,6 +255,14 @@ async function main() {
   console.log(`[sync] Registrations: ${regs.join(', ')}`);
   if (args.dryRun) console.log('[sync] DRY RUN — no files will be written');
 
+  // Guarantee the cache file exists before any early return below (e.g. no
+  // candidates found this run) can skip past the code that would otherwise
+  // create it. The workflow's git-add step references this path literally —
+  // a run that never wrote it once would fail with a pathspec error.
+  if (!args.dryRun && !fs.existsSync(CHECKED_CACHE_PATH)) {
+    saveCheckedFlightsCache({});
+  }
+
   // Step 1: Start server
   console.log('[sync] Starting API server...');
   let serverProcess;
@@ -291,17 +327,23 @@ async function main() {
     }
 
     // Step 3: Compute violations
+    // Skip flights already resolved in a previous run — see
+    // loadCheckedFlightsCache above for why this matters.
+    const checkedCache = loadCheckedFlightsCache();
+    const idsToCheck = allIds.filter((id) => !checkedCache[id]);
+    console.log(`[sync] ${allIds.length - idsToCheck.length} flight(s) already checked previously, skipping recheck`);
+
     // Sent in batches: the server checks each flight against FR24 with a
     // pacing delay, and a single request covering a large batch can run
     // past undici's 5-minute default headers timeout, killing the whole
     // run with no results saved. Chunking keeps each request well under that.
     console.log('[sync] Computing violations...');
     const VIOLATIONS_BATCH_SIZE = 20;
-    const results = [];
-    for (let i = 0; i < allIds.length; i += VIOLATIONS_BATCH_SIZE) {
-      const batchIds = allIds.slice(i, i + VIOLATIONS_BATCH_SIZE);
+    const freshResults = [];
+    for (let i = 0; i < idsToCheck.length; i += VIOLATIONS_BATCH_SIZE) {
+      const batchIds = idsToCheck.slice(i, i + VIOLATIONS_BATCH_SIZE);
       const batchNum = Math.floor(i / VIOLATIONS_BATCH_SIZE) + 1;
-      const batchTotal = Math.ceil(allIds.length / VIOLATIONS_BATCH_SIZE);
+      const batchTotal = Math.ceil(idsToCheck.length / VIOLATIONS_BATCH_SIZE);
       console.log(`[sync] Violations batch ${batchNum}/${batchTotal} (${batchIds.length} flight(s))`);
       const viol = await fetchJson(`${BASE_URL}/api/fr24/violations`, {
         method: 'POST',
@@ -313,8 +355,27 @@ async function main() {
         process.exitCode = 3;
         return;
       }
-      results.push(...(Array.isArray(viol.results) ? viol.results : []));
+      freshResults.push(...(Array.isArray(viol.results) ? viol.results : []));
     }
+
+    const nowIso = new Date().toISOString();
+    for (const r of freshResults) {
+      const fid = String(r?.flight_id || '').trim();
+      if (!fid) continue;
+      checkedCache[fid] = {
+        violation: r.violation === true,
+        incursions: Number.isFinite(Number(r.incursions)) ? Number(r.incursions) : null,
+        checkedAt: nowIso
+      };
+    }
+    if (!args.dryRun) saveCheckedFlightsCache(checkedCache);
+
+    const results = allIds.map((id) => {
+      const entry = checkedCache[id];
+      return entry
+        ? { flight_id: id, violation: entry.violation, incursions: entry.incursions }
+        : { flight_id: id, violation: false, incursions: null };
+    });
     const violationById = new Map(
       results.map((r) => [String(r?.flight_id || '').trim(), r])
     );

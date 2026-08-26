@@ -2,8 +2,10 @@ name: Daily Flight Sync
 
 on:
   schedule:
-    # Run 5x daily at 08:00, 12:00, 15:00, 18:00, 21:00 SAST
-    - cron: '0 6,10,13,16,19 * * *'
+    # Run 3x daily at 08:00, 14:00, 20:00 SAST (was 5x/day — cut to reduce
+    # FR24 credit usage; the checked-flights cache in daily-sync.cjs removes
+    # most of the redundant re-querying this used to cause anyway)
+    - cron: '0 6,12,18 * * *'
   workflow_dispatch:
     inputs:
       hours:
@@ -106,7 +108,15 @@ jobs:
           fi
 
           git add -A backend/uploads/ static-site/kml-optimised/ backend/flight-maps/ static-site/pending-review.json static-site/master-metadata.json backend/scripts/master-metadata.json static-site/index.html
-          
+
+          # Guarded separately: unlike the paths above, this file is only
+          # ever written conditionally by the sync script. A literal path
+          # that doesn't exist would make git add fail outright (this is
+          # exactly what broke every run for over a week in July).
+          if [ -f API/checked-flights-cache.json ]; then
+            git add API/checked-flights-cache.json
+          fi
+
           if git diff --cached --quiet; then
             echo "No changes to commit"
           else
