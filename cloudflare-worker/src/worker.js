@@ -33,6 +33,9 @@ export default {
     if (pathname === '/admin/api/summary') {
       return handleAdminSummary(request, env);
     }
+    if (pathname === '/admin/api/decide' && request.method === 'POST') {
+      return handleAdminDecide(request, env);
+    }
     if (pathname === '/admin/sendgrid-events' && request.method === 'POST') {
       return handleAdminSendgridEvents(request, env);
     }
@@ -196,6 +199,51 @@ async function handleAdminSummary(request, env) {
   } catch (err) {
     return jsonResponse({ ok: false, error: String(err?.message || err) }, 500);
   }
+}
+
+// Approve/reject from the dashboard, authenticated by the admin session
+// cookie instead of the per-flight HMAC token used by /review. Those tokens
+// are short-lived (token_expiry_days, currently 7) because an email link is
+// a bearer credential anyone who has it can use — that constraint doesn't
+// apply to an action taken from an already-authenticated admin session, so
+// this path has no expiry and works on backlog items of any age.
+async function handleAdminDecide(request, env) {
+  const config = getAdminConfig(env);
+  if (!config.ready.ok) {
+    return jsonResponse({ ok: false, error: 'not_configured' }, 503);
+  }
+
+  const session = await readAdminSession(request, env);
+  if (!session.ok) {
+    return jsonResponse({ ok: false, error: 'unauthorized' }, 401);
+  }
+
+  const body = await parseBody(request);
+  const flightId = String(body.flight_id || '').trim();
+  const action = String(body.action || '').trim();
+  // 'suspicious' is admin-dashboard-only (not offered via the public token
+  // link in handleReview) — it's a judgment call, not something to expose
+  // as a bearer-token action anyone with an old email could trigger.
+  const validActions = ['approve', 'reject', 'suspicious'];
+
+  if (!flightId || !validActions.includes(action)) {
+    return jsonResponse({ ok: false, error: 'invalid_request' }, 400);
+  }
+
+  try {
+    await triggerGithubDispatch('review_decision', {
+      flight_id: flightId,
+      action,
+      decided_at: new Date().toISOString(),
+      decided_by: 'admin_dashboard'
+    }, env);
+  } catch (err) {
+    return jsonResponse({ ok: false, error: String(err?.message || err) }, 502);
+  }
+
+  await appendAudit(env, { type: 'admin_review_decision', flightId, action, email: session.email });
+
+  return jsonResponse({ ok: true, flightId, action });
 }
 
 async function handleAdminSendgridEvents(request, env) {
@@ -661,6 +709,7 @@ function adminDashboardPage(email) {
     .modal-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
     .btn-approve { border-color: #166534; color: #166534; }
     .btn-reject { border-color: #991b1b; color: #991b1b; }
+    .btn-suspicious { border-color: #92400e; color: #92400e; }
     .btn-disabled { opacity: 0.5; pointer-events: none; }
     @media (max-width: 760px) {
       .modal-grid { grid-template-columns: 1fr; }
@@ -713,10 +762,11 @@ function adminDashboardPage(email) {
       </div>
       <div class="modal-actions">
         <a id="mFr24" class="btn btn-sm" target="_blank" rel="noreferrer">View on FlightRadar24</a>
-        <a id="mApprove" class="btn btn-sm btn-approve" target="_blank" rel="noreferrer">Approve — Violating Flight</a>
-        <a id="mReject" class="btn btn-sm btn-reject" target="_blank" rel="noreferrer">Reject — Not a Violation</a>
+        <button id="mApprove" class="btn btn-sm btn-approve" type="button">Approve — Violating Flight</button>
+        <button id="mReject" class="btn btn-sm btn-reject" type="button">Reject — Not a Violation</button>
+        <button id="mSuspicious" class="btn btn-sm btn-suspicious" type="button">Suspicious — Possible Transponder Off</button>
       </div>
-      <div id="mWarn" class="small" style="margin-top:8px; color:#991b1b; display:none;">Review links unavailable for this item.</div>
+      <div id="mStatus" class="small" style="margin-top:8px; display:none;"></div>
     </div>
   </div>
 
@@ -874,29 +924,70 @@ function adminDashboardPage(email) {
         }
       }
 
-      const tokenApprove = String(p.approve_token || '').trim();
-      const expApprove = String(p.approve_expires || '').trim();
-      const tokenReject = String(p.reject_token || '').trim();
-      const expReject = String(p.reject_expires || '').trim();
-      const hasLinks = Boolean(tokenApprove && expApprove && tokenReject && expReject);
-      const base = location.origin.replace(/\\/+$/, '');
-      const approveHref = base + '/review?id=' + encodeURIComponent(p.flight_id || '') + '&action=approve&token=' + encodeURIComponent(tokenApprove) + '&expires=' + encodeURIComponent(expApprove);
-      const rejectHref = base + '/review?id=' + encodeURIComponent(p.flight_id || '') + '&action=reject&token=' + encodeURIComponent(tokenReject) + '&expires=' + encodeURIComponent(expReject);
       const approve = document.getElementById('mApprove');
       const reject = document.getElementById('mReject');
-      const warn = document.getElementById('mWarn');
+      const suspicious = document.getElementById('mSuspicious');
+      const status = document.getElementById('mStatus');
+      if (status) status.style.display = 'none';
       if (approve) {
-        approve.href = hasLinks ? approveHref : '#';
-        approve.className = hasLinks ? 'btn btn-sm btn-approve' : 'btn btn-sm btn-approve btn-disabled';
+        approve.disabled = false;
+        approve.onclick = () => decide(p.flight_id, 'approve');
       }
       if (reject) {
-        reject.href = hasLinks ? rejectHref : '#';
-        reject.className = hasLinks ? 'btn btn-sm btn-reject' : 'btn btn-sm btn-reject btn-disabled';
+        reject.disabled = false;
+        reject.onclick = () => decide(p.flight_id, 'reject');
       }
-      if (warn) warn.style.display = hasLinks ? 'none' : 'block';
+      if (suspicious) {
+        suspicious.disabled = false;
+        suspicious.onclick = () => decide(p.flight_id, 'suspicious');
+      }
 
       const modal = document.getElementById('pendingModal');
       if (modal) modal.style.display = 'flex';
+    }
+
+    // Approve/reject/suspicious via the logged-in admin session — no
+    // per-flight token or expiry involved, so this works regardless of how
+    // old the item is. "Suspicious" is for flights that look like a pilot
+    // deliberately switched off their transponder rather than an ordinary
+    // false-positive gap — it's set aside (kept out of the active queue,
+    // KML/PNG retained) without being published or dismissed either way.
+    async function decide(flightId, action) {
+      const approve = document.getElementById('mApprove');
+      const reject = document.getElementById('mReject');
+      const suspicious = document.getElementById('mSuspicious');
+      const status = document.getElementById('mStatus');
+      const buttons = [approve, reject, suspicious];
+      buttons.forEach((b) => { if (b) b.disabled = true; });
+      if (status) {
+        status.style.display = 'block';
+        status.style.color = '#1a1a1a';
+        status.textContent = 'Submitting ' + action + '...';
+      }
+      try {
+        const resp = await fetch('/admin/api/decide', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ flight_id: flightId, action })
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.ok) throw new Error(data.error || ('HTTP ' + resp.status));
+        if (status) {
+          status.style.color = '#166534';
+          status.textContent = 'Recorded as ' + action + '. Refreshing...';
+        }
+        setTimeout(() => {
+          closePendingModal();
+          load();
+        }, 800);
+      } catch (e) {
+        buttons.forEach((b) => { if (b) b.disabled = false; });
+        if (status) {
+          status.style.color = '#991b1b';
+          status.textContent = 'Failed: ' + e.message;
+        }
+      }
     }
 
     function closePendingModal() {

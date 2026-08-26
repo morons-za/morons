@@ -105,6 +105,16 @@ jobs:
               // Keep rejected decisions as a durable "do-not-requeue" list.
               // daily-sync checks pending.decisions and will skip these flight IDs.
               console.log('Retaining rejected decision to prevent future re-queueing');
+            } else if (action === 'suspicious') {
+              // Flagged as a likely deliberate transponder-off, not an
+              // ordinary false-positive gap. Not published (not confirmed
+              // as a violation) and not deleted (kept for further review) —
+              // KML/PNG stay in backend/uploads and backend/flight-maps
+              // exactly as daily-sync originally saved them. recordDecision
+              // above already moved it out of the active pending queue and
+              // into decisions, which is enough to stop daily-sync from
+              // re-flagging it on a future run.
+              console.log('Marked suspicious — keeping artifacts, not publishing');
             }
           } catch (err) {
             console.error('Process decision failed:', err.message);
@@ -145,6 +155,8 @@ jobs:
           else
             if [ "$ACTION" = "approve" ]; then
               git commit -m "review: approve flight $FLIGHT_ID as violation [skip netlify]"
+            elif [ "$ACTION" = "suspicious" ]; then
+              git commit -m "review: flag flight $FLIGHT_ID as suspicious (possible transponder off) [skip netlify]"
             else
               git commit -m "review: reject flight $FLIGHT_ID — not a violation [skip netlify]"
             fi
