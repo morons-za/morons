@@ -20,25 +20,6 @@
       "reject_expires": "2026-03-12T10:44:06.189Z"
     },
     {
-      "flight_id": "3ea5935c",
-      "filename": "2026-03-08-ZS-RTG-3ea5935c.kml",
-      "registration": "ZS-RTG",
-      "date": "2026-03-08",
-      "time": "07:10",
-      "incursions": 1,
-      "classification": "gap_only",
-      "maxGapKm": 10.05,
-      "avgSegmentKm": 0.14,
-      "totalSegments": 772,
-      "gapCount": 2,
-      "reason": "gap_only_violation",
-      "detected_at": "2026-03-08T10:29:05.459Z",
-      "approve_token": "1527c5e4d51ad0678ab30aa31568355225a8ac84a237c0464fb9426030fe0ec2",
-      "approve_expires": "2026-03-15T10:29:05.458Z",
-      "reject_token": "0569b46cf2e110850d68f90c8c3788ef79c25fb3ba1d9b492a509cceb2c79ff5",
-      "reject_expires": "2026-03-15T10:29:05.459Z"
-    },
-    {
       "flight_id": "3efecbf0",
       "filename": "2026-03-31-ZS-RTG-3efecbf0.kml",
       "registration": "ZS-RTG",
@@ -1163,6 +1144,27 @@
       "reject_expires": "2026-03-12T10:44:00.656Z",
       "action": "reject",
       "decided_at": "2026-08-27T14:53:15.575Z"
+    },
+    {
+      "flight_id": "3ea5935c",
+      "filename": "2026-03-08-ZS-RTG-3ea5935c.kml",
+      "registration": "ZS-RTG",
+      "date": "2026-03-08",
+      "time": "07:10",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 10.05,
+      "avgSegmentKm": 0.14,
+      "totalSegments": 772,
+      "gapCount": 2,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-03-08T10:29:05.459Z",
+      "approve_token": "1527c5e4d51ad0678ab30aa31568355225a8ac84a237c0464fb9426030fe0ec2",
+      "approve_expires": "2026-03-15T10:29:05.458Z",
+      "reject_token": "0569b46cf2e110850d68f90c8c3788ef79c25fb3ba1d9b492a509cceb2c79ff5",
+      "reject_expires": "2026-03-15T10:29:05.459Z",
+      "action": "reject",
+      "decided_at": "2026-08-27T16:44:22.299Z"
     }
   ]
 }
