@@ -952,6 +952,9 @@ function adminDashboardPage(email) {
     // deliberately switched off their transponder rather than an ordinary
     // false-positive gap — it's set aside (kept out of the active queue,
     // KML/PNG retained) without being published or dismissed either way.
+    let activeDecideFlightId = null;
+    function sleepMs(ms) { return new Promise((r) => setTimeout(r, ms)); }
+
     async function decide(flightId, action) {
       const approve = document.getElementById('mApprove');
       const reject = document.getElementById('mReject');
@@ -959,11 +962,15 @@ function adminDashboardPage(email) {
       const status = document.getElementById('mStatus');
       const buttons = [approve, reject, suspicious];
       buttons.forEach((b) => { if (b) b.disabled = true; });
-      if (status) {
+      activeDecideFlightId = flightId;
+      const setStatus = (color, text) => {
+        if (activeDecideFlightId !== flightId || !status) return;
         status.style.display = 'block';
-        status.style.color = '#1a1a1a';
-        status.textContent = 'Submitting ' + action + '...';
-      }
+        status.style.color = color;
+        status.textContent = text;
+      };
+
+      setStatus('#1a1a1a', 'Submitting ' + action + '...');
       try {
         const resp = await fetch('/admin/api/decide', {
           method: 'POST',
@@ -973,21 +980,40 @@ function adminDashboardPage(email) {
         });
         const data = await resp.json();
         if (!resp.ok || !data.ok) throw new Error(data.error || ('HTTP ' + resp.status));
-        if (status) {
-          status.style.color = '#166534';
-          status.textContent = 'Recorded as ' + action + '. Refreshing...';
-        }
-        setTimeout(() => {
-          closePendingModal();
-          load();
-        }, 800);
       } catch (e) {
         buttons.forEach((b) => { if (b) b.disabled = false; });
-        if (status) {
-          status.style.color = '#991b1b';
-          status.textContent = 'Failed: ' + e.message;
+        setStatus('#991b1b', 'Failed: ' + e.message);
+        return;
+      }
+
+      // The request above only queues a GitHub Actions run (checkout, run
+      // the decision script, commit, push) — the actual pending-review.json
+      // update typically takes 1-3 minutes, not the moment this call
+      // returns. Poll until the flight actually drops out of the pending
+      // list instead of refreshing immediately and showing stale data.
+      const maxAttempts = 18; // ~3 minutes at 10s apart
+      for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        setStatus('#1a1a1a', 'Submitted. Processing via GitHub Actions (' + (attempt - 1) * 10 + 's so far, usually takes 1-2 min)...');
+        await sleepMs(10000);
+        if (activeDecideFlightId !== flightId) return;
+        try {
+          const resp = await fetch('/admin/api/summary', { credentials: 'same-origin' });
+          const data = await resp.json();
+          if (resp.ok && data.ok) {
+            render(data);
+            const stillPending = (data.falsePositives.pending || []).some((p) => p.flight_id === flightId);
+            if (!stillPending) {
+              setStatus('#166534', 'Done — ' + action + ' recorded.');
+              setTimeout(() => { if (activeDecideFlightId === flightId) closePendingModal(); }, 1200);
+              return;
+            }
+          }
+        } catch (e) {
+          // transient fetch failure while polling — just retry next attempt
         }
       }
+      setStatus('#92400e', 'Still processing after 3 minutes — check the Audit log or GitHub Actions runs, then refresh.');
+      buttons.forEach((b) => { if (b) b.disabled = false; });
     }
 
     function closePendingModal() {
