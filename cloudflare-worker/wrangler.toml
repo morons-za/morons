@@ -11,6 +11,8 @@ routes = [
 [vars]
 GITHUB_REPO = "morons-za/morons"
 GITHUB_WORKFLOW_FILE = "process-decisions.yml"
+ADMIN_ALLOWED_EMAIL = "admin@morons.org.za"
+ADMIN_FROM_EMAIL = "admin@morons.org.za"
 
 [[kv_namespaces]]
 binding = "ADMIN_RATE_KV"
@@ -25,3 +27,6 @@ preview_id = "f9f7a408bb534e6fa7c7ccc2a15924ac"
 # Secrets (set via `wrangler secret put`):
 #   HMAC_SECRET       - shared with API/review-config.json
 #   GITHUB_TOKEN      - GitHub PAT with repo + actions:write scope
+#   ADMIN_USERNAME    - login username (kept as a secret, not a var, so it
+#                       never sits in git and can't be wiped by a plain
+#                       `wrangler deploy` the way vars/routes/KV bindings are)
