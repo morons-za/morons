@@ -1,0 +1,112 @@
+{
+  "41600442": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415bf5f3": {
+    "violation": true,
+    "incursions": 7,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415bacb5": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415bc2b4": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415bcfcd": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415c0913": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415c46cd": {
+    "violation": true,
+    "incursions": 1,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415cdb7c": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415d34ac": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "41605b7d": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "41608fb5": {
+    "violation": true,
+    "incursions": 5,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "4160cd8b": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "4160f8eb": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "416127a2": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "41616b3f": {
+    "violation": true,
+    "incursions": 1,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415bb3fb": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415cd9d2": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "416022a5": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "4161103a": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "415c10e5": {
+    "violation": true,
+    "incursions": 7,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "4160416f": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "41605a36": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-08-27T17:42:11.570Z"
+  }
+}

@@ -1,8 +1,44 @@
 {
-  "generated": "2026-08-26T16:52:26.671Z",
-  "totalFiles": 1721,
-  "validFlights": 1721,
+  "generated": "2026-08-27T17:43:05.218Z",
+  "totalFiles": 1725,
+  "validFlights": 1725,
   "flights": [
+    {
+      "filename": "2026-08-27-ZS-HIM-41616b3f.kml",
+      "registration": "ZS-HIM",
+      "date": "2026-08-27",
+      "time": "15:01",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-08-27-ZS-HIM-41608fb5.kml",
+      "registration": "ZS-HIM",
+      "date": "2026-08-27",
+      "time": "11:18",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-08-27-ZT-HOT-4160416f.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-08-27",
+      "time": "09:28",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 0.04
+    },
+    {
+      "filename": "2026-08-27-ZS-RTG-416022a5.kml",
+      "registration": "ZS-RTG",
+      "date": "2026-08-27",
+      "time": "08:39",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 0.05
+    },
     {
       "filename": "2026-08-26-ZS-HIM-415c46cd.kml",
       "registration": "ZS-HIM",
