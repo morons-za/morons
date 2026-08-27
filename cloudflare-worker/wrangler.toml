@@ -3,12 +3,24 @@ main = "src/worker.js"
 compatibility_date = "2024-12-01"
 
 routes = [
-  { pattern = "morons.org.za/review*", zone_name = "morons.org.za" }
+  { pattern = "morons.org.za/review*", zone_name = "morons.org.za" },
+  { pattern = "morons.org.za/admin*", zone_name = "morons.org.za" },
+  { pattern = "morons.org.za/health", zone_name = "morons.org.za" }
 ]
 
 [vars]
 GITHUB_REPO = "morons-za/morons"
 GITHUB_WORKFLOW_FILE = "process-decisions.yml"
+
+[[kv_namespaces]]
+binding = "ADMIN_RATE_KV"
+id = "fda14491db154576a3448ec6bfaff629"
+preview_id = "da14ab879e1b40d58ff39a1c44c21966"
+
+[[kv_namespaces]]
+binding = "ADMIN_AUDIT_KV"
+id = "a2627f58a4634a4d96a06b55fe6f046b"
+preview_id = "f9f7a408bb534e6fa7c7ccc2a15924ac"
 
 # Secrets (set via `wrangler secret put`):
 #   HMAC_SECRET       - shared with API/review-config.json
