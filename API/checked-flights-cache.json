@@ -4,6 +4,16 @@
     "incursions": 0,
     "checkedAt": "2026-08-27T17:42:11.570Z"
   },
+  "41644851": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-28T18:32:04.255Z"
+  },
+  "41647938": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-28T18:32:04.255Z"
+  },
   "415bf5f3": {
     "violation": true,
     "incursions": 7,
@@ -108,5 +118,25 @@
     "violation": true,
     "incursions": 4,
     "checkedAt": "2026-08-27T17:42:11.570Z"
+  },
+  "41643b56": {
+    "violation": true,
+    "incursions": 5,
+    "checkedAt": "2026-08-28T18:32:04.255Z"
+  },
+  "41641fcc": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-28T18:32:04.255Z"
+  },
+  "41643d31": {
+    "violation": true,
+    "incursions": 10,
+    "checkedAt": "2026-08-28T18:32:04.255Z"
+  },
+  "41643b76": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-08-28T18:32:04.255Z"
   }
 }
