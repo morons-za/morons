@@ -1,25 +1,6 @@
 {
   "pending": [
     {
-      "flight_id": "3e9ac601",
-      "filename": "2026-03-05-ZT-RNW-3e9ac601.kml",
-      "registration": "ZT-RNW",
-      "date": "2026-03-05",
-      "time": "06:52",
-      "incursions": 1,
-      "classification": "gap_only",
-      "maxGapKm": 14.13,
-      "avgSegmentKm": 0.24,
-      "totalSegments": 112,
-      "gapCount": 1,
-      "reason": "gap_only_violation",
-      "detected_at": "2026-03-05T10:44:06.189Z",
-      "approve_token": "994159b59fc135c0a8ec62b70a8b1f9fc1bfc991900d68043340393e19e56e29",
-      "approve_expires": "2026-03-12T10:44:06.188Z",
-      "reject_token": "1d0f87b81ba204504fbf15d8ab9a7dc1ffafa7e3765994f7e5649628965c9ff1",
-      "reject_expires": "2026-03-12T10:44:06.189Z"
-    },
-    {
       "flight_id": "3efecbf0",
       "filename": "2026-03-31-ZS-RTG-3efecbf0.kml",
       "registration": "ZS-RTG",
@@ -1184,6 +1165,27 @@
       "reject_expires": "2026-03-15T10:29:05.459Z",
       "action": "reject",
       "decided_at": "2026-08-27T16:44:22.299Z"
+    },
+    {
+      "flight_id": "3e9ac601",
+      "filename": "2026-03-05-ZT-RNW-3e9ac601.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-03-05",
+      "time": "06:52",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 14.13,
+      "avgSegmentKm": 0.24,
+      "totalSegments": 112,
+      "gapCount": 1,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-03-05T10:44:06.189Z",
+      "approve_token": "994159b59fc135c0a8ec62b70a8b1f9fc1bfc991900d68043340393e19e56e29",
+      "approve_expires": "2026-03-12T10:44:06.188Z",
+      "reject_token": "1d0f87b81ba204504fbf15d8ab9a7dc1ffafa7e3765994f7e5649628965c9ff1",
+      "reject_expires": "2026-03-12T10:44:06.189Z",
+      "action": "suspicious",
+      "decided_at": "2026-08-31T23:50:53.565Z"
     }
   ]
 }
