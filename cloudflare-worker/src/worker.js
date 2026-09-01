@@ -1023,6 +1023,7 @@ function adminDashboardPage(email) {
         suspicious.onclick = () => decide(p.flight_id, 'suspicious');
       }
 
+      currentModalFlightId = p.flight_id;
       const modal = document.getElementById('pendingModal');
       if (modal) modal.style.display = 'flex';
     }
@@ -1049,6 +1050,7 @@ function adminDashboardPage(email) {
         decidedNote.textContent = 'Flagged suspicious at ' + (d.decided_at || 'unknown time') + '.';
       }
 
+      currentModalFlightId = null; // read-only view, no decision in flight for it
       const modal = document.getElementById('pendingModal');
       if (modal) modal.style.display = 'flex';
     }
@@ -1059,7 +1061,19 @@ function adminDashboardPage(email) {
     // deliberately switched off their transponder rather than an ordinary
     // false-positive gap — it's set aside (kept out of the active queue,
     // KML/PNG retained) without being published or dismissed either way.
-    let activeDecideFlightId = null;
+    //
+    // currentModalFlightId tracks which flight the modal is *currently
+    // displaying* — used only to decide whether a given poll tick should
+    // touch the modal's status text / auto-close it. It must NOT gate
+    // whether polling itself continues: an earlier bug used one shared
+    // flag for both, so starting a second decision (or just closing the
+    // modal) silently killed the first flight's poll entirely, before it
+    // ever got a chance to refresh the Pending false positives table —
+    // reported as "no state change" after deciding two flights in a row.
+    // Each call to decide() now runs its own independent poll to
+    // completion regardless of what the modal is doing, since its real
+    // job is keeping the underlying table correct, not just this modal.
+    let currentModalFlightId = null;
     function sleepMs(ms) { return new Promise((r) => setTimeout(r, ms)); }
 
     async function decide(flightId, action) {
@@ -1069,9 +1083,8 @@ function adminDashboardPage(email) {
       const status = document.getElementById('mStatus');
       const buttons = [approve, reject, suspicious];
       buttons.forEach((b) => { if (b) b.disabled = true; });
-      activeDecideFlightId = flightId;
       const setStatus = (color, text) => {
-        if (activeDecideFlightId !== flightId || !status) return;
+        if (currentModalFlightId !== flightId || !status) return;
         status.style.display = 'block';
         status.style.color = color;
         status.textContent = text;
@@ -1088,7 +1101,7 @@ function adminDashboardPage(email) {
         const data = await resp.json();
         if (!resp.ok || !data.ok) throw new Error(data.error || ('HTTP ' + resp.status));
       } catch (e) {
-        buttons.forEach((b) => { if (b) b.disabled = false; });
+        if (currentModalFlightId === flightId) buttons.forEach((b) => { if (b) b.disabled = false; });
         setStatus('#991b1b', 'Failed: ' + e.message);
         return;
       }
@@ -1098,11 +1111,12 @@ function adminDashboardPage(email) {
       // update typically takes 1-3 minutes, not the moment this call
       // returns. Poll until the flight actually drops out of the pending
       // list instead of refreshing immediately and showing stale data.
+      // Runs to completion even if the modal is closed or moves on to a
+      // different flight in the meantime.
       const maxAttempts = 18; // ~3 minutes at 10s apart
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
         setStatus('#1a1a1a', 'Submitted. Processing via GitHub Actions (' + (attempt - 1) * 10 + 's so far, usually takes 1-2 min)...');
         await sleepMs(10000);
-        if (activeDecideFlightId !== flightId) return;
         try {
           const resp = await fetch('/admin/api/summary', { credentials: 'same-origin' });
           const data = await resp.json();
@@ -1111,7 +1125,9 @@ function adminDashboardPage(email) {
             const stillPending = (data.falsePositives.pending || []).some((p) => p.flight_id === flightId);
             if (!stillPending) {
               setStatus('#166534', 'Done — ' + action + ' recorded.');
-              setTimeout(() => { if (activeDecideFlightId === flightId) closePendingModal(); }, 1200);
+              if (currentModalFlightId === flightId) {
+                setTimeout(() => { if (currentModalFlightId === flightId) closePendingModal(); }, 1200);
+              }
               return;
             }
           }
@@ -1120,10 +1136,11 @@ function adminDashboardPage(email) {
         }
       }
       setStatus('#92400e', 'Still processing after 3 minutes — check the Audit log or GitHub Actions runs, then refresh.');
-      buttons.forEach((b) => { if (b) b.disabled = false; });
+      if (currentModalFlightId === flightId) buttons.forEach((b) => { if (b) b.disabled = false; });
     }
 
     function closePendingModal() {
+      currentModalFlightId = null;
       const modal = document.getElementById('pendingModal');
       if (modal) modal.style.display = 'none';
     }
@@ -1139,6 +1156,11 @@ function adminDashboardPage(email) {
     }
 
     load();
+    // Background safety net, independent of the per-decision polling in
+    // decide(): keeps the tables honest even if something else changes
+    // pending-review.json (another admin session, a fresh daily-sync run)
+    // without requiring a manual reload.
+    setInterval(load, 30000);
   </script>
 </body>
 </html>`;
