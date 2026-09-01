@@ -1,25 +1,6 @@
 {
   "pending": [
     {
-      "flight_id": "3f6b2789",
-      "filename": "2026-04-27-ZT-HOT-3f6b2789.kml",
-      "registration": "ZT-HOT",
-      "date": "2026-04-27",
-      "time": "07:27",
-      "incursions": 2,
-      "classification": "gap_only",
-      "maxGapKm": 12.65,
-      "avgSegmentKm": 0.16,
-      "totalSegments": 551,
-      "gapCount": 2,
-      "reason": "gap_only_violation",
-      "detected_at": "2026-04-27T08:30:46.855Z",
-      "approve_token": "7fc4d1412e6f8128f89a28ca78913dd0cf25f51c3b7cbea20209e365c436a90f",
-      "approve_expires": "2026-05-04T08:30:46.854Z",
-      "reject_token": "44ae97ce0ef86b840edcbb99e4f5b153e90fd6e15af9d22a1a9b13d53013ee12",
-      "reject_expires": "2026-05-04T08:30:46.855Z"
-    },
-    {
       "flight_id": "3f73c6a8",
       "filename": "2026-04-29-ZS-HIE-3f73c6a8.kml",
       "registration": "ZS-HIE",
@@ -1204,6 +1185,27 @@
       "reject_expires": "2026-04-09T17:00:09.116Z",
       "action": "reject",
       "decided_at": "2026-09-01T14:30:57.326Z"
+    },
+    {
+      "flight_id": "3f6b2789",
+      "filename": "2026-04-27-ZT-HOT-3f6b2789.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-04-27",
+      "time": "07:27",
+      "incursions": 2,
+      "classification": "gap_only",
+      "maxGapKm": 12.65,
+      "avgSegmentKm": 0.16,
+      "totalSegments": 551,
+      "gapCount": 2,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-04-27T08:30:46.855Z",
+      "approve_token": "7fc4d1412e6f8128f89a28ca78913dd0cf25f51c3b7cbea20209e365c436a90f",
+      "approve_expires": "2026-05-04T08:30:46.854Z",
+      "reject_token": "44ae97ce0ef86b840edcbb99e4f5b153e90fd6e15af9d22a1a9b13d53013ee12",
+      "reject_expires": "2026-05-04T08:30:46.855Z",
+      "action": "suspicious",
+      "decided_at": "2026-09-01T19:48:04.533Z"
     }
   ]
 }
