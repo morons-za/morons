@@ -741,6 +741,7 @@ function adminDashboardPage(email) {
     <div id="runs" class="row"></div>
     <div id="emails" class="row"></div>
     <div id="review" class="row"></div>
+    <div id="suspicious" class="row"></div>
     <div id="integrity" class="row"></div>
     <div id="audit" class="row"></div>
   </div>
@@ -749,8 +750,8 @@ function adminDashboardPage(email) {
     <div class="modal-card">
       <div class="top">
         <div>
-          <h2 class="modal-title">Pending review</h2>
-          <p class="modal-subtitle">Mirror of email review card with action links.</p>
+          <h2 class="modal-title" id="modalTitle">Pending review</h2>
+          <p class="modal-subtitle" id="modalSubtitle">Mirror of email review card with action links.</p>
         </div>
         <button class="btn" onclick="closePendingModal()">Close</button>
       </div>
@@ -768,9 +769,12 @@ function adminDashboardPage(email) {
       </div>
       <div class="modal-actions">
         <a id="mFr24" class="btn btn-sm" target="_blank" rel="noreferrer">View on FlightRadar24</a>
-        <button id="mApprove" class="btn btn-sm btn-approve" type="button">Approve — Violating Flight</button>
-        <button id="mReject" class="btn btn-sm btn-reject" type="button">Reject — Not a Violation</button>
-        <button id="mSuspicious" class="btn btn-sm btn-suspicious" type="button">Suspicious — Possible Transponder Off</button>
+        <div id="mDecisionButtons" style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="mApprove" class="btn btn-sm btn-approve" type="button">Approve — Violating Flight</button>
+          <button id="mReject" class="btn btn-sm btn-reject" type="button">Reject — Not a Violation</button>
+          <button id="mSuspicious" class="btn btn-sm btn-suspicious" type="button">Suspicious — Possible Transponder Off</button>
+        </div>
+        <span id="mDecidedNote" class="small" style="display:none;"></span>
       </div>
       <div id="mStatus" class="small" style="margin-top:8px; display:none;"></div>
     </div>
@@ -778,6 +782,7 @@ function adminDashboardPage(email) {
 
   <script>
     let pendingCache = [];
+    let suspiciousCache = [];
 
     async function load() {
       const statusEl = document.getElementById('status');
@@ -837,6 +842,10 @@ function adminDashboardPage(email) {
       pendingCache = Array.isArray(data.falsePositives.pending) ? data.falsePositives.pending : [];
       document.getElementById('review').innerHTML = renderPendingReview(pendingCache);
 
+      const allDecisions = Array.isArray(data.falsePositives.decisions) ? data.falsePositives.decisions : [];
+      suspiciousCache = allDecisions.filter((d) => d.action === 'suspicious');
+      document.getElementById('suspicious').innerHTML = renderSuspiciousList(suspiciousCache);
+
       document.getElementById('integrity').innerHTML = panel('Data integrity', table(
         ['Metric', 'Value'],
         [
@@ -885,6 +894,26 @@ function adminDashboardPage(email) {
       ));
     }
 
+    // Flights flagged "Suspicious — Possible Transponder Off" instead of
+    // approved/rejected. Unlike approve (ends up on the public site) or
+    // reject (simply excluded), "suspicious" has no other visible trace
+    // once it leaves the pending queue — this is the only place to find
+    // them again for further investigation.
+    function renderSuspiciousList(items) {
+      const rows = items.map((d, idx) => [
+        '<code>' + esc(d.flight_id || '') + '</code>',
+        esc(d.registration || ''),
+        esc(d.date || ''),
+        esc(d.reason || ''),
+        esc(d.decided_at || ''),
+        '<button class="btn btn-sm" onclick="openSuspiciousModal(' + idx + ')">View</button>'
+      ]);
+      return panel('Suspicious flights (possible transponder off)', table(
+        ['Flight', 'Registration', 'Date', 'Reason', 'Flagged', 'Action'],
+        rows
+      ));
+    }
+
     function buildFr24Url(registration, flightId) {
       const reg = String(registration || '').trim().toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const fid = String(flightId || '').trim().toLowerCase();
@@ -892,9 +921,10 @@ function adminDashboardPage(email) {
       return 'https://www.flightradar24.com/data/aircraft/' + reg + '#' + fid;
     }
 
-    function openPendingModal(index) {
-      const p = pendingCache[index];
-      if (!p) return;
+    // Shared by both the actionable "pending" modal and the read-only
+    // "suspicious" one below — same detail fields either way, only the
+    // header text and whether the decision buttons appear differ.
+    function populateModalFields(p) {
       const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '-'; };
       set('mFlightId', String(p.flight_id || '-'));
       set('mRegistration', String(p.registration || '-'));
@@ -929,12 +959,26 @@ function adminDashboardPage(email) {
           noImg.style.display = 'block';
         }
       }
+    }
+
+    function openPendingModal(index) {
+      const p = pendingCache[index];
+      if (!p) return;
+      populateModalFields(p);
+
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('modalTitle', 'Pending review');
+      set('modalSubtitle', 'Mirror of email review card with action links.');
 
       const approve = document.getElementById('mApprove');
       const reject = document.getElementById('mReject');
       const suspicious = document.getElementById('mSuspicious');
       const status = document.getElementById('mStatus');
+      const decisionButtons = document.getElementById('mDecisionButtons');
+      const decidedNote = document.getElementById('mDecidedNote');
       if (status) status.style.display = 'none';
+      if (decisionButtons) decisionButtons.style.display = 'flex';
+      if (decidedNote) decidedNote.style.display = 'none';
       if (approve) {
         approve.disabled = false;
         approve.onclick = () => decide(p.flight_id, 'approve');
@@ -946,6 +990,32 @@ function adminDashboardPage(email) {
       if (suspicious) {
         suspicious.disabled = false;
         suspicious.onclick = () => decide(p.flight_id, 'suspicious');
+      }
+
+      const modal = document.getElementById('pendingModal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    // Read-only: a suspicious-flagged flight has already left the pending
+    // queue, so there's nothing left to decide here — just the same detail
+    // view without the action buttons, plus a note on when/why it was flagged.
+    function openSuspiciousModal(index) {
+      const d = suspiciousCache[index];
+      if (!d) return;
+      populateModalFields(d);
+
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('modalTitle', 'Suspicious flight (read-only)');
+      set('modalSubtitle', 'Flagged as a likely deliberate transponder-off, not an ordinary false-positive gap.');
+
+      const status = document.getElementById('mStatus');
+      const decisionButtons = document.getElementById('mDecisionButtons');
+      const decidedNote = document.getElementById('mDecidedNote');
+      if (status) status.style.display = 'none';
+      if (decisionButtons) decisionButtons.style.display = 'none';
+      if (decidedNote) {
+        decidedNote.style.display = 'inline';
+        decidedNote.textContent = 'Flagged suspicious at ' + (d.decided_at || 'unknown time') + '.';
       }
 
       const modal = document.getElementById('pendingModal');
