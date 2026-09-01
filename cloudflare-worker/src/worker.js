@@ -295,15 +295,22 @@ async function buildAdminSummary(env) {
   const workflowFile = 'daily-sync.yml';
   const processWorkflow = 'process-decisions.yml';
 
+  // Resolved once and reused for every file read below, so they're all
+  // pinned to the same exact commit rather than each independently asking
+  // for "whatever main currently is" — see resolveMainSha for why this
+  // matters. A null ref (resolution itself failed) just falls back to the
+  // previous behavior for that call.
+  const mainSha = await resolveMainSha(repo, env);
+
   const [defaultLookback, dailyRuns, processRuns, pendingReview, digestState, staticMeta, backendMeta, auditLog] =
     await Promise.all([
       fetchDailyDefaultLookback(repo, env),
       fetchWorkflowRuns(repo, workflowFile, env, 8),
       fetchWorkflowRuns(repo, processWorkflow, env, 8).catch(() => []),
-      fetchRepoJson(repo, 'static-site/pending-review.json', env, { pending: [], decisions: [] }),
-      fetchRepoJson(repo, 'API/cache/digest-state.json', env, null),
-      fetchRepoJson(repo, 'static-site/master-metadata.json', env, { flights: [] }),
-      fetchRepoJson(repo, 'backend/scripts/master-metadata.json', env, { flights: [] }),
+      fetchRepoJson(repo, 'static-site/pending-review.json', env, { pending: [], decisions: [] }, mainSha),
+      fetchRepoJson(repo, 'API/cache/digest-state.json', env, null, mainSha),
+      fetchRepoJson(repo, 'static-site/master-metadata.json', env, { flights: [] }, mainSha),
+      fetchRepoJson(repo, 'backend/scripts/master-metadata.json', env, { flights: [] }, mainSha),
       readAuditLog(env)
     ]);
 
@@ -578,9 +585,25 @@ async function fetchDailyDefaultLookback(repo, env) {
   return m ? Number(m[1]) : 48;
 }
 
-async function fetchRepoJson(repo, filePath, env, fallbackValue) {
+// Resolves the current commit SHA for main. Pinning file reads to this
+// exact SHA (rather than asking for "contents on main") is a stronger
+// cache-defeater than any header: a given SHA's content is immutable, so
+// its contents URL is one a cache has never seen before right after a new
+// commit — a guaranteed miss, regardless of whether any intermediate cache
+// honors Cache-Control correctly. If this itself returns a stale SHA the
+// read is still self-consistent, just briefly behind — never silently
+// wrong the way the header-only approach could be.
+async function resolveMainSha(repo, env) {
+  const url = `https://api.github.com/repos/${repo}/git/refs/heads/main`;
+  const resp = await fetch(url, { headers: githubHeaders(env), cache: 'no-store' });
+  if (!resp.ok) return null;
+  const json = await resp.json();
+  return json?.object?.sha || null;
+}
+
+async function fetchRepoJson(repo, filePath, env, fallbackValue, ref) {
   try {
-    const text = await fetchRepoText(repo, filePath, env, null);
+    const text = await fetchRepoText(repo, filePath, env, null, ref);
     if (text == null) return fallbackValue;
     return JSON.parse(text);
   } catch {
@@ -588,8 +611,8 @@ async function fetchRepoJson(repo, filePath, env, fallbackValue) {
   }
 }
 
-async function fetchRepoText(repo, filePath, env, fallbackValue) {
-  const url = `https://api.github.com/repos/${repo}/contents/${filePath}`;
+async function fetchRepoText(repo, filePath, env, fallbackValue, ref) {
+  const url = `https://api.github.com/repos/${repo}/contents/${filePath}${ref ? `?ref=${encodeURIComponent(ref)}` : ''}`;
   // no-store: see comment in fetchWorkflowRuns above — this is what was
   // making the dashboard show a flight as still pending after it had
   // already been correctly moved to `decisions` on GitHub.
@@ -605,7 +628,15 @@ function githubHeaders(env) {
   return {
     Authorization: `Bearer ${env.GITHUB_TOKEN}`,
     Accept: 'application/vnd.github+json',
-    'User-Agent': 'heli-review-worker'
+    'User-Agent': 'heli-review-worker',
+    // Real HTTP header, distinct from the `cache: 'no-store'` fetch option
+    // used elsewhere — that only controls Cloudflare's own edge cache of
+    // the subrequest, it adds nothing to the actual request GitHub sees.
+    // GitHub's API sits behind its own CDN, which can cache a GET response
+    // for a hot, repeatedly-requested URL like this regardless of what
+    // Cloudflare does on its end. This tells GitHub's side not to serve a
+    // cached copy either.
+    'Cache-Control': 'no-cache'
   };
 }
 
