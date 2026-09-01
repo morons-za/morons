@@ -48,120 +48,134 @@ jobs:
         working-directory: backend
         run: npm ci
 
-      - name: Capture pre-decision flight count
-        run: |
-          if [ -f static-site/master-metadata.json ]; then
-            BEFORE_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
-          else
-            BEFORE_FLIGHT_COUNT=0
-          fi
-          echo "BEFORE_FLIGHT_COUNT=$BEFORE_FLIGHT_COUNT" >> "$GITHUB_ENV"
-          echo "Pre-decision flights: $BEFORE_FLIGHT_COUNT"
-
-      - name: Process decision
-        run: |
-          node -e "
-          const { recordDecision, clearProcessedDecisions } = require('./API/pending-review.cjs');
-          const { execSync } = require('child_process');
-          const fs = require('fs');
-          const path = require('path');
-
-          const flightId = '${{ github.event.client_payload.flight_id }}';
-          const action = '${{ github.event.client_payload.action }}';
-
-          try {
-            console.log('Processing decision:', { flightId, action });
-
-            const flight = recordDecision(flightId, action);
-            if (!flight) {
-              console.log('Flight not found in pending review, may already be processed');
-              process.exit(0);
-            }
-
-            console.log('Recorded decision for flight:', flight.flight_id, '->', action);
-
-            if (action === 'approve') {
-              console.log('Approved — adding to static site...');
-              try {
-                execSync('python3 backend/scripts/optimise_kml.py', { cwd: process.cwd(), stdio: 'inherit', timeout: 120000 });
-              } catch (e) { console.warn('Optimiser warning:', e.message); }
-              try {
-                execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
-              } catch (e) { console.warn('Metadata warning:', e.message); }
-              clearProcessedDecisions([flightId]);
-            } else if (action === 'reject') {
-              console.log('Rejected — removing artifacts...');
-              const uploadsDir = path.join(process.cwd(), 'backend', 'uploads');
-              const optimisedDir = path.join(process.cwd(), 'static-site', 'kml-optimised');
-              const mapsDir = path.join(process.cwd(), 'backend', 'flight-maps');
-
-              let kmlFiles = [];
-              if (fs.existsSync(uploadsDir)) {
-                kmlFiles = fs.readdirSync(uploadsDir).filter(f => f.includes(flightId) && f.endsWith('.kml'));
-              }
-              for (const f of kmlFiles) {
-                const kmlPath = path.join(uploadsDir, f);
-                const optPath = path.join(optimisedDir, f.replace('.kml', '-opt.kml'));
-                const pngPath = path.join(mapsDir, f.replace('.kml', '.png'));
-                [kmlPath, optPath, pngPath].forEach(p => {
-                  if (fs.existsSync(p)) { fs.unlinkSync(p); console.log('Deleted:', p); }
-                });
-              }
-
-              try {
-                execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
-              } catch (e) { console.warn('Metadata warning:', e.message); }
-              // Keep rejected decisions as a durable "do-not-requeue" list.
-              // daily-sync checks pending.decisions and will skip these flight IDs.
-              console.log('Retaining rejected decision to prevent future re-queueing');
-            } else if (action === 'suspicious') {
-              // Flagged as a likely deliberate transponder-off, not an
-              // ordinary false-positive gap. Not published (not confirmed
-              // as a violation) and not deleted (kept for further review) —
-              // KML/PNG stay in backend/uploads and backend/flight-maps
-              // exactly as daily-sync originally saved them. recordDecision
-              // above already moved it out of the active pending queue and
-              // into decisions, which is enough to stop daily-sync from
-              // re-flagging it on a future run.
-              console.log('Marked suspicious — keeping artifacts, not publishing');
-            }
-          } catch (err) {
-            console.error('Process decision failed:', err.message);
-            console.error(err.stack);
-            process.exit(1);
-          }
-          "
-
-      - name: Rebuild static site if new flight approved
-        if: ${{ github.event.client_payload.action == 'approve' }}
-        run: |
-          if [ -f static-site/master-metadata.json ]; then
-            AFTER_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
-          else
-            AFTER_FLIGHT_COUNT=0
-          fi
-          BEFORE="${BEFORE_FLIGHT_COUNT:-0}"
-          echo "Post-decision flights: $AFTER_FLIGHT_COUNT"
-          if [ "$AFTER_FLIGHT_COUNT" -gt "$BEFORE" ]; then
-            echo "New approved flight detected ($BEFORE -> $AFTER_FLIGHT_COUNT). Rebuilding static site..."
-            node backend/scripts/build-static-site.cjs
-          else
-            echo "No new flight added ($BEFORE -> $AFTER_FLIGHT_COUNT). Skipping static site rebuild."
-          fi
-
-      - name: Commit and push
+      - name: Process decision and push (retried against fresh main on conflict)
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-          git add -A backend/uploads/ static-site/kml-optimised/ backend/flight-maps/ static-site/pending-review.json static-site/master-metadata.json static-site/index.html
-
           FLIGHT_ID="${{ github.event.client_payload.flight_id }}"
           ACTION="${{ github.event.client_payload.action }}"
 
-          if git diff --cached --quiet; then
-            echo "No changes to commit"
-          else
+          # Different flight_ids can run this workflow genuinely in parallel
+          # (see concurrency comment above). A plain `git rebase` retry on a
+          # push conflict isn't reliable here: two runs deleting different,
+          # possibly-adjacent entries from the same pending-review.json array
+          # is exactly the kind of change a line-based text merge can't
+          # always reconcile, and a failed rebase leaves the workspace in a
+          # broken, unresolved-conflict state that just fails again identically
+          # on the next retry. So instead of merging a stale diff, every
+          # attempt starts over from a clean, fresh checkout of the current
+          # origin/main and re-derives the same change against it —
+          # recordDecision() is idempotent (no-ops if the flight is already
+          # processed), so redoing the full computation each time is safe.
+          attempt=1
+          max_attempts=5
+          while true; do
+            echo "=== Attempt $attempt/$max_attempts: $ACTION for $FLIGHT_ID ==="
+            git fetch origin main
+            git reset --hard origin/main
+
+            if [ -f static-site/master-metadata.json ]; then
+              BEFORE_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
+            else
+              BEFORE_FLIGHT_COUNT=0
+            fi
+            echo "Pre-decision flights: $BEFORE_FLIGHT_COUNT"
+
+            node -e "
+            const { recordDecision, clearProcessedDecisions } = require('./API/pending-review.cjs');
+            const { execSync } = require('child_process');
+            const fs = require('fs');
+            const path = require('path');
+
+            const flightId = '${{ github.event.client_payload.flight_id }}';
+            const action = '${{ github.event.client_payload.action }}';
+
+            try {
+              console.log('Processing decision:', { flightId, action });
+
+              const flight = recordDecision(flightId, action);
+              if (!flight) {
+                console.log('Flight not found in pending review, may already be processed');
+                process.exit(0);
+              }
+
+              console.log('Recorded decision for flight:', flight.flight_id, '->', action);
+
+              if (action === 'approve') {
+                console.log('Approved — adding to static site...');
+                try {
+                  execSync('python3 backend/scripts/optimise_kml.py', { cwd: process.cwd(), stdio: 'inherit', timeout: 120000 });
+                } catch (e) { console.warn('Optimiser warning:', e.message); }
+                try {
+                  execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
+                } catch (e) { console.warn('Metadata warning:', e.message); }
+                clearProcessedDecisions([flightId]);
+              } else if (action === 'reject') {
+                console.log('Rejected — removing artifacts...');
+                const uploadsDir = path.join(process.cwd(), 'backend', 'uploads');
+                const optimisedDir = path.join(process.cwd(), 'static-site', 'kml-optimised');
+                const mapsDir = path.join(process.cwd(), 'backend', 'flight-maps');
+
+                let kmlFiles = [];
+                if (fs.existsSync(uploadsDir)) {
+                  kmlFiles = fs.readdirSync(uploadsDir).filter(f => f.includes(flightId) && f.endsWith('.kml'));
+                }
+                for (const f of kmlFiles) {
+                  const kmlPath = path.join(uploadsDir, f);
+                  const optPath = path.join(optimisedDir, f.replace('.kml', '-opt.kml'));
+                  const pngPath = path.join(mapsDir, f.replace('.kml', '.png'));
+                  [kmlPath, optPath, pngPath].forEach(p => {
+                    if (fs.existsSync(p)) { fs.unlinkSync(p); console.log('Deleted:', p); }
+                  });
+                }
+
+                try {
+                  execSync('node backend/scripts/generate-master-metadata-main.cjs', { cwd: process.cwd(), stdio: 'inherit', timeout: 60000 });
+                } catch (e) { console.warn('Metadata warning:', e.message); }
+                // Keep rejected decisions as a durable "do-not-requeue" list.
+                // daily-sync checks pending.decisions and will skip these flight IDs.
+                console.log('Retaining rejected decision to prevent future re-queueing');
+              } else if (action === 'suspicious') {
+                // Flagged as a likely deliberate transponder-off, not an
+                // ordinary false-positive gap. Not published (not confirmed
+                // as a violation) and not deleted (kept for further review) —
+                // KML/PNG stay in backend/uploads and backend/flight-maps
+                // exactly as daily-sync originally saved them. recordDecision
+                // above already moved it out of the active pending queue and
+                // into decisions, which is enough to stop daily-sync from
+                // re-flagging it on a future run.
+                console.log('Marked suspicious — keeping artifacts, not publishing');
+              }
+            } catch (err) {
+              console.error('Process decision failed:', err.message);
+              console.error(err.stack);
+              process.exit(1);
+            }
+            "
+
+            if [ "$ACTION" = "approve" ]; then
+              if [ -f static-site/master-metadata.json ]; then
+                AFTER_FLIGHT_COUNT=$(node -e "const fs=require('fs'); const d=JSON.parse(fs.readFileSync('static-site/master-metadata.json','utf8')); process.stdout.write(String((d.flights||[]).length));")
+              else
+                AFTER_FLIGHT_COUNT=0
+              fi
+              echo "Post-decision flights: $AFTER_FLIGHT_COUNT"
+              if [ "$AFTER_FLIGHT_COUNT" -gt "$BEFORE_FLIGHT_COUNT" ]; then
+                echo "New approved flight detected ($BEFORE_FLIGHT_COUNT -> $AFTER_FLIGHT_COUNT). Rebuilding static site..."
+                node backend/scripts/build-static-site.cjs
+              else
+                echo "No new flight added ($BEFORE_FLIGHT_COUNT -> $AFTER_FLIGHT_COUNT). Skipping static site rebuild."
+              fi
+            fi
+
+            git add -A backend/uploads/ static-site/kml-optimised/ backend/flight-maps/ static-site/pending-review.json static-site/master-metadata.json static-site/index.html
+
+            if git diff --cached --quiet; then
+              echo "No changes to commit (already processed)"
+              break
+            fi
+
             if [ "$ACTION" = "approve" ]; then
               git commit -m "review: approve flight $FLIGHT_ID as violation [skip netlify]"
             elif [ "$ACTION" = "suspicious" ]; then
@@ -169,22 +183,18 @@ jobs:
             else
               git commit -m "review: reject flight $FLIGHT_ID — not a violation [skip netlify]"
             fi
-            # Different flight_ids can now run this workflow genuinely in
-            # parallel (see concurrency comment above), so a push race here
-            # is expected occasionally rather than exceptional. Retry with
-            # jittered backoff instead of the single retry this used to have.
-            attempt=1
-            max_attempts=5
-            until git push origin HEAD:main; do
-              if [ "$attempt" -ge "$max_attempts" ]; then
-                echo "Push failed after $max_attempts attempts, giving up."
-                exit 1
-              fi
-              sleep_s=$(( (RANDOM % 5) + attempt * 3 ))
-              echo "Push rejected (attempt $attempt/$max_attempts); rebasing onto latest main, retrying in ${sleep_s}s..."
-              sleep "$sleep_s"
-              git fetch origin main
-              git rebase origin/main
-              attempt=$((attempt + 1))
-            done
-          fi
+
+            if git push origin HEAD:main; then
+              echo "Pushed successfully on attempt $attempt."
+              break
+            fi
+
+            if [ "$attempt" -ge "$max_attempts" ]; then
+              echo "Push failed after $max_attempts attempts, giving up."
+              exit 1
+            fi
+            sleep_s=$(( (RANDOM % 5) + attempt * 3 ))
+            echo "Push rejected; retrying from a fresh origin/main in ${sleep_s}s..."
+            sleep "$sleep_s"
+            attempt=$((attempt + 1))
+          done
