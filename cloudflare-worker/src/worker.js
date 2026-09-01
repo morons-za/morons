@@ -563,7 +563,10 @@ async function triggerGithubDispatch(eventType, clientPayload, env) {
 
 async function fetchWorkflowRuns(repo, workflowFile, env, perPage = 8) {
   const url = `https://api.github.com/repos/${repo}/actions/workflows/${encodeURIComponent(workflowFile)}/runs?per_page=${perPage}`;
-  const resp = await fetch(url, { headers: githubHeaders(env) });
+  // no-store: this is a Worker-to-GitHub subrequest, which Cloudflare's
+  // edge can cache independently of any Cache-Control on our own response
+  // to the browser — a hard refresh on the client does nothing about it.
+  const resp = await fetch(url, { headers: githubHeaders(env), cache: 'no-store' });
   if (!resp.ok) throw new Error(`Failed to fetch workflow runs (${workflowFile}): ${resp.status}`);
   const json = await resp.json();
   return Array.isArray(json?.workflow_runs) ? json.workflow_runs : [];
@@ -587,7 +590,10 @@ async function fetchRepoJson(repo, filePath, env, fallbackValue) {
 
 async function fetchRepoText(repo, filePath, env, fallbackValue) {
   const url = `https://api.github.com/repos/${repo}/contents/${filePath}`;
-  const resp = await fetch(url, { headers: githubHeaders(env) });
+  // no-store: see comment in fetchWorkflowRuns above — this is what was
+  // making the dashboard show a flight as still pending after it had
+  // already been correctly moved to `decisions` on GitHub.
+  const resp = await fetch(url, { headers: githubHeaders(env), cache: 'no-store' });
   if (resp.status === 404) return fallbackValue;
   if (!resp.ok) throw new Error(`Failed to fetch ${filePath}: ${resp.status}`);
   const json = await resp.json();
