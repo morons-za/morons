@@ -7,8 +7,17 @@ on:
 permissions:
   contents: write
 
+# Scoped per-flight, not repo-wide: a single shared group meant that
+# clicking through several review decisions in quick succession queued
+# multiple runs in the same group, and GitHub Actions silently *cancels*
+# all but the most recently queued run in a group when cancel-in-progress
+# is false — so most of a review session's decisions never ran at all
+# (visible only as "cancelled" in the Actions run list, no error surfaced
+# anywhere else). Scoping by flight_id means different decisions never
+# compete; only a genuine duplicate dispatch for the same flight can still
+# cancel a still-queued twin, which is safe since it's the same outcome.
 concurrency:
-  group: process-review-decisions-main
+  group: process-review-decision-${{ github.event.client_payload.flight_id }}
   cancel-in-progress: false
 
 jobs:
@@ -160,10 +169,22 @@ jobs:
             else
               git commit -m "review: reject flight $FLIGHT_ID — not a violation [skip netlify]"
             fi
-            if ! git push origin HEAD:main; then
-              echo "Push rejected; rebasing once onto latest main and retrying..."
+            # Different flight_ids can now run this workflow genuinely in
+            # parallel (see concurrency comment above), so a push race here
+            # is expected occasionally rather than exceptional. Retry with
+            # jittered backoff instead of the single retry this used to have.
+            attempt=1
+            max_attempts=5
+            until git push origin HEAD:main; do
+              if [ "$attempt" -ge "$max_attempts" ]; then
+                echo "Push failed after $max_attempts attempts, giving up."
+                exit 1
+              fi
+              sleep_s=$(( (RANDOM % 5) + attempt * 3 ))
+              echo "Push rejected (attempt $attempt/$max_attempts); rebasing onto latest main, retrying in ${sleep_s}s..."
+              sleep "$sleep_s"
               git fetch origin main
               git rebase origin/main
-              git push origin HEAD:main
-            fi
+              attempt=$((attempt + 1))
+            done
           fi
