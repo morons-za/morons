@@ -1098,8 +1098,14 @@ function adminDashboardPage(email) {
         return;
       }
 
-      setStatus('#166534', 'Submitted. GitHub Actions will process this in 1-2 minutes — the table refreshes automatically every 30s, or reload anytime to check now.');
-      setTimeout(closePendingModal, 2500);
+      // Deliberately NOT auto-closed: an earlier version closed this after
+      // 2.5s, which — combined with real processing genuinely taking
+      // 30-90+ seconds — made a normal, expected wait look like a failure
+      // every time someone checked the table right after closing. Leaving
+      // this message on screen until the user dismisses it themselves
+      // means they've necessarily seen the actual expected wait time
+      // before concluding something's wrong.
+      setStatus('#166534', 'Submitted — recorded, not yet applied. GitHub Actions typically takes 30-90 seconds to actually update the table (checkout, run the script, commit, push). It is NOT done the moment this message appears. You can close this now; the table updates on its own within 30s of that finishing, or reload to check sooner.');
     }
 
     function closePendingModal() {
