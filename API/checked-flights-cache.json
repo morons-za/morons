@@ -253,5 +253,15 @@
     "violation": true,
     "incursions": 12,
     "checkedAt": "2026-09-02T11:07:10.544Z"
+  },
+  "41786abc": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-09-02T16:28:06.763Z"
+  },
+  "4178794f": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-02T16:28:06.763Z"
   }
 }
