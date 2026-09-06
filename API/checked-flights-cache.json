@@ -29,6 +29,11 @@
     "incursions": 5,
     "checkedAt": "2026-09-05T15:01:18.683Z"
   },
+  "41879925": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-06T10:46:06.912Z"
+  },
   "415bf5f3": {
     "violation": true,
     "incursions": 7,
@@ -338,5 +343,35 @@
     "violation": true,
     "incursions": 7,
     "checkedAt": "2026-09-05T15:01:18.683Z"
+  },
+  "41880b6b": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-06T10:46:06.912Z"
+  },
+  "418824dc": {
+    "violation": true,
+    "incursions": 6,
+    "checkedAt": "2026-09-06T10:46:06.912Z"
+  },
+  "4187cd44": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-09-06T10:46:06.912Z"
+  },
+  "4187a23f": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-09-06T10:46:06.912Z"
+  },
+  "4187d178": {
+    "violation": true,
+    "incursions": 5,
+    "checkedAt": "2026-09-06T10:46:06.912Z"
+  },
+  "4187a02e": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-09-06T10:46:06.912Z"
   }
 }
