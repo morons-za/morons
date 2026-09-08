@@ -443,5 +443,20 @@
     "violation": true,
     "incursions": 5,
     "checkedAt": "2026-09-08T11:05:36.560Z"
+  },
+  "418fdda9": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-09-08T16:30:53.706Z"
+  },
+  "4190904e": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-08T16:30:53.706Z"
+  },
+  "41900d59": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-09-08T16:30:53.706Z"
   }
 }
