@@ -1,8 +1,17 @@
 {
-  "generated": "2026-09-09T11:10:18.216Z",
-  "totalFiles": 1755,
-  "validFlights": 1755,
+  "generated": "2026-09-09T16:27:31.101Z",
+  "totalFiles": 1756,
+  "validFlights": 1756,
   "flights": [
+    {
+      "filename": "2026-09-09-ZT-RNW-41941362.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-09-09",
+      "time": "12:15",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.03
+    },
     {
       "filename": "2026-09-09-ZT-HOT-4193be31.kml",
       "registration": "ZT-HOT",
