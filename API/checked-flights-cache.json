@@ -703,5 +703,30 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-09-14T21:45:19.177Z"
+  },
+  "41ab1642": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-15T11:34:36.907Z"
+  },
+  "41ab7400": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-15T11:34:36.907Z"
+  },
+  "41ab98f7": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-15T11:34:36.907Z"
+  },
+  "41ab54c3": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-15T11:34:36.907Z"
+  },
+  "41ab1060": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-09-15T11:34:36.907Z"
   }
 }
