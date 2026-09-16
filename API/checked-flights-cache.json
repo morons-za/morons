@@ -753,5 +753,25 @@
     "violation": true,
     "incursions": 4,
     "checkedAt": "2026-09-16T11:20:55.512Z"
+  },
+  "41afcf16": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-16T16:41:26.766Z"
+  },
+  "41b0218c": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-16T16:41:26.766Z"
+  },
+  "41b08f17": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-09-16T16:41:26.766Z"
+  },
+  "41b02da3": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-09-16T16:41:26.766Z"
   }
 }
