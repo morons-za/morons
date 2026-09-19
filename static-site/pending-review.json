@@ -721,6 +721,25 @@
       "approve_expires": "2026-09-25T11:03:23.200Z",
       "reject_token": "586bb5470fbc38a4cafc655e264f7528c1f4d08911cdb4ad74caee9a83e1a157",
       "reject_expires": "2026-09-25T11:03:23.200Z"
+    },
+    {
+      "flight_id": "41bc22c4",
+      "filename": "2026-09-19-ZS-HIM-41bc22c4.kml",
+      "registration": "ZS-HIM",
+      "date": "2026-09-19",
+      "time": "09:55",
+      "incursions": 2,
+      "classification": "gap_only",
+      "maxGapKm": 29.68,
+      "avgSegmentKm": 0.16,
+      "totalSegments": 825,
+      "gapCount": 1,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-09-19T10:47:21.446Z",
+      "approve_token": "960c3fcd76148954cd805e8221acf161e5e8082b5973c67b056a2658513a10ca",
+      "approve_expires": "2026-09-26T10:47:21.445Z",
+      "reject_token": "007d3b90596bf8471f4dc67ab2cb7e1040d49317b5c1f1c1587fb4d49b323337",
+      "reject_expires": "2026-09-26T10:47:21.446Z"
     }
   ],
   "decisions": [
