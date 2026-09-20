@@ -923,5 +923,40 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-09-19T15:47:53.918Z"
+  },
+  "41bfa2e6": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-20T11:09:34.164Z"
+  },
+  "41bf6026": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-20T11:09:34.164Z"
+  },
+  "41bf87bc": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-20T11:09:34.164Z"
+  },
+  "41bf7683": {
+    "violation": true,
+    "incursions": 19,
+    "checkedAt": "2026-09-20T11:09:34.164Z"
+  },
+  "41bf85b3": {
+    "violation": true,
+    "incursions": 10,
+    "checkedAt": "2026-09-20T11:09:34.164Z"
+  },
+  "41bfe8bc": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-09-20T11:09:34.164Z"
+  },
+  "41bf7058": {
+    "violation": true,
+    "incursions": 17,
+    "checkedAt": "2026-09-20T11:09:34.164Z"
   }
 }
