@@ -1198,5 +1198,30 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-09-24T17:00:10.347Z"
+  },
+  "41d3a369": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-09-25T11:40:36.408Z"
+  },
+  "41d35215": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-25T11:40:36.408Z"
+  },
+  "41d39256": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-09-25T11:40:36.408Z"
+  },
+  "41d3e0be": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-25T11:40:36.408Z"
+  },
+  "41d3a52e": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-25T11:40:36.408Z"
   }
 }
