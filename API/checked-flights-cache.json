@@ -1313,5 +1313,35 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-09-27T11:53:13.133Z"
+  },
+  "41dc3253": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-09-27T16:51:29.468Z"
+  },
+  "41dc4fa0": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-09-27T16:51:29.468Z"
+  },
+  "41dc03d6": {
+    "violation": true,
+    "incursions": 14,
+    "checkedAt": "2026-09-27T16:51:29.468Z"
+  },
+  "41dc01e7": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-09-27T16:51:29.468Z"
+  },
+  "41dc3174": {
+    "violation": true,
+    "incursions": 6,
+    "checkedAt": "2026-09-27T16:51:29.468Z"
+  },
+  "41dc537d": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-09-27T16:51:29.468Z"
   }
 }
