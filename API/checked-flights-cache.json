@@ -1648,5 +1648,15 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-10-02T12:21:50.022Z"
+  },
+  "41efe175": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-10-02T22:05:31.357Z"
+  },
+  "41f06781": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-02T22:05:31.357Z"
   }
 }
