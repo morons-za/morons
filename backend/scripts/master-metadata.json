@@ -1,8 +1,17 @@
 {
-  "generated": "2026-10-05T14:23:14.574Z",
-  "totalFiles": 1837,
-  "validFlights": 1837,
+  "generated": "2026-10-05T23:59:00.346Z",
+  "totalFiles": 1838,
+  "validFlights": 1838,
   "flights": [
+    {
+      "filename": "2026-10-05-ZS-HIM-41fb6b64.kml",
+      "registration": "ZS-HIM",
+      "date": "2026-10-05",
+      "time": "13:34",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIM.jpg",
+      "fileSizeMB": 0.03
+    },
     {
       "filename": "2026-10-05-ZT-RMS-41fb55a7.kml",
       "registration": "ZT-RMS",
