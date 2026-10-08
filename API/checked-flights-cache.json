@@ -1918,5 +1918,15 @@
     "violation": true,
     "incursions": 7,
     "checkedAt": "2026-10-08T13:16:21.608Z"
+  },
+  "420803d3": {
+    "violation": true,
+    "incursions": 1,
+    "checkedAt": "2026-10-08T23:14:10.279Z"
+  },
+  "42084b27": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-08T23:14:10.279Z"
   }
 }
