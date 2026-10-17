@@ -64,31 +64,6 @@
     "incursions": 7,
     "checkedAt": "2026-10-16T16:31:03.467Z"
   },
-  "4177b1ab": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-02T11:07:10.544Z"
-  },
-  "417850cc": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-02T11:07:10.544Z"
-  },
-  "4177b180": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-02T11:07:10.544Z"
-  },
-  "41782ba5": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-02T11:07:10.544Z"
-  },
-  "4177d6c1": {
-    "violation": true,
-    "incursions": 12,
-    "checkedAt": "2026-09-02T11:07:10.544Z"
-  },
   "41786abc": {
     "violation": true,
     "incursions": 3,
