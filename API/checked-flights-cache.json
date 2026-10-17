@@ -64,16 +64,6 @@
     "incursions": 7,
     "checkedAt": "2026-10-16T16:31:03.467Z"
   },
-  "41786abc": {
-    "violation": true,
-    "incursions": 3,
-    "checkedAt": "2026-09-02T16:28:06.763Z"
-  },
-  "4178794f": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-02T16:28:06.763Z"
-  },
   "417c1047": {
     "violation": true,
     "incursions": 7,
