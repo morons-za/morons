@@ -2118,5 +2118,35 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-10-17T10:31:08.732Z"
+  },
+  "422ca7e1": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-18T10:51:06.514Z"
+  },
+  "422c89e5": {
+    "violation": true,
+    "incursions": 5,
+    "checkedAt": "2026-10-18T10:51:06.514Z"
+  },
+  "422cac98": {
+    "violation": true,
+    "incursions": 5,
+    "checkedAt": "2026-10-18T10:51:06.514Z"
+  },
+  "422ca798": {
+    "violation": true,
+    "incursions": 20,
+    "checkedAt": "2026-10-18T10:51:06.514Z"
+  },
+  "422c2f0b": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-18T10:51:06.514Z"
+  },
+  "422c896c": {
+    "violation": true,
+    "incursions": 1,
+    "checkedAt": "2026-10-18T10:51:06.514Z"
   }
 }
