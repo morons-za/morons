@@ -1,8 +1,17 @@
 {
-  "generated": "2026-10-19T12:52:55.499Z",
-  "totalFiles": 1881,
-  "validFlights": 1881,
+  "generated": "2026-10-19T22:16:09.095Z",
+  "totalFiles": 1882,
+  "validFlights": 1882,
   "flights": [
+    {
+      "filename": "2026-10-19-ZS-RTG-42316ad8.kml",
+      "registration": "ZS-RTG",
+      "date": "2026-10-19",
+      "time": "14:04",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 0.03
+    },
     {
       "filename": "2026-10-19-ZT-HOT-4230464f.kml",
       "registration": "ZT-HOT",
