@@ -1,9 +1,4 @@
 {
-  "41848034": {
-    "violation": true,
-    "incursions": 5,
-    "checkedAt": "2026-09-05T15:01:18.683Z"
-  },
   "41879925": {
     "violation": false,
     "incursions": 0,
@@ -68,16 +63,6 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-10-19T12:52:16.164Z"
-  },
-  "4184fc18": {
-    "violation": true,
-    "incursions": 1,
-    "checkedAt": "2026-09-05T15:01:18.683Z"
-  },
-  "4184c3dd": {
-    "violation": true,
-    "incursions": 7,
-    "checkedAt": "2026-09-05T15:01:18.683Z"
   },
   "41880b6b": {
     "violation": false,
@@ -2143,5 +2128,15 @@
     "violation": true,
     "incursions": 3,
     "checkedAt": "2026-10-20T11:22:05.162Z"
+  },
+  "423522cd": {
+    "violation": true,
+    "incursions": 7,
+    "checkedAt": "2026-10-20T16:46:14.693Z"
+  },
+  "423597b5": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-20T16:46:14.693Z"
   }
 }
