@@ -79,15 +79,10 @@
     "incursions": 0,
     "checkedAt": "2026-10-29T12:48:30.299Z"
   },
-  "41a84cc4": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-14T21:45:19.177Z"
-  },
-  "41a8901d": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-14T21:45:19.177Z"
+  "42586563": {
+    "violation": true,
+    "incursions": 6,
+    "checkedAt": "2026-10-29T22:42:11.368Z"
   },
   "41ab1642": {
     "violation": false,
@@ -2228,5 +2223,30 @@
     "violation": true,
     "incursions": 9,
     "checkedAt": "2026-10-29T12:48:30.299Z"
+  },
+  "42585c39": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-29T22:42:11.368Z"
+  },
+  "4258a77f": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-10-29T22:42:11.368Z"
+  },
+  "42589a06": {
+    "violation": true,
+    "incursions": 1,
+    "checkedAt": "2026-10-29T22:42:11.368Z"
+  },
+  "4258638d": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-29T22:42:11.368Z"
+  },
+  "425897c1": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-10-29T22:42:11.368Z"
   }
 }
