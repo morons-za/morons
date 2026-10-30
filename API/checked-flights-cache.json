@@ -84,31 +84,6 @@
     "incursions": 6,
     "checkedAt": "2026-10-29T22:42:11.368Z"
   },
-  "41ab1642": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-15T11:34:36.907Z"
-  },
-  "41ab7400": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-15T11:34:36.907Z"
-  },
-  "41ab98f7": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-15T11:34:36.907Z"
-  },
-  "41ab54c3": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-15T11:34:36.907Z"
-  },
-  "41ab1060": {
-    "violation": true,
-    "incursions": 2,
-    "checkedAt": "2026-09-15T11:34:36.907Z"
-  },
   "41af9df8": {
     "violation": false,
     "incursions": 0,
@@ -2248,5 +2223,50 @@
     "violation": true,
     "incursions": 4,
     "checkedAt": "2026-10-29T22:42:11.368Z"
+  },
+  "425b8fe2": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425bb4b4": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425beb0a": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425c1c41": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425bc546": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425be48b": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425bf791": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425b5aa7": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
+  },
+  "425b6a5a": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-10-30T12:39:52.066Z"
   }
 }
