@@ -1,8 +1,35 @@
 {
-  "generated": "2026-11-01T21:58:00.042Z",
-  "totalFiles": 1934,
-  "validFlights": 1934,
+  "generated": "2026-11-02T15:31:13.224Z",
+  "totalFiles": 1937,
+  "validFlights": 1937,
   "flights": [
+    {
+      "filename": "2026-11-02-ZS-HMB-4265ad51.kml",
+      "registration": "ZS-HMB",
+      "date": "2026-11-02",
+      "time": "08:25",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 0.05
+    },
+    {
+      "filename": "2026-11-02-ZS-HBO-4265a6ca.kml",
+      "registration": "ZS-HBO",
+      "date": "2026-11-02",
+      "time": "08:11",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 0.04
+    },
+    {
+      "filename": "2026-11-02-ZT-RNW-42658715.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-11-02",
+      "time": "07:06",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.07
+    },
     {
       "filename": "2026-11-01-ZS-HBO-42634f72.kml",
       "registration": "ZS-HBO",

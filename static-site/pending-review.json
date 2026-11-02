@@ -1101,6 +1101,25 @@
       "approve_expires": "2026-11-05T22:42:42.819Z",
       "reject_token": "4898c6f1d7c05b22c5602110f5139bbcc9c60345e8ea5a461b59fef5f3429ea9",
       "reject_expires": "2026-11-05T22:42:42.820Z"
+    },
+    {
+      "flight_id": "42658184",
+      "filename": "2026-11-02-ZT-HOT-42658184.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-11-02",
+      "time": "06:55",
+      "incursions": 12,
+      "classification": "no_track_data",
+      "maxGapKm": 0,
+      "avgSegmentKm": 0,
+      "totalSegments": 0,
+      "gapCount": 0,
+      "reason": "no_track_data",
+      "detected_at": "2026-11-02T15:31:00.761Z",
+      "approve_token": "15c59c8d280276936f87e61144f1f8aaa089196e95ac8c16ec61ca2f4951713c",
+      "approve_expires": "2026-11-09T15:31:00.760Z",
+      "reject_token": "f1a1cb95db0cc8d1b98e409fb44c734a8e59f276a360d04011042fc01c29f34a",
+      "reject_expires": "2026-11-09T15:31:00.761Z"
     }
   ],
   "decisions": [
