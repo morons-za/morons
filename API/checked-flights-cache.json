@@ -119,50 +119,15 @@
     "incursions": 8,
     "checkedAt": "2026-11-03T14:01:37.811Z"
   },
-  "41c72b11": {
+  "42746503": {
     "violation": false,
     "incursions": 0,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
+    "checkedAt": "2026-11-06T14:07:19.324Z"
   },
-  "41c6dfe1": {
+  "42747043": {
     "violation": false,
     "incursions": 0,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
-  },
-  "41c742ee": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
-  },
-  "41c74de7": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
-  },
-  "41c751bc": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
-  },
-  "41c6f100": {
-    "violation": true,
-    "incursions": 11,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
-  },
-  "41c70e76": {
-    "violation": true,
-    "incursions": 10,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
-  },
-  "41c75d07": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
-  },
-  "41c6f26d": {
-    "violation": true,
-    "incursions": 4,
-    "checkedAt": "2026-09-22T11:25:14.991Z"
+    "checkedAt": "2026-11-06T14:07:19.324Z"
   },
   "41c84d5a": {
     "violation": false,
@@ -2288,5 +2253,35 @@
     "violation": false,
     "incursions": 0,
     "checkedAt": "2026-11-05T23:32:11.929Z"
+  },
+  "427454f0": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-11-06T14:07:19.324Z"
+  },
+  "4274a1d7": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-11-06T14:07:19.324Z"
+  },
+  "427514d7": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-06T14:07:19.324Z"
+  },
+  "427481d4": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-06T14:07:19.324Z"
+  },
+  "4274bd14": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-06T14:07:19.324Z"
+  },
+  "427469d2": {
+    "violation": true,
+    "incursions": 10,
+    "checkedAt": "2026-11-06T14:07:19.324Z"
   }
 }
