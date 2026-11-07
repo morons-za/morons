@@ -1,7 +1,7 @@
 {
-  "generated": "2026-11-07T12:52:11.023Z",
-  "totalFiles": 1956,
-  "validFlights": 1956,
+  "generated": "2026-11-07T21:43:13.453Z",
+  "totalFiles": 1957,
+  "validFlights": 1957,
   "flights": [
     {
       "filename": "2026-11-07-ZS-HIE-427855bc.kml",
@@ -20,6 +20,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZS-HBO.jpg",
       "fileSizeMB": 0.02
+    },
+    {
+      "filename": "2026-11-07-ZS-HMB-42782fd3.kml",
+      "registration": "ZS-HMB",
+      "date": "2026-11-07",
+      "time": "08:13",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 0.06
     },
     {
       "filename": "2026-11-07-ZS-HIE-42781076.kml",
