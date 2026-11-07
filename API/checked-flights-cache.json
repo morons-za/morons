@@ -129,25 +129,20 @@
     "incursions": 0,
     "checkedAt": "2026-11-06T14:07:19.324Z"
   },
-  "41caed45": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-23T11:20:33.940Z"
+  "42781076": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
   },
-  "41cb6443": {
+  "42781319": {
     "violation": false,
     "incursions": 0,
-    "checkedAt": "2026-09-23T11:20:33.940Z"
+    "checkedAt": "2026-11-07T12:51:26.568Z"
   },
-  "41cb8878": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-23T11:20:33.940Z"
-  },
-  "41cb632a": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-09-23T11:20:33.940Z"
+  "42784838": {
+    "violation": true,
+    "incursions": 11,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
   },
   "41cc5e15": {
     "violation": false,
@@ -2263,5 +2258,60 @@
     "violation": true,
     "incursions": 3,
     "checkedAt": "2026-11-06T22:59:28.692Z"
+  },
+  "427848b3": {
+    "violation": true,
+    "incursions": 1,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "4278397e": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "427855bc": {
+    "violation": true,
+    "incursions": 3,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "427871cd": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "42788db8": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "4278a7e2": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "42782fd3": {
+    "violation": true,
+    "incursions": 9,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "427879f0": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "42784a7d": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "4278a410": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
+  },
+  "42780a7e": {
+    "violation": true,
+    "incursions": 12,
+    "checkedAt": "2026-11-07T12:51:26.568Z"
   }
 }
