@@ -1196,6 +1196,25 @@
       "approve_expires": "2026-11-14T12:52:06.148Z",
       "reject_token": "c2ff0a974ce05f64fd87c1fe90bfd8730b4e13c3e1648ffc4a6003222ef044b5",
       "reject_expires": "2026-11-14T12:52:06.149Z"
+    },
+    {
+      "flight_id": "427fcf46",
+      "filename": "2026-11-09-ZS-HMB-427fcf46.kml",
+      "registration": "ZS-HMB",
+      "date": "2026-11-09",
+      "time": "13:54",
+      "incursions": 5,
+      "classification": "no_track_data",
+      "maxGapKm": 0,
+      "avgSegmentKm": 0,
+      "totalSegments": 0,
+      "gapCount": 0,
+      "reason": "no_track_data",
+      "detected_at": "2026-11-09T15:59:40.352Z",
+      "approve_token": "d3aaab01282e3e340b5b84c3dc80e77caf2e153aaf167201fd0f91d554ce938b",
+      "approve_expires": "2026-11-16T15:59:40.351Z",
+      "reject_token": "db1f81d712b27fee4a36804b6b0debf07b62d043985a7fba62dd258dfadba3ec",
+      "reject_expires": "2026-11-16T15:59:40.352Z"
     }
   ],
   "decisions": [
