@@ -1215,6 +1215,25 @@
       "approve_expires": "2026-11-16T15:59:40.351Z",
       "reject_token": "db1f81d712b27fee4a36804b6b0debf07b62d043985a7fba62dd258dfadba3ec",
       "reject_expires": "2026-11-16T15:59:40.352Z"
+    },
+    {
+      "flight_id": "4282fcd9",
+      "filename": "2026-11-10-ZS-RTG-4282fcd9.kml",
+      "registration": "ZS-RTG",
+      "date": "2026-11-10",
+      "time": "10:28",
+      "incursions": 2,
+      "classification": "no_track_data",
+      "maxGapKm": 0,
+      "avgSegmentKm": 0,
+      "totalSegments": 0,
+      "gapCount": 0,
+      "reason": "no_track_data",
+      "detected_at": "2026-11-10T14:46:40.027Z",
+      "approve_token": "270a5e9e74b86dbc437f91f9b4438800e3c3d73e3fdc9df07b5e77f22d10bdaa",
+      "approve_expires": "2026-11-17T14:46:40.027Z",
+      "reject_token": "7c740c9152ee9ebfece04d40804f95f97bd6acf76f06272f309ef24659b68ad7",
+      "reject_expires": "2026-11-17T14:46:40.027Z"
     }
   ],
   "decisions": [
