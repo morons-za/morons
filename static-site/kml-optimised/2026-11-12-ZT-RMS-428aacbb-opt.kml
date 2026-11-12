@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+  <Document>
+    <name>FR24 428aacbb - Optimised</name>
+    <description><![CDATA[Optimised flight path with 20 points (decimated from 98 original points). Source format: Standard KML]]></description>
+    
+    <Style id="flightPath">
+      <LineStyle>
+        <color>ffff0000</color>
+        <width>3</width>
+      </LineStyle>
+    </Style>
+    
+    <Placemark>
+      <name>Flight Path</name>
+      <description><![CDATA[Optimized flight path]]></description>
+      <styleUrl>#flightPath</styleUrl>
+      <LineString>
+        <extrude>1</extrude>
+        <tessellate>1</tessellate>
+        <altitudeMode>absolute</altitudeMode>
+        <coordinates>
+          18.41135,-34.02063,0 18.41606,-34.01386,0 18.42847,-34.0092,0 18.4234,-34.00259,0 18.42332,-33.99824,0 18.42705,-33.99188,0 18.43801,-33.98405,0 18.44053,-33.97738,0 18.44051,-33.972,0 18.44489,-33.96507,0 18.45071,-33.96122,0 18.45996,-33.9559,0 18.45069,-33.94963,0 18.45634,-33.94053,0 18.45013,-33.9323,0 18.4403,-33.92763,0 18.43626,-33.91775,0 18.43373,-33.91147,0 18.43333,-33.90514,0 18.43186,-33.89843,0
+        </coordinates>
+      </LineString>
+    </Placemark>
+  </Document>
+</kml>
