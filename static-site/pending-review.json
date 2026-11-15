@@ -1291,6 +1291,25 @@
       "approve_expires": "2026-11-20T14:29:35.489Z",
       "reject_token": "e44fc67ccb5d0a9d044743afe29ba94665c7086f0db619ceff99c38c107d054d",
       "reject_expires": "2026-11-20T14:29:35.490Z"
+    },
+    {
+      "flight_id": "4294f760",
+      "filename": "2026-11-15-ZT-RMS-4294f760.kml",
+      "registration": "ZT-RMS",
+      "date": "2026-11-15",
+      "time": "09:46",
+      "incursions": 7,
+      "classification": "no_track_data",
+      "maxGapKm": 0,
+      "avgSegmentKm": 0,
+      "totalSegments": 0,
+      "gapCount": 0,
+      "reason": "no_track_data",
+      "detected_at": "2026-11-15T13:52:13.536Z",
+      "approve_token": "89c27b5335daf252ac0a1669b3c322611f3661f5c8e93e248f79925194ab7a0c",
+      "approve_expires": "2026-11-22T13:52:13.536Z",
+      "reject_token": "fe4e2024e693bb2c206cf33d624c414f4d2bc4ed5d563087dfd7e63b09207eb9",
+      "reject_expires": "2026-11-22T13:52:13.536Z"
     }
   ],
   "decisions": [
