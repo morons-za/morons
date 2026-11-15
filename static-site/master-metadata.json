@@ -1,8 +1,17 @@
 {
-  "generated": "2026-11-15T13:52:25.460Z",
-  "totalFiles": 2012,
-  "validFlights": 2012,
+  "generated": "2026-11-15T22:43:52.576Z",
+  "totalFiles": 2013,
+  "validFlights": 2013,
   "flights": [
+    {
+      "filename": "2026-11-15-ZT-RMP-4295a879.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-11-15",
+      "time": "14:41",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.01
+    },
     {
       "filename": "2026-11-15-ZS-HIE-42952e86.kml",
       "registration": "ZS-HIE",
