@@ -1,8 +1,35 @@
 {
-  "generated": "2026-11-15T22:43:52.576Z",
-  "totalFiles": 2013,
-  "validFlights": 2013,
+  "generated": "2026-11-16T15:33:20.464Z",
+  "totalFiles": 2016,
+  "validFlights": 2016,
   "flights": [
+    {
+      "filename": "2026-11-16-ZT-HOT-42983e5a.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-11-16",
+      "time": "09:28",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 0.05
+    },
+    {
+      "filename": "2026-11-16-ZS-RTG-42982b8f.kml",
+      "registration": "ZS-RTG",
+      "date": "2026-11-16",
+      "time": "08:50",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 0.12
+    },
+    {
+      "filename": "2026-11-16-ZT-HOT-4297ffe7.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-11-16",
+      "time": "07:20",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 0.04
+    },
     {
       "filename": "2026-11-15-ZT-RMP-4295a879.kml",
       "registration": "ZT-RMP",
