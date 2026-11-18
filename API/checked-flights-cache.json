@@ -184,11 +184,6 @@
     "incursions": 0,
     "checkedAt": "2026-11-16T15:33:00.974Z"
   },
-  "41f3b73b": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-03T16:06:53.773Z"
-  },
   "41f6a7d5": {
     "violation": true,
     "incursions": 22,
