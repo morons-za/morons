@@ -1,7 +1,7 @@
 {
-  "generated": "2026-11-19T15:40:52.932Z",
-  "totalFiles": 2037,
-  "validFlights": 2037,
+  "generated": "2026-11-20T00:33:27.855Z",
+  "totalFiles": 2038,
+  "validFlights": 2038,
   "flights": [
     {
       "filename": "2026-11-19-ZS-HIE-42a420b3.kml",
@@ -47,6 +47,15 @@
       "owner": "Cape Town Helicopters",
       "imageUrl": "./aircraft-images/ZT-RNW.jpg",
       "fileSizeMB": 0.06
+    },
+    {
+      "filename": "2026-11-19-ZT-RMP-42a307ca.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-11-19",
+      "time": "06:43",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.01
     },
     {
       "filename": "2026-11-18-ZS-HIE-42a0b535.kml",
