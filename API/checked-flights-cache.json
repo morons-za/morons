@@ -179,11 +179,6 @@
     "incursions": 0,
     "checkedAt": "2026-11-16T15:33:00.974Z"
   },
-  "4203ac4b": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-07T23:00:07.958Z"
-  },
   "4206aab2": {
     "violation": true,
     "incursions": 3,
@@ -2608,5 +2603,10 @@
     "violation": true,
     "incursions": 3,
     "checkedAt": "2026-11-21T14:32:32.842Z"
+  },
+  "42abd055": {
+    "violation": true,
+    "incursions": 1,
+    "checkedAt": "2026-11-21T23:01:15.479Z"
   }
 }

@@ -1405,6 +1405,25 @@
       "approve_expires": "2026-11-27T15:18:25.570Z",
       "reject_token": "3315b15c2b524f98e42f17d2d4626233b64845a809d2abdbb7219fe23351c2cb",
       "reject_expires": "2026-11-27T15:18:25.570Z"
+    },
+    {
+      "flight_id": "42abd055",
+      "filename": "2026-11-21-ZT-RMP-42abd055.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-11-21",
+      "time": "15:05",
+      "incursions": 1,
+      "classification": "gap_only",
+      "maxGapKm": 9.14,
+      "avgSegmentKm": 0.21,
+      "totalSegments": 348,
+      "gapCount": 5,
+      "reason": "gap_only_violation",
+      "detected_at": "2026-11-21T23:01:39.598Z",
+      "approve_token": "bc45276ee58cd8f3d55e86a4f00db3ab576b22acdeb52e6ad7a74bc88d820f15",
+      "approve_expires": "2026-11-28T23:01:39.598Z",
+      "reject_token": "2b805fcf10207664092bc5b2b0f92aac636d291bd1ae3c76f63e1805dfb75299",
+      "reject_expires": "2026-11-28T23:01:39.598Z"
     }
   ],
   "decisions": [
