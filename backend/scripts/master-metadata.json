@@ -1,8 +1,71 @@
 {
-  "generated": "2026-11-20T23:56:21.925Z",
-  "totalFiles": 2043,
-  "validFlights": 2043,
+  "generated": "2026-11-21T14:33:52.367Z",
+  "totalFiles": 2050,
+  "validFlights": 2050,
   "flights": [
+    {
+      "filename": "2026-11-21-ZS-HIE-42ab368b.kml",
+      "registration": "ZS-HIE",
+      "date": "2026-11-21",
+      "time": "11:43",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-11-21-ZS-HIE-42ab1420.kml",
+      "registration": "ZS-HIE",
+      "date": "2026-11-21",
+      "time": "10:47",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-11-21-ZS-HIE-42aac092.kml",
+      "registration": "ZS-HIE",
+      "date": "2026-11-21",
+      "time": "08:03",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.05
+    },
+    {
+      "filename": "2026-11-21-ZS-HMB-42aab336.kml",
+      "registration": "ZS-HMB",
+      "date": "2026-11-21",
+      "time": "07:33",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 0.02
+    },
+    {
+      "filename": "2026-11-21-ZT-HOT-42aaaf0e.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-11-21",
+      "time": "07:23",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 0.04
+    },
+    {
+      "filename": "2026-11-21-ZT-RMP-42aaaef9.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-11-21",
+      "time": "07:23",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.01
+    },
+    {
+      "filename": "2026-11-21-ZT-RNW-42aaa421.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-11-21",
+      "time": "06:57",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.08
+    },
     {
       "filename": "2026-11-20-ZS-HIE-42a7af59.kml",
       "registration": "ZS-HIE",
