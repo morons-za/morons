@@ -1,8 +1,71 @@
 {
-  "generated": "2026-11-23T17:56:31.611Z",
-  "totalFiles": 2059,
-  "validFlights": 2059,
+  "generated": "2026-11-24T17:30:52.449Z",
+  "totalFiles": 2066,
+  "validFlights": 2066,
   "flights": [
+    {
+      "filename": "2026-11-24-ZS-RTG-42b60fcf.kml",
+      "registration": "ZS-RTG",
+      "date": "2026-11-24",
+      "time": "14:39",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-RTG.jpg",
+      "fileSizeMB": 0.02
+    },
+    {
+      "filename": "2026-11-24-ZS-HIE-42b5fd61.kml",
+      "registration": "ZS-HIE",
+      "date": "2026-11-24",
+      "time": "14:18",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HIE.jpg",
+      "fileSizeMB": 0.03
+    },
+    {
+      "filename": "2026-11-24-ZT-RNW-42b595b4.kml",
+      "registration": "ZT-RNW",
+      "date": "2026-11-24",
+      "time": "12:12",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-RNW.jpg",
+      "fileSizeMB": 0.05
+    },
+    {
+      "filename": "2026-11-24-ZS-HMB-42b53405.kml",
+      "registration": "ZS-HMB",
+      "date": "2026-11-24",
+      "time": "09:24",
+      "owner": "Sport Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HMB.jpg",
+      "fileSizeMB": 0.06
+    },
+    {
+      "filename": "2026-11-24-ZS-HBO-42b50f07.kml",
+      "registration": "ZS-HBO",
+      "date": "2026-11-24",
+      "time": "08:13",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZS-HBO.jpg",
+      "fileSizeMB": 0.05
+    },
+    {
+      "filename": "2026-11-24-ZT-HOT-42b50e84.kml",
+      "registration": "ZT-HOT",
+      "date": "2026-11-24",
+      "time": "08:11",
+      "owner": "Cape Town Helicopters",
+      "imageUrl": "./aircraft-images/ZT-HOT.jpg",
+      "fileSizeMB": 0.07
+    },
+    {
+      "filename": "2026-11-24-ZT-RMP-42b501e0.kml",
+      "registration": "ZT-RMP",
+      "date": "2026-11-24",
+      "time": "07:47",
+      "owner": "Aerios Global Aviation",
+      "imageUrl": "./aircraft-images/ZT-RMP.jpg",
+      "fileSizeMB": 0.01
+    },
     {
       "filename": "2026-11-23-ZS-HBO-42b18cde.kml",
       "registration": "ZS-HBO",
