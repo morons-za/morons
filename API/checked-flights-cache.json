@@ -164,26 +164,6 @@
     "incursions": 0,
     "checkedAt": "2026-11-16T15:33:00.974Z"
   },
-  "421318ad": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-11T21:46:50.702Z"
-  },
-  "4213431a": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-11T21:46:50.702Z"
-  },
-  "421378b6": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-11T21:46:50.702Z"
-  },
-  "421343ab": {
-    "violation": true,
-    "incursions": 4,
-    "checkedAt": "2026-10-11T21:46:50.702Z"
-  },
   "4215901d": {
     "violation": true,
     "incursions": 1,
