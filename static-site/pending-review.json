@@ -1538,6 +1538,25 @@
       "approve_expires": "2026-12-02T17:06:00.858Z",
       "reject_token": "0a2453a762c7e5e0d1f7cf6e18ae95bc12e53b4fdbc0648ba2f35ad15831ea99",
       "reject_expires": "2026-12-02T17:06:00.859Z"
+    },
+    {
+      "flight_id": "42bd2e7d",
+      "filename": "2026-11-26-ZS-HIE-42bd2e7d.kml",
+      "registration": "ZS-HIE",
+      "date": "2026-11-26",
+      "time": "13:44",
+      "incursions": 1,
+      "classification": "no_track_data",
+      "maxGapKm": 0,
+      "avgSegmentKm": 0,
+      "totalSegments": 0,
+      "gapCount": 0,
+      "reason": "no_track_data",
+      "detected_at": "2026-11-26T16:47:06.514Z",
+      "approve_token": "0c99c7b56c543e55eeb58773885b6406c44d460d539fd76cd8ca546787084308",
+      "approve_expires": "2026-12-03T16:47:06.514Z",
+      "reject_token": "b99d44cfe661d3f8227bc07963a4173f872ecc762516e72b5d33ec661b172b52",
+      "reject_expires": "2026-12-03T16:47:06.514Z"
     }
   ],
   "decisions": [
