@@ -164,46 +164,6 @@
     "incursions": 0,
     "checkedAt": "2026-11-16T15:33:00.974Z"
   },
-  "421d386c": {
-    "violation": true,
-    "incursions": 5,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
-  "421d747c": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
-  "421d923c": {
-    "violation": true,
-    "incursions": 4,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
-  "421db730": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
-  "421de00c": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
-  "421d7a75": {
-    "violation": true,
-    "incursions": 8,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
-  "421d75c8": {
-    "violation": true,
-    "incursions": 1,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
-  "421ddd8a": {
-    "violation": false,
-    "incursions": 0,
-    "checkedAt": "2026-10-14T11:39:23.048Z"
-  },
   "421e8ffd": {
     "violation": false,
     "incursions": 0,
@@ -2693,5 +2653,60 @@
     "violation": true,
     "incursions": 9,
     "checkedAt": "2026-11-27T16:31:23.721Z"
+  },
+  "42c286ea": {
+    "violation": true,
+    "incursions": 18,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c25750": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c2878f": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c2a5df": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c31fb4": {
+    "violation": true,
+    "incursions": 2,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c36e4f": {
+    "violation": false,
+    "incursions": 0,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c2efd8": {
+    "violation": true,
+    "incursions": 6,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c262ac": {
+    "violation": true,
+    "incursions": 12,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c2671b": {
+    "violation": true,
+    "incursions": 12,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c26d57": {
+    "violation": true,
+    "incursions": 4,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
+  },
+  "42c266cf": {
+    "violation": true,
+    "incursions": 9,
+    "checkedAt": "2026-11-28T15:24:59.120Z"
   }
 }
